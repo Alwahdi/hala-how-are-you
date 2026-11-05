@@ -15,7 +15,7 @@ related: [voucher-issuance.md, voucher-printing.md, pos-settlement.md, voucher-s
 - الجداول التالية رحلة مقترحة [assumption]، وليست وصفاً بأن صاحب الشبكة ينفذ كل خطوة اليوم.
 
 ## الوضع الحالي المعروف [confirmed] (المؤسس)
-- وصف العمل والأسئلة التي أجاب عنها المؤسس في [المصدر](network-owner-workflows.md#نقاط-البيع-والتحصيل).
+- وصف العمل والأسئلة التي أجاب عنها المؤسس في [المصدر](network-owner-workflows.md).
 - لم يوصف سجل موثوق للبيع الفردي؛ لا نملأ هذه الفجوة بتقدير ندعي أنه حقيقة. [assumption]
 
 ## رحلة الكرت والدفعة المقترحة [assumption]

@@ -11,7 +11,7 @@ related: [voucher-lifecycle.md, voucher-issuance.md, network-owner-workflows.md]
 الاحتياجات أصلها وصف المؤسس، والتوصيات موسومة [assumption]؛ ما يحتاج جواباً يبقى مفتوحاً.
 
 ## المرجع
-- متطلبات الورق والحقول والقوالب في [ملاحظات المؤسس](network-owner-workflows.md#إنشاء-الكروت-والطباعة). [confirmed]
+- متطلبات الورق والحقول والقوالب في [ملاحظات المؤسس](network-owner-workflows.md). [confirmed]
 - الرحلة والضوابط التالية مقترحة [assumption]، وليست اختياراً لشكل شاشة أو مكتبة طباعة.
 
 ## رحلتان للطباعة [assumption]
