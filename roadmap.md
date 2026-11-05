@@ -4,4 +4,6 @@
 - [x] Update discovery index and approved status within the approved scope.
 - [x] Validate metadata, links, document sizes, and scope coverage.
 - [x] Record the founder's package example, varying POS agreements, wholesale example, and exceptional returns.
-- [ ] Resolve remaining usage accounting and return rules — blocked on founder clarification; the initial examples are recorded.
+- [x] Record connected-time and combined upload/download confirmation for the founder's package example.
+- [ ] Verify the package settings against official MikroTik User Manager documentation.
+- [ ] Resolve remaining cross-package and return rules — blocked on founder clarification; the initial example is recorded.
