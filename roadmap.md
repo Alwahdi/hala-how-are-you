@@ -5,5 +5,5 @@
 - [x] Validate metadata, links, document sizes, and scope coverage.
 - [x] Record the founder's package example, varying POS agreements, wholesale example, and exceptional returns.
 - [x] Record connected-time and combined upload/download confirmation for the founder's package example.
-- [ ] Verify the package settings against official MikroTik User Manager documentation.
+- [x] Verify v7 package field semantics against official MikroTik User Manager documentation; v6 equivalence and real-router behavior remain unverified.
 - [ ] Resolve remaining cross-package and return rules — blocked on founder clarification; the initial example is recorded.
