@@ -11,7 +11,7 @@ related: [voucher-lifecycle.md, network-owner-workflows.md, network-owner-data-e
 الاحتياجات أصلها وصف المؤسس، والتوصيات موسومة [assumption]؛ ما يحتاج جواباً يبقى مفتوحاً.
 
 ## المرجع
-- إعدادات الإصدار التي طلبها المؤسس في [مصدر الاحتياجات](network-owner-workflows.md#إنشاء-الكروت-والطباعة). [confirmed]
+- إعدادات الإصدار التي طلبها المؤسس في [مصدر الاحتياجات](network-owner-workflows.md). [confirmed]
 - هذا الملف يحلل قواعد غير محسومة؛ جميع السياسات التالية [assumption] ومقترحة فقط.
 
 ## ما يجب فهمه قبل الإصدار [assumption]

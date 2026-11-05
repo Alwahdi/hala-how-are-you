@@ -11,7 +11,7 @@ related: [voucher-lifecycle.md, network-owner-workflows.md, network-owner-data-e
 الاحتياجات أصلها وصف المؤسس، والتوصيات موسومة [assumption]؛ ما يحتاج جواباً يبقى مفتوحاً.
 
 ## المرجع
-- الوقائع التي وصفها المؤسس في [نقاط البيع والتحصيل](network-owner-workflows.md#نقاط-البيع-والتحصيل). [confirmed]
+- الوقائع التي وصفها المؤسس في [ملاحظات نقاط البيع والتحصيل](network-owner-workflows.md). [confirmed]
 - قواعد الاستحقاق أدناه بدائل [assumption]؛ لم يحدد المؤسس بعد أيها معمول به.
 
 ## الاتفاق أولاً [assumption]

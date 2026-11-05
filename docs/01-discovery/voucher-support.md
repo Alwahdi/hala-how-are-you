@@ -11,7 +11,7 @@ related: [voucher-lifecycle.md, network-owner-data-evidence.md, network-owner-wo
 الاحتياجات أصلها وصف المؤسس، والتوصيات موسومة [assumption]؛ ما يحتاج جواباً يبقى مفتوحاً.
 
 ## المرجع
-- حاجة المؤسس للاستعلام والشكاوى في [المصدر](network-owner-workflows.md#الاستعلام-عن-الكرت-والشكاوى). [confirmed]
+- حاجة المؤسس للاستعلام والشكاوى في [المصدر](network-owner-workflows.md). [confirmed]
 - حدود ما توفره التقنية موثقة في [ملف الأدلة](network-owner-data-evidence.md)؛ لا تكرر هنا كوعود. [confirmed]
 - الخطوات والسياسات التالية مقترحة [assumption].
 
