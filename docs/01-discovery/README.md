@@ -15,6 +15,7 @@ related: [../05-operations/roadmap.md]
 | [problems.md](problems.md) | المشاكل مرقمة مع درجة التأكد | 3 مؤكدة من المؤسس، والباقي افتراض |
 | [personas.md](personas.md) | الأطراف الأربعة | مسودة |
 | [brainstorm.md](brainstorm.md) | كل أفكار العصف الذهني | مكتمل (الجولة الأولى) |
+| [network-owner-workflows.md](network-owner-workflows.md) | احتياجات الكروت والطباعة ونقاط البيع والمتابعة [confirmed] (المؤسس) | جولة ثانية؛ أسئلة التفاصيل مفتوحة |
 | [hypotheses.md](hypotheses.md) | الفرضيات اللي لازم نختبرها | مسودة |
 | [interviews/](interviews/README.md) | دليل المقابلات ونتائجها | الدليل جاهز، وما تمت أي مقابلة |
 | [competitors.md](competitors.md) | تحليل المنافسين | هيكل جاهز، وما بدأ البحث |
