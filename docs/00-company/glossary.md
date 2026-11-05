@@ -31,6 +31,11 @@ related: [vision.md]
 | CGNAT | Carrier-Grade NAT | مزود الخدمة يشارك عنوان عام واحد بين مشتركين كثير، فما تقدر توصل للراوتر من برا |
 | نفق | Tunnel (L2TP / SSTP / WireGuard) | اتصال يفتحه الراوتر بنفسه لجهاز مركزي، فيصير الوصول له ممكن حتى لو كان خلف CGNAT |
 | عنوان ثابت | Static Public IP | عنوان عام ما يتغير، ونادر في هذا السوق |
+| مدير المستخدمين | User Manager | حزمة مايكروتيك لإدارة حسابات الدخول والباقات تعمل كخادم RADIUS |
+| RADIUS | Remote Authentication Dial-In User Service | بروتوكول المصادقة والتفويض ومحاسبة جلسات الوصول؛ ليس نفق إدارة عن بعد |
+| المستخدمون المحليون للهوتسبوت | Hotspot Users | حسابات دخول محفوظة محلياً في إعدادات الهوتسبوت على الراوتر |
+| PPPoE | Point-to-Point Protocol over Ethernet | خدمة وصول بجلسات مصادقة بين عميل (Client) وخادم (Server) عبر Ethernet |
+| DHCP | Dynamic Host Configuration Protocol | بروتوكول توزيع عناوين IP وإعدادات الشبكة على الأجهزة |
 
 ## البيع
 | المصطلح | English | المعنى |
