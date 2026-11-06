@@ -1,8 +1,8 @@
 # Current task
 
-- [ ] Research short global name candidates after founder's direction choice; positioning selected in D-007. Final name remains blocked on founder choice.
+- [x] Research short global name candidates after founder's direction choice; see docs/00-company/product-name-research-round-three.md. Final name remains blocked on founder choice.
 
-- [x] Research second naming shortlist and rewrite positioning after founder feedback — first round retained as historical; second round awaits selection before identity work.
+- [x] Research second naming shortlist and rewrite positioning after founder feedback — positioning selected; names not adopted, global-short-name round follows D-007.
 
 - [x] Record founder brand requirements and prepare identity-first landing-page plan (2026-11-06). See docs/00-company/brand-brief.md.
 - [ ] Develop identity proposals and landing-page brief — plan approved; prepare naming/positioning options first and await founder selection before final identity. Do not implement the page before identity approval.
