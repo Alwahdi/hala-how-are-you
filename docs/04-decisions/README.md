@@ -18,3 +18,4 @@ related: [../templates/decision.md]
 | [D-004](D-004-self-serve-product-led-growth.md) | التهيئة الذاتية والنمو بقيادة المنتج؛ تعديل شرط التركيب في D-002 | approved | 2026-11-06 |
 | [D-005](D-005-identity-before-landing-page.md) | الهوية قبل صفحة الهبوط مع بوابات اعتماد الاسم والاتجاه البصري | approved | 2026-11-06 |
 | [D-006](D-006-reopen-naming-and-positioning.md) | إعادة بحث الاسم وصياغة التموضع بعد عدم اعتماد الجولة الأولى | approved | 2026-11-06 |
+| [D-007](D-007-connected-work-positioning.md) | محور عمل الشبكة المترابط واتجاه اسم عالمي قصير | approved | 2026-11-06 |
