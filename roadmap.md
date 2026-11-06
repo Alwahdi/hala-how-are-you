@@ -1,6 +1,6 @@
 # Current task
 
-- [ ] Examine Nelufi exact uses, same-sector similarity, domain records and accessible trademark sources at founder request; research only, not final name approval.
+- [x] Examine Nelufi uses, Nefeli similarity, registry records and accessible trademark evidence; see docs/00-company/nelufi-due-diligence.md. Name remains conditional; professional legal clearance unavailable here, Noon activity and .com unresolved.
 
 - [x] Research short global name candidates after founder's direction choice; see docs/00-company/product-name-research-round-three.md. Final name remains blocked on founder choice.
 
