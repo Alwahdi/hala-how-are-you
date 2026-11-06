@@ -1,5 +1,7 @@
 # Current task
 
+- [ ] Examine Nelufi exact uses, same-sector similarity, domain records and accessible trademark sources at founder request; research only, not final name approval.
+
 - [x] Research short global name candidates after founder's direction choice; see docs/00-company/product-name-research-round-three.md. Final name remains blocked on founder choice.
 
 - [x] Research second naming shortlist and rewrite positioning after founder feedback — positioning selected; names not adopted, global-short-name round follows D-007.
