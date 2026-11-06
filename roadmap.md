@@ -1,6 +1,6 @@
 # Current task
 
-- [ ] Research second naming shortlist and rewrite positioning after founder feedback — keep first round historical; wait for selection before identity work.
+- [x] Research second naming shortlist and rewrite positioning after founder feedback — first round retained as historical; second round awaits selection before identity work.
 
 - [x] Record founder brand requirements and prepare identity-first landing-page plan (2026-11-06). See docs/00-company/brand-brief.md.
 - [ ] Develop identity proposals and landing-page brief — plan approved; prepare naming/positioning options first and await founder selection before final identity. Do not implement the page before identity approval.
