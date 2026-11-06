@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Record first-specimen rejection, new reference and dark/vivid-green direction in D-012/D-013; prepare second image specimen for founder review. No app implementation.
+
 - [x] Prepare initial visual identity specimen at founder request; see docs/00-company/identity-specimen-one.md. Final identity approval pending; no app code changed.
 
 - [x] Record approved voice and bold/clear/non-distracting design principles in D-010.

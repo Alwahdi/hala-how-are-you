@@ -1,6 +1,7 @@
 ---
 type: decision
-status: approved
+status: superseded
+superseded_by: D-013-dark-vivid-green-direction.md
 owner: founder
 updated: 2026-11-06
 related: [README.md, D-010-clear-voice-bold-design-principles.md, D-005-identity-before-landing-page.md, ../00-company/bold-design-research.md]
