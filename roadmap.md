@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Record founder correction: final product name and company-subdomain relationship in docs/04-decisions/D-009-final-product-name-company-subdomains.md; supersede D-008. No domain connection requested.
+
 - [x] Record temporary working name and direct vision description in docs/04-decisions/D-008-temporary-name-direct-description.md; no final commercial name or design approval.
 
 - [x] Examine Nelufi uses, Nefeli similarity, registry records and accessible trademark evidence; see docs/00-company/nelufi-due-diligence.md. Name remains conditional; professional legal clearance unavailable here, Noon activity and .com unresolved.
@@ -9,7 +11,7 @@
 - [x] Research second naming shortlist and rewrite positioning after founder feedback — positioning selected; names not adopted, global-short-name round follows D-007.
 
 - [x] Record founder brand requirements and prepare identity-first landing-page plan (2026-11-06). See docs/00-company/brand-brief.md.
-- [ ] Develop identity proposals and landing-page brief — await founder approval of tone/visual direction and final commercial name before page implementation; working-name scope recorded in D-008.
+- [ ] Develop identity proposals and landing-page brief — name gate resolved in D-009; await founder approval of tone/visual direction before page implementation.
 - [x] Prepare positioning proposal and sourced first naming shortlist (2026-11-06); see docs/00-company/brand-positioning.md and product-name-research.md.
 - [x] Choose positioning direction — recorded in D-007; product name still awaits founder selection before tone and visual identity.
 

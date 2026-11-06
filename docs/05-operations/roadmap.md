@@ -18,7 +18,8 @@ related: [status.md]
 - [x] اعتماد المسار المحدود للهوية قبل صفحة الهبوط وفق [D-005](../04-decisions/D-005-identity-before-landing-page.md). [confirmed]
 - [x] اختيار محور التموضع وفق [D-007](../04-decisions/D-007-connected-work-positioning.md). [confirmed]
 - [x] حسم اسم العمل والوصف وفق [D-008](../04-decisions/D-008-temporary-name-direct-description.md)؛ لا يغلق بوابة الاسم التجاري النهائي. [confirmed]
-- [ ] اختيار الاسم، ثم النبرة والاتجاه البصري، ثم إعداد الصفحة؛ بوابات الخطة لا يغلقها اعتماد مسارها.
+- [x] اعتماد الاسم النهائي وعلاقة نطاق الشركة وفق [D-009](../04-decisions/D-009-final-product-name-company-subdomains.md). [confirmed]
+- [ ] اعتماد النبرة والاتجاه البصري، ثم إعداد الصفحة؛ لا اعتماد تصميم أو ربط نطاق بعد.
 - [x] توثيق اعتماد الاتجاه في [D-004](../04-decisions/D-004-self-serve-product-led-growth.md) (2026-11-06)؛ ليس إغلاقاً للتحقق أو اعتماداً للبناء. [confirmed]
 - [ ] تحليل المنافسين
 - [ ] تقدير حجم السوق
