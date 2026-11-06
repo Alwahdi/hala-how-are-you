@@ -35,6 +35,7 @@ related: [roadmap.md]
 - أسئلة دورة الكرت مفهرسة في [التحليل](../01-discovery/voucher-lifecycle.md#ما-يتوقف-على-المؤسس)؛ لا إجابات مفترضة. [confirmed]
 
 ## آخر تحديث
+2026-11-06: رفض العينة الأولى وفق [D-012](../04-decisions/D-012-reject-specimen-review-dark-reference.md)؛ التالي حسم الاتجاه الداكن المستلهم من مرجع المؤسس قبل عينة بديلة. [confirmed]
 2026-11-06: أُعدّت [عينة الهوية الأولى](../00-company/identity-specimen-one.md) بإذن المؤسس؛ تنتظر المراجعة، ولا تغيير للتطبيق أو صفحة مبنية. [confirmed]
 2026-11-06: سجل اختيار [D-011](../04-decisions/D-011-petrol-lime-visual-direction.md)؛ الخطوط والشعار والتصميم النهائي تنتظر المراجعة والاعتماد. [confirmed]
 2026-11-06: اعتماد [D-010](../04-decisions/D-010-clear-voice-bold-design-principles.md) وبدء بحث المراجع؛ الألوان والخطوط والشعار لم تعتمد. [confirmed]
