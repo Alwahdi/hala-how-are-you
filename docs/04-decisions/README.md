@@ -25,3 +25,4 @@ related: [../templates/decision.md]
 | [D-011](D-011-petrol-lime-visual-direction.md) | اتجاه سابق استبدله D-013 | superseded | 2026-11-06 |
 | [D-012](D-012-reject-specimen-review-dark-reference.md) | رفض العينة الأولى ومراجعة مرجع داكن قبل حسم الألوان | approved | 2026-11-06 |
 | [D-013](D-013-dark-vivid-green-direction.md) | اتجاه داكن وأخضر حيوي بدلاً من لوحة D-011 | approved | 2026-11-06 |
+| [D-014](D-014-cairo-latin-digits-glass-reference.md) | Cairo للعربية وأرقام لاتينية ودراسة الزجاج والترتيب | approved | 2026-11-06 |

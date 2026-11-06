@@ -1,5 +1,8 @@
 # Current task
 
+- [x] Record Cairo/Latin-digit requirements and glass/organization feedback in D-014; inspect Flowrbit page and main image, save study. No app implementation.
+- [ ] Prepare true-font glass design-system specimen — awaits approval of its implementation plan before app changes.
+
 - [x] Record first-specimen rejection, new reference and dark/vivid-green direction in D-012/D-013; prepare second image specimen for founder review. No app implementation.
 
 - [x] Prepare initial visual identity specimen at founder request; see docs/00-company/identity-specimen-one.md. Final identity approval pending; no app code changed.
