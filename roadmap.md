@@ -1,7 +1,7 @@
 # Current task
 
 - [x] Record approved voice and bold/clear/non-distracting design principles in D-010.
-- [ ] Research Mobbin, Webflow and operations design systems; present an evidence-based visual recommendation without app implementation.
+- [x] Research Mobbin, Webflow, Linear and operations design systems; recommendations and access limits saved in docs/00-company/bold-design-research.md. Await founder palette choice; no app implementation.
 
 - [x] Record founder correction: final product name and company-subdomain relationship in docs/04-decisions/D-009-final-product-name-company-subdomains.md; supersede D-008. No domain connection requested.
 

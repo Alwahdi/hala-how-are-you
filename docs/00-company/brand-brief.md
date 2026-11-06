@@ -17,6 +17,7 @@ related: [vision.md, brand-positioning.md, ../01-discovery/self-serve-growth.md,
 - [confirmed] الاتجاه الأحدث للاسم والتموضع في [D-007](../04-decisions/D-007-connected-work-positioning.md)؛ لا تكرر قيمه هنا.
 - [confirmed] الاعتماد الأحدث للاسم النهائي والوصف المباشر في D-009؛ لا يعاد البحث عن الاسم دون طلب المؤسس.
 - [confirmed] النبرة والمبادئ البصرية ومراجع البحث المطلوبة في [D-010](../04-decisions/D-010-clear-voice-bold-design-principles.md)؛ لا تكرر القيم هنا.
+- [confirmed] المراجع والتوصيات غير المعتمدة في [بحث التصميم](bold-design-research.md).
 
 ## هدف الصفحة — معتمد في الخطة
 - [confirmed] طلب وصول مبكر قبل جاهزية أول ميزة، ثم يتحول إلى تجربة مباشرة بعد تحقق جاهزيتها؛ لا يعد التسجيل وعداً بموعد غير محدد أو شراءً. المصدر: اعتماد الخطة 2026-11-06.
