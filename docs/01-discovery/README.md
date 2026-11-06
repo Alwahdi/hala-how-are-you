@@ -31,6 +31,7 @@ related: [../05-operations/roadmap.md]
 | [public-discussions.md](public-discussions.md) | شكاوى وتعليقات ومصادر وحدود الوصول | أدلة عامة؛ ليست مقابلات محلية |
 | [demand-validation.md](demand-validation.md) | أدلة اختبار الحاجة والدفع والتجديد | اقتراح يحتاج خطة واعتماداً |
 | [local-payment-context.md](local-payment-context.md) | قنوات دفع معلنة وقيود محلية | أهلية التاجر والتحصيل غير محسومة |
+| [self-serve-growth.md](self-serve-growth.md) | متطلبات التهيئة الذاتية والنمو بقيادة المنتج ومصادرها | هدف مؤسس؛ الأسعار والحدود والإمكان الفني غير معتمدة |
 
 ## وش الباقي
 1. التأكد من المشاكل مع 5 إلى 10 أصحاب شبكات.
