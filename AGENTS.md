@@ -60,6 +60,8 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - `docs/05-operations/roadmap.md` checkbox updated if a task closed.
 
 ## Architecture rules
+- The current app is a client-only interactive design specimen, not a network product; keep demo data and Latin-number formatting in a browser-safe module to avoid implying live integrations.
+- Load Arabic Cairo and the proposed Latin font through installed Fontsource CSS, and define glass/color roles in global semantic tokens; this makes actual font use and readable fallback surfaces verifiable.
 - Company knowledge is plain Markdown in `docs/`, never only in chat or tool memory — keeps it portable across workspaces and tools.
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.
