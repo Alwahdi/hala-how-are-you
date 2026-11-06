@@ -19,3 +19,4 @@ related: [../templates/decision.md]
 | [D-005](D-005-identity-before-landing-page.md) | الهوية قبل صفحة الهبوط مع بوابات اعتماد الاسم والاتجاه البصري | approved | 2026-11-06 |
 | [D-006](D-006-reopen-naming-and-positioning.md) | إعادة بحث الاسم وصياغة التموضع بعد عدم اعتماد الجولة الأولى | approved | 2026-11-06 |
 | [D-007](D-007-connected-work-positioning.md) | محور عمل الشبكة المترابط واتجاه اسم عالمي قصير | approved | 2026-11-06 |
+| [D-008](D-008-temporary-name-direct-description.md) | اسم عمل مؤقت ووصف مباشر للرؤية، دون اسم تجاري نهائي | approved | 2026-11-06 |
