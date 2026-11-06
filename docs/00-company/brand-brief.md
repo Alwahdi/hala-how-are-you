@@ -21,6 +21,7 @@ related: [vision.md, brand-positioning.md, ../01-discovery/self-serve-growth.md,
 - [confirmed] اتجاه الألوان الحالي وحدود اعتماده في [D-013](../04-decisions/D-013-dark-vivid-green-direction.md).
 - [confirmed] العينة الأولى مرفوضة وفق D-012؛ [العينة الثانية](identity-specimen-two.md) تنتظر المراجعة.
 - [confirmed] ملاحظات العينة الثانية ومتطلبات الخط والأرقام في [D-014](../04-decisions/D-014-cairo-latin-digits-glass-reference.md)؛ تحليل المرجع في [دراسة Flowrbit](flowrbit-design-study.md).
+- [confirmed] العينة الأحدث تفاعلية؛ نطاقها ونتائجها في [سجل العينة](interactive-design-specimen.md)، وتنتظر المراجعة.
 
 ## هدف الصفحة — معتمد في الخطة
 - [confirmed] طلب وصول مبكر قبل جاهزية أول ميزة، ثم يتحول إلى تجربة مباشرة بعد تحقق جاهزيتها؛ لا يعد التسجيل وعداً بموعد غير محدد أو شراءً. المصدر: اعتماد الخطة 2026-11-06.
