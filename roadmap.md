@@ -1,6 +1,7 @@
 # Current task
 
-- [ ] Research public owner discussions, competing tools/prices, and demand-validation methods; preserve verified sources and access limitations in draft discovery reports without changing approved documents or app code. Continuation requested 2026-11-06; completed agent results retrieved, synthesis in progress.
+- [x] Research public owner discussions, competing tools/prices, and demand-validation methods; preserve sources and access limitations in draft discovery reports without changing approved documents or app code. Completed synthesis and document validation 2026-11-06; see docs/01-discovery/research-summary.md.
+- [ ] Update approved operations status/roadmap with research results — blocked on founder approval; proposed changes are in docs/01-discovery/research-summary.md. Discovery remains open.
 - [x] Document the approved voucher lifecycle analysis and linked expansion workflows.
 - [x] Update discovery index and approved status within the approved scope.
 - [x] Validate metadata, links, document sizes, and scope coverage.
