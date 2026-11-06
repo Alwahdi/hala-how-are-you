@@ -1,7 +1,8 @@
 # Current task
 
 - [x] Record approved voice and bold/clear/non-distracting design principles in D-010.
-- [x] Research Mobbin, Webflow, Linear and operations design systems; recommendations and access limits saved in docs/00-company/bold-design-research.md. Await founder palette choice; no app implementation.
+- [x] Research Mobbin, Webflow, Linear and operations design systems; recommendations and access limits saved in docs/00-company/bold-design-research.md. Palette direction selected in D-011; no app implementation.
+- [x] Record founder palette-direction selection in D-011; final typography, logo and design await review.
 
 - [x] Record founder correction: final product name and company-subdomain relationship in docs/04-decisions/D-009-final-product-name-company-subdomains.md; supersede D-008. No domain connection requested.
 
@@ -14,7 +15,7 @@
 - [x] Research second naming shortlist and rewrite positioning after founder feedback — positioning selected; names not adopted, global-short-name round follows D-007.
 
 - [x] Record founder brand requirements and prepare identity-first landing-page plan (2026-11-06). See docs/00-company/brand-brief.md.
-- [ ] Develop identity proposals and landing-page brief — name and voice resolved in D-009/D-010; await founder approval of visual direction before page implementation.
+- [ ] Develop identity proposals and landing-page brief — name, voice and palette direction resolved in D-009/D-010/D-011; final typography, logo and design require founder approval before page implementation.
 - [x] Prepare positioning proposal and sourced first naming shortlist (2026-11-06); see docs/00-company/brand-positioning.md and product-name-research.md.
 - [x] Choose positioning direction — recorded in D-007; product name still awaits founder selection before tone and visual identity.
 
