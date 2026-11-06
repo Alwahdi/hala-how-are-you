@@ -21,3 +21,4 @@ related: [../templates/decision.md]
 | [D-007](D-007-connected-work-positioning.md) | محور عمل الشبكة المترابط واتجاه اسم عالمي قصير | approved | 2026-11-06 |
 | [D-008](D-008-temporary-name-direct-description.md) | اسم عمل مؤقت؛ استبدله D-009 | superseded | 2026-11-06 |
 | [D-009](D-009-final-product-name-company-subdomains.md) | اسم المنتج النهائي وإسناد المنتجات لنطاقات الشركة الفرعية | approved | 2026-11-06 |
+| [D-010](D-010-clear-voice-bold-design-principles.md) | اعتماد النبرة الواضحة ومبادئ التصميم الجريء غير المشتت | approved | 2026-11-06 |
