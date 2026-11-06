@@ -2,7 +2,7 @@
 type: index
 status: draft
 owner: founder
-updated: 2026-11-05
+updated: 2026-11-06
 related: [../05-operations/roadmap.md]
 ---
 # الاستكشاف
@@ -25,12 +25,16 @@ related: [../05-operations/roadmap.md]
 | [network-owner-data-evidence.md](network-owner-data-evidence.md) | حدود بيانات مايكروتيك مع مصادر | تحقق مكتبي لا تجربة ميدانية |
 | [hypotheses.md](hypotheses.md) | الفرضيات اللي لازم نختبرها | مسودة |
 | [interviews/](interviews/README.md) | دليل المقابلات ونتائجها | الدليل جاهز، وما تمت أي مقابلة |
-| [competitors.md](competitors.md) | تحليل المنافسين | هيكل جاهز، وما بدأ البحث |
+| [competitors.md](competitors.md) | مقارنة المنتجات والبديل الحالي وأسعار العرض | بحث مكتبي؛ التجربة والدفع المحلي غير متحققين |
 | [market.md](market.md) | حجم السوق | هيكل جاهز، وما بدأ البحث |
+| [research-summary.md](research-summary.md) | خلاصة البحث وحدوده والخطوة المقترحة | مسودة، لا إغلاق للاستكشاف |
+| [public-discussions.md](public-discussions.md) | شكاوى وتعليقات ومصادر وحدود الوصول | أدلة عامة؛ ليست مقابلات محلية |
+| [demand-validation.md](demand-validation.md) | أدلة اختبار الحاجة والدفع والتجديد | اقتراح يحتاج خطة واعتماداً |
+| [local-payment-context.md](local-payment-context.md) | قنوات دفع معلنة وقيود محلية | أهلية التاجر والتحصيل غير محسومة |
 
 ## وش الباقي
 1. التأكد من المشاكل مع 5 إلى 10 أصحاب شبكات.
-2. تحليل المنافسين.
+2. مراجعة تحليل المنافسين المكتبي واعتماد إغلاقه أو طلب تحقق إضافي.
 3. تقدير حجم السوق والقدرة على الدفع.
 4. التأكد إن الفكرة ممكنة تقنياً، وأولها: كيف المنصة بتوصل للراوترات عن بعد.
 5. فهم طرق الدفع المتاحة محلياً.
