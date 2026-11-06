@@ -1,6 +1,7 @@
 ---
 type: decision
-status: approved
+status: superseded
+superseded_by: D-009-final-product-name-company-subdomains.md
 owner: founder
 updated: 2026-11-06
 related: [README.md, D-007-connected-work-positioning.md, D-005-identity-before-landing-page.md, ../00-company/simple-name-direction.md]
@@ -8,6 +9,7 @@ related: [README.md, D-007-connected-work-positioning.md, D-005-identity-before-
 # D-008: اسم مؤقت ووصف مباشر
 
 **الملخص:** [confirmed] اختار المؤسس «Mikro اسم مؤقت» بتاريخ 2026-11-06 بعد توضيح قربه من علامة MikroTik.
+[confirmed] هذا اعتماد تاريخي استبدله تصحيح المؤسس في [D-009](D-009-final-product-name-company-subdomains.md)؛ لا يعمل بصفة المؤقت الآن.
 [confirmed] يعتمد وصف الرؤية المباشر المطلوب بدلاً من العبارة الرئيسية السابقة؛ لا اعتماد لاسم تجاري نهائي أو جاهزية المنتج.
 
 ## السياق
