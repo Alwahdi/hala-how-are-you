@@ -2,7 +2,7 @@
 type: index
 status: approved
 owner: founder
-updated: 2026-11-05
+updated: 2026-11-06
 related: [../templates/decision.md]
 ---
 # سجل القرارات
@@ -15,3 +15,4 @@ related: [../templates/decision.md]
 | [D-001](D-001-company-as-code.md) | نبني الشركة كلها ككود، والملفات هي مصدر الحقيقة | approved | 2026-11-05 |
 | [D-002](D-002-start-with-network-owner.md) | نبدأ بصاحب الشبكة كعميل، والمهندس هو القناة والمشرف | approved | 2026-11-05 |
 | [D-003](D-003-docs-language.md) | قواعد الوكلاء بالإنجليزي، ومحتوى الشركة بالعربي | approved | 2026-11-05 |
+| [D-004](D-004-self-serve-product-led-growth.md) | التهيئة الذاتية والنمو بقيادة المنتج؛ تعديل شرط التركيب في D-002 | approved | 2026-11-06 |

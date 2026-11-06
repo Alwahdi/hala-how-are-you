@@ -2,7 +2,7 @@
 type: roadmap
 status: approved
 owner: founder
-updated: 2026-11-05
+updated: 2026-11-06
 related: [status.md]
 ---
 # خارطة الطريق
@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] توثيق اعتماد الاتجاه في [D-004](../04-decisions/D-004-self-serve-product-led-growth.md) (2026-11-06)؛ ليس إغلاقاً للتحقق أو اعتماداً للبناء. [confirmed]
 - [ ] تحليل المنافسين
 - [ ] تقدير حجم السوق
 - [ ] طرق الدفع المحلية (H-007)
