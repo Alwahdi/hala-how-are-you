@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Record founder preference for no in-person field visits and clarify pre-build studies for a functional thin slice with transparent in-product demand testing (2026-11-06). See docs/01-discovery/in-product-validation.md; no launch or build approval.
+
 - [x] Record founder approval of the self-serve/PLG direction as D-004; reconcile D-002's mandatory engineer installation clause and update operations within this approval scope (2026-11-06). Prices, quotas, validation execution and app construction remain unapproved.
 
 - [x] Record founder requirements for fully automated self-serve setup and affordable value-first upgrades; research model terminology (2026-11-06). See docs/01-discovery/self-serve-growth.md; no pricing or app implementation approved.

@@ -32,6 +32,7 @@ related: [../05-operations/roadmap.md]
 | [demand-validation.md](demand-validation.md) | أدلة اختبار الحاجة والدفع والتجديد | اقتراح يحتاج خطة واعتماداً |
 | [local-payment-context.md](local-payment-context.md) | قنوات دفع معلنة وقيود محلية | أهلية التاجر والتحصيل غير محسومة |
 | [self-serve-growth.md](self-serve-growth.md) | متطلبات التهيئة الذاتية والنمو بقيادة المنتج ومصادرها | هدف مؤسس؛ الأسعار والحدود والإمكان الفني غير معتمدة |
+| [in-product-validation.md](in-product-validation.md) | تفضيل التحقق دون زيارات من منتج صغير وأسئلة استخدام | اختيار المهمة وخطة التجربة غير معتمدين |
 
 ## وش الباقي
 1. التأكد من المشاكل مع 5 إلى 10 أصحاب شبكات.
