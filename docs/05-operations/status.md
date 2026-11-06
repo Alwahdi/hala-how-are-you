@@ -35,6 +35,7 @@ related: [roadmap.md]
 - أسئلة دورة الكرت مفهرسة في [التحليل](../01-discovery/voucher-lifecycle.md#ما-يتوقف-على-المؤسس)؛ لا إجابات مفترضة. [confirmed]
 
 ## آخر تحديث
+2026-11-06: اكتمل [فحص Nelufi الموسع](../00-company/nelufi-due-diligence.md)؛ تسجيل NEFELI في مجال الشبكات يستدعي فحص علامة متخصص قبل اعتماد الاسم، ولا هوية بصرية بدأت. [confirmed]
 2026-11-06: اعتماد [D-007](../04-decisions/D-007-connected-work-positioning.md)؛ بحث اسم جديد بالاتجاه المختار، ولا اسم نهائياً بعد. [confirmed]
 2026-11-06: رفض اعتماد الجولة الأولى وفق [D-006](../04-decisions/D-006-reopen-naming-and-positioning.md)؛ أُعدّ [بحث أسماء بديل](../00-company/product-name-research-round-two.md) و[تموضع بديل](../00-company/brand-positioning-round-two.md)، وينتظران اختيار المؤسس. [confirmed]
 2026-11-06: بدء أساس العلامة وبحث الاسم ضمن [D-005](../04-decisions/D-005-identity-before-landing-page.md)؛ الاختيارات النهائية تنتظر المؤسس. [confirmed]
