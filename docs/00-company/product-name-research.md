@@ -1,6 +1,7 @@
 ---
 type: naming-research
-status: draft
+status: superseded
+superseded_by: product-name-research-round-two.md
 owner: founder
 updated: 2026-11-06
 related: [brand-brief.md, brand-positioning.md, ../04-decisions/D-005-identity-before-landing-page.md]
@@ -8,6 +9,7 @@ related: [brand-brief.md, brand-positioning.md, ../04-decisions/D-005-identity-b
 # بحث أسماء المنتج — الجولة الأولى
 
 **الملخص:** [confirmed] فُحصت أسماء مبتكرة ومتغيرات عربية ولاتينية في بحث ويب بتاريخ 2026-11-06.
+[confirmed] هذه جولة تاريخية لم يعتمدها المؤسس؛ القرار في [D-006](../04-decisions/D-006-reopen-naming-and-positioning.md)، والبحث التالي في [الجولة الثانية](product-name-research-round-two.md).
 [assumption] ثلاثة مرشحين للمناقشة، لا اسم معتمداً ولا ضمان توافر قانوني أو نطاق.
 [confirmed] هذه استبعادات بحثية مقترحة، لا قرارات رفض من المؤسس.
 
