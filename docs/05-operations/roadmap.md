@@ -21,6 +21,7 @@ related: [status.md]
 - [x] اعتماد الاسم النهائي وعلاقة نطاق الشركة وفق [D-009](../04-decisions/D-009-final-product-name-company-subdomains.md). [confirmed]
 - [x] اعتماد النبرة ومبادئ التصميم وفق [D-010](../04-decisions/D-010-clear-voice-bold-design-principles.md). [confirmed]
 - [x] اختيار اتجاه الألوان لتطوير العينة وفق [D-011](../04-decisions/D-011-petrol-lime-visual-direction.md). [confirmed]
+- [x] إعداد [عينة الهوية الأولى](../00-company/identity-specimen-one.md) للمراجعة؛ ليست اعتماداً للتصميم النهائي. [confirmed]
 - [ ] مراجعة واعتماد الخطوط والشعار والتصميم النهائي، ثم إعداد الصفحة؛ لا اعتماد تنفيذ أو ربط نطاق بعد.
 - [x] توثيق اعتماد الاتجاه في [D-004](../04-decisions/D-004-self-serve-product-led-growth.md) (2026-11-06)؛ ليس إغلاقاً للتحقق أو اعتماداً للبناء. [confirmed]
 - [ ] تحليل المنافسين

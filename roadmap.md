@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Prepare initial visual identity specimen at founder request; see docs/00-company/identity-specimen-one.md. Final identity approval pending; no app code changed.
+
 - [x] Record approved voice and bold/clear/non-distracting design principles in D-010.
 - [x] Research Mobbin, Webflow, Linear and operations design systems; recommendations and access limits saved in docs/00-company/bold-design-research.md. Palette direction selected in D-011; no app implementation.
 - [x] Record founder palette-direction selection in D-011; final typography, logo and design await review.

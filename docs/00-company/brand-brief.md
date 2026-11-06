@@ -19,6 +19,7 @@ related: [vision.md, brand-positioning.md, ../01-discovery/self-serve-growth.md,
 - [confirmed] النبرة والمبادئ البصرية ومراجع البحث المطلوبة في [D-010](../04-decisions/D-010-clear-voice-bold-design-principles.md)؛ لا تكرر القيم هنا.
 - [confirmed] المراجع والتوصيات غير المعتمدة في [بحث التصميم](bold-design-research.md).
 - [confirmed] اتجاه الألوان المختار وحدود اعتماده في [D-011](../04-decisions/D-011-petrol-lime-visual-direction.md).
+- [confirmed] حالة العينة الأولى وحدودها في [عينة الهوية](identity-specimen-one.md)؛ لا اعتماد نهائي لها بعد.
 
 ## هدف الصفحة — معتمد في الخطة
 - [confirmed] طلب وصول مبكر قبل جاهزية أول ميزة، ثم يتحول إلى تجربة مباشرة بعد تحقق جاهزيتها؛ لا يعد التسجيل وعداً بموعد غير محدد أو شراءً. المصدر: اعتماد الخطة 2026-11-06.
