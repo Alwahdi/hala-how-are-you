@@ -2,6 +2,8 @@
 
 - [x] Record founder brand requirements and prepare identity-first landing-page plan (2026-11-06). See docs/00-company/brand-brief.md.
 - [ ] Develop identity proposals and landing-page brief — plan approved; prepare naming/positioning options first and await founder selection before final identity. Do not implement the page before identity approval.
+- [x] Prepare positioning proposal and sourced first naming shortlist (2026-11-06); see docs/00-company/brand-positioning.md and product-name-research.md.
+- [ ] Choose product name and positioning — blocked on founder selection; tone, visual identity and landing-page work follow this gate.
 
 - [x] Record founder preference for no in-person field visits and clarify pre-build studies for a functional thin slice with transparent in-product demand testing (2026-11-06). See docs/01-discovery/in-product-validation.md; no launch or build approval.
 
