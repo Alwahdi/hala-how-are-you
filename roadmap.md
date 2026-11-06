@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Record founder requirements for fully automated self-serve setup and affordable value-first upgrades; research model terminology (2026-11-06). See docs/01-discovery/self-serve-growth.md; no pricing or app implementation approved.
+
 - [x] Research public owner discussions, competing tools/prices, and demand-validation methods; preserve sources and access limitations in draft discovery reports without changing approved documents or app code. Completed synthesis and document validation 2026-11-06; see docs/01-discovery/research-summary.md.
 - [ ] Update approved operations status/roadmap with research results — blocked on founder approval; proposed changes are in docs/01-discovery/research-summary.md. Discovery remains open.
 - [x] Document the approved voucher lifecycle analysis and linked expansion workflows.

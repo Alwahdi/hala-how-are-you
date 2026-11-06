@@ -2,7 +2,7 @@
 type: glossary
 status: draft
 owner: founder
-updated: 2026-11-05
+updated: 2026-11-06
 related: [vision.md]
 ---
 # قاموس المصطلحات
@@ -57,3 +57,16 @@ related: [vision.md]
 | الشركة ككود | Company as Code | كل معرفة الشركة في ملفات منظمة، وهي مصدر الحقيقة الوحيد |
 | النسخة الأولى | MVP | أصغر نسخة من المنتج تحل الوجع الأساسي |
 | مؤكد / افتراض / فرضية | confirmed / assumption / hypothesis | درجة التأكد من أي معلومة |
+
+## النمو والتسعير
+| المصطلح | English | المعنى |
+|---|---|---|
+| النمو بقيادة المنتج | Product-Led Growth (PLG) | [confirmed] المنتج يقود اكتشاف القيمة والتبني والتحويل إلى الدفع والتوسع؛ ليس مجرد خطة مجانية. [المصدر](https://stripe.com/resources/more/plg-pricing-models) |
+| التهيئة الذاتية | Self-Serve Onboarding | [assumption] إتمام التسجيل والربط وأول مهمة دون اشتراط مساعدة بشرية؛ تعريف عمل في الاستكشاف. |
+| نموذج مجاني ومدفوع | Freemium | [confirmed] قيمة مجانية مستمرة ضمن حدود مع مسار ترقية مدفوع. [المصدر](https://productled.com/blog/6-free-models-in-saas) |
+| تجربة محدودة بالاستخدام | Usage-Based Free Trial | [confirmed] تجربة تنتهي عند استهلاك حصة معلومة بدلاً من الوقت وحده. [المصدر](https://productled.com/blog/6-free-models-in-saas) |
+| تجربة عكسية | Reverse Trial | [confirmed] تجربة مزايا مدفوعة ثم الرجوع إلى خطة مجانية إذا لم يشترك المستخدم. [المصدر](https://www.growthunhinged.com/p/your-guide-to-reverse-trials) |
+| التسعير حسب الاستخدام | Usage-Based Pricing | [confirmed] يتحدد المقابل بوحدة استخدام؛ وجود حصة في خطة ثابتة لا يعني هذا النموذج وحده. [المصدر](https://stripe.com/resources/more/plg-pricing-models) |
+| تقييد المزايا / الاستخدام | Feature / Usage Gating | [assumption] حدود معلنة تميز الخطط بحسب المزايا أو حجم الاستخدام؛ تعريف عمل. |
+| أول إدراك للقيمة | Aha Moment | [assumption] اللحظة التي يفهم فيها العميل قيمة نتيجة فعلية؛ تعريف عمل للاختبار. |
+| زمن الوصول للقيمة | Time to Value | [assumption] المدة إلى أول نتيجة ذات قيمة، لا مجرد إكمال التسجيل؛ تعريف قياس مقترح. |
