@@ -3,7 +3,7 @@ type: discovery-requirements
 status: draft
 owner: founder
 updated: 2026-11-06
-related: [README.md, ../00-company/glossary.md, demand-validation.md, local-payment-context.md, network-owner-data-evidence.md, research-summary.md, ../05-operations/status.md]
+related: [README.md, ../00-company/glossary.md, demand-validation.md, local-payment-context.md, network-owner-data-evidence.md, research-summary.md, ../05-operations/status.md, ../04-decisions/D-004-self-serve-product-led-growth.md]
 ---
 # التهيئة الذاتية والنمو بقيادة المنتج
 
@@ -42,6 +42,6 @@ related: [README.md, ../00-company/glossary.md, demand-validation.md, local-paym
 - [assumption] التحقق من وسيلة دفع مناسبة يأتي من [السياق المحلي](local-payment-context.md)، لا من سهولة الدفع لدى منتج عالمي.
 
 ## المتابعة والموافقات
-- [confirmed] البحث وتسجيل المتطلبات فقط؛ لا بناء أو سعر أو جمع أموال أو تعديل وثيقة معتمدة.
-- [assumption] التحديث المقترح لملف [الحالة المعتمد](../05-operations/status.md): ربط هذه المتطلبات بخطة التحقق التالية؛ ينتظر موافقة المؤسس.
+- [confirmed] عند إعداد البحث لم يكن الاتجاه معتمداً؛ اعتمد المؤسس الاتجاه لاحقاً بتاريخ 2026-11-06 في [D-004](../04-decisions/D-004-self-serve-product-led-growth.md). التفسير السابق محفوظ كسجل اقتراحات؛ المرجع النافذ للمبادئ المعتمدة هو القرار، لا كل افتراض هنا.
+- [confirmed] حُدّث [ملف الحالة](../05-operations/status.md) في نطاق تسجيل الاعتماد فقط؛ لم يعتمد بناء أو أسعار أو جمع أموال.
 - [assumption] الخطوة التالية عرض خطة اختبار التهيئة والقيمة المجانية وحدود الترقية واقتصادياتها للموافقة، مع إبقاء الاستكشاف مفتوحاً.
