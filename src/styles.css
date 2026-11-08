@@ -251,6 +251,10 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .request-pane { padding:32px; }
 .request-fields { display:flex; flex-direction:column; gap:12px; }
 .request-fields input,.request-fields button { height:50px; }
+.phone-fields { display:grid; grid-template-columns:90px minmax(0,1fr); gap:10px; }
+.phone-fields input { min-width:0; }
+.request-form [aria-invalid='true'] { border-color:var(--destructive); }
+.request-form button { min-height:48px; }
 .form-trap { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
 .request-success { min-height:210px; display:flex; flex-direction:column; justify-content:center; gap:16px; }
 .request-success h3 { font-size:22px; font-weight:650; }.request-success p { color:var(--muted-foreground); font-size:14px; line-height:1.9; }

@@ -62,6 +62,8 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 ## Architecture rules
 - The app has a public early-access landing page and a separate client-only design specimen, not live network operations; keep demo data and Latin-number formatting browser-safe to avoid implying live integrations.
 - Early-access capture uses a validated public server function with private Cloud storage and no visitor read policies; return no subscriber details and handle duplicates identically to protect leads.
+- Early-access contacts share one method/value schema with library-validated international phone numbers; preserve the legacy capture table and backfill new storage so earlier leads are not lost.
+- Public-page language is resolved from a saved cookie before Accept-Language in the root server loader and shared through context; this keeps SSR, privacy navigation and manual choice consistent without geographic tracking.
 - Load Arabic Cairo and the proposed Latin font through installed Fontsource CSS, and define glass/color roles in global semantic tokens; this makes actual font use and readable fallback surfaces verifiable.
 - Company knowledge is plain Markdown in `docs/`, never only in chat or tool memory — keeps it portable across workspaces and tools.
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
