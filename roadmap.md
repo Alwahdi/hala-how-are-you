@@ -1,5 +1,7 @@
 # Current task
 
+- [ ] Audit every Nielsen heuristic against the current landing before any UI edits; present minimal gap-remediation plan for founder approval.
+
 - [x] Revise landing copy, narrative, saved browser-language preference and early-access contact choice under approved plan and D-017/D-018; 20 tests and both real submission paths passed, duplicates and legacy preservation checked, test rows removed. No publishing or automatic messages.
 
 - [x] Study Nielsen's full ten-heuristics article and four founder attachments; save standing usability/content/context review in D-017 and memory pointers, validate docs, and leave the app unchanged.
