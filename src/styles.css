@@ -205,3 +205,55 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 @supports not (backdrop-filter:blur(1px)) { .glass { background:var(--card); } }
 @media (max-width:760px) { .intro { margin-top:45px; } .intro h1 { font-size:34px; } .workspace { margin-inline:20px; } .workspace-grid { grid-template-columns:1fr; gap:32px; } .state-grid { grid-template-columns:1fr; } .specimen-header { width:calc(100% - 32px); } }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
+
+/* Conversion page roles and layout, scoped away from the design specimen. */
+:root { --landing-band: oklch(.145 .012 165); --landing-rule: oklch(.65 .015 165 / .18); --preview-shadow: 0 35px 90px oklch(.02 0 0 / .6); }
+.landing { overflow:clip; background:var(--background); }
+.landing-width { width:calc(100% - 80px); max-width:1160px; margin-inline:auto; }
+.landing-header { height:100px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
+.landing-hero { text-align:center; padding-top:52px; }
+.hero-eyebrow { display:flex; align-items:center; justify-content:center; gap:10px; font-size:12px; color:var(--muted-foreground); }
+.landing-hero h1 { font-size:132px; line-height:1.15; margin:15px 0 12px; font-weight:800; }
+.landing-hero h2 { font-size:32px; font-weight:650; line-height:1.6; }
+.hero-description { max-width:620px; margin:14px auto 24px; font-size:16px; line-height:1.9; color:var(--muted-foreground); }
+.landing-cta { height:52px; padding-inline:28px; font-size:15px; }
+.hero-reassurance { font-size:12px; color:var(--muted-foreground); margin-top:14px; }
+.hero-preview { max-width:990px; margin:40px auto 0; border:1px solid var(--glass-edge); border-radius:8px 8px 0 0; box-shadow:var(--preview-shadow); background:var(--card); overflow:hidden; text-align:start; }
+.preview-caption { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 24px; font-size:11px; color:var(--muted-foreground); background:var(--glass-fill); border-bottom:1px solid var(--border); }
+.hero-preview img { width:100%; height:auto; display:block; }
+.preview-bottom { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; font-size:11px; color:var(--muted-foreground); border-top:1px solid var(--border); }
+.landing-band { padding:90px 0; background:var(--landing-band); border-block:1px solid var(--landing-rule); }
+.section-heading { max-width:680px; }
+.section-heading h2 { font-size:40px; line-height:1.55; font-weight:700; margin:15px 0; }
+.section-heading>p:last-child { color:var(--muted-foreground); font-size:15px; line-height:1.9; }
+.benefit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:36px; margin-top:46px; }
+.benefit-item { border-top:1px solid var(--border); padding-top:24px; position:relative; }
+.benefit-item>span { position:absolute; inset-inline-end:0; top:28px; }
+.benefit-item h3,.journey-grid h3 { font-size:20px; font-weight:650; margin:24px 0 12px; }
+.benefit-item p,.journey-grid p { font-size:14px; line-height:1.9; color:var(--muted-foreground); }
+.journey-section { padding-block:90px; }
+.journey-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:48px; margin-top:45px; list-style:none; }
+.journey-number { font-size:32px; color:var(--secondary); font-weight:500; }
+.company-note { display:flex; align-items:center; gap:14px; border-top:1px solid var(--border); margin-top:56px; padding-top:26px; color:var(--muted-foreground); font-size:13px; line-height:1.8; }
+.company-note svg { flex-shrink:0; color:var(--secondary); }
+.faq-section { display:grid; grid-template-columns:1fr 1.3fr; gap:70px; padding-block:50px 100px; }
+.faq-section h2 { font-size:32px; }
+.faq-list details { border-bottom:1px solid var(--border); }
+.faq-list summary { display:flex; align-items:center; justify-content:space-between; gap:20px; cursor:pointer; list-style:none; padding:23px 0; font-size:16px; font-weight:600; }
+.faq-list summary::-webkit-details-marker { display:none; }
+.faq-list summary svg { flex-shrink:0; color:var(--muted-foreground); transition:transform .2s; }
+.faq-list details[open] summary svg { transform:rotate(45deg); }
+.faq-list details p { font-size:14px; line-height:1.9; color:var(--muted-foreground); padding-bottom:24px; }
+.faq-list summary:focus-visible { outline:2px solid var(--ring); outline-offset:4px; }
+.request-section { background:var(--landing-band); border-block:1px solid var(--border); padding-block:80px; scroll-margin-top:30px; }
+.request-layout { display:grid; grid-template-columns:1fr 1.1fr; align-items:center; gap:70px; }
+.request-layout h2 { font-size:44px; font-weight:700; line-height:1.5; margin-top:15px; }
+.request-pane { padding:32px; }
+.request-fields { display:flex; flex-direction:column; gap:12px; }
+.request-fields input,.request-fields button { height:50px; }
+.form-trap { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.request-success { min-height:210px; display:flex; flex-direction:column; justify-content:center; gap:16px; }
+.request-success h3 { font-size:22px; font-weight:650; }.request-success p { color:var(--muted-foreground); font-size:14px; line-height:1.9; }
+.landing-footer { min-height:100px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.mobile-request { display:none; }
+@media(max-width:760px){.landing-width {width:calc(100% - 40px)}.landing-header{height:78px}.landing-header>div:first-child{gap:8px}.landing-header>div:first-child>span:last-child{display:none}.landing-hero{padding-top:36px}.landing-hero h1{font-size:88px;margin-top:20px}.landing-hero h2{font-size:23px;line-height:1.6}.hero-description{font-size:14px}.hero-preview{margin-top:34px}.preview-caption{padding:12px;font-size:10px}.landing-band,.journey-section{padding-block:58px}.section-heading h2{font-size:29px}.benefit-grid,.journey-grid{grid-template-columns:1fr;gap:30px}.benefit-item h3,.journey-grid h3{margin-top:15px}.journey-grid li{border-top:1px solid var(--border);padding-top:22px}.faq-section{grid-template-columns:1fr;gap:20px;padding-block:30px 58px}.faq-list summary{font-size:14px}.request-layout{grid-template-columns:1fr;gap:28px}.request-layout h2{font-size:34px}.request-section{padding-block:52px}.request-pane{padding:24px}.landing-footer{flex-wrap:wrap;padding-block:28px;margin-bottom:72px}.mobile-request{display:flex;position:fixed;bottom:16px;inset-inline:20px;width:calc(100% - 40px);height:50px;z-index:20;box-shadow:var(--glass-shadow)}.hero-eyebrow{font-size:10px}.company-note{align-items:flex-start}}
