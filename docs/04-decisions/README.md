@@ -2,7 +2,7 @@
 type: index
 status: approved
 owner: founder
-updated: 2026-11-06
+updated: 2026-11-08
 related: [../templates/decision.md]
 ---
 # سجل القرارات
@@ -26,3 +26,4 @@ related: [../templates/decision.md]
 | [D-012](D-012-reject-specimen-review-dark-reference.md) | رفض العينة الأولى ومراجعة مرجع داكن قبل حسم الألوان | approved | 2026-11-06 |
 | [D-013](D-013-dark-vivid-green-direction.md) | اتجاه داكن وأخضر حيوي بدلاً من لوحة D-011 | approved | 2026-11-06 |
 | [D-014](D-014-cairo-latin-digits-glass-reference.md) | Cairo للعربية وأرقام لاتينية ودراسة الزجاج والترتيب | approved | 2026-11-06 |
+| [D-015](D-015-product-ux-interaction-review.md) | مراجعة فرصة المنتج واقتصادياته وتجربته وتفاعله في كل مهمة بحسب صلتها | approved | 2026-11-08 |

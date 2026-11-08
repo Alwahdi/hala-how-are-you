@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Save founder's standing product-economics/UX/interaction review requirement in D-015 and memory pointer; preserve approval gates, note incomplete IxD attachment, and leave app unchanged.
+
 - [x] Complete the approved Mikro product opportunity assessment against the uploaded ten-question framework; evidence-linked draft saved in docs/01-discovery/product-opportunity-assessment.md, operations updated, and documentation validated. No app changes; experiment plan and full-product decision remain unapproved.
 
 - [x] Record Cairo/Latin-digit requirements and glass/organization feedback in D-014; inspect Flowrbit page and main image, save study. No app implementation.
