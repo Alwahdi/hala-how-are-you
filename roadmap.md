@@ -1,6 +1,7 @@
 # Current task
 
-- [ ] Prepare and obtain approval for conversion-first Mikro landing-page plan under D-016; implementation waits on founder approval. No network integration or publishing.
+- [x] Implement approved conversion-first landing page; private Cloud lead capture, bilingual privacy, preserved specimen, nine tests and browser submission checks completed. No publishing or network connection.
+- [ ] Complete privacy retention period and dedicated contact channel — waiting on founder details before a public campaign.
 
 - [x] Save founder's standing product-economics/UX/interaction review requirement in D-015 and memory pointer; preserve approval gates, note incomplete IxD attachment, and leave app unchanged.
 
