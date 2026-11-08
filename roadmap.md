@@ -1,5 +1,7 @@
 # Current task
 
+- [x] Study Nielsen's full ten-heuristics article and four founder attachments; save standing usability/content/context review in D-017 and memory pointers, validate docs, and leave the app unchanged.
+
 - [x] Implement approved conversion-first landing page; private Cloud lead capture, bilingual privacy, preserved specimen, nine tests and browser submission checks completed. No publishing or network connection.
 - [ ] Complete privacy retention period and dedicated contact channel — waiting on founder details before a public campaign.
 
