@@ -1,5 +1,7 @@
 # Current task
 
+- [ ] Prepare and obtain approval for conversion-first Mikro landing-page plan under D-016; implementation waits on founder approval. No network integration or publishing.
+
 - [x] Save founder's standing product-economics/UX/interaction review requirement in D-015 and memory pointer; preserve approval gates, note incomplete IxD attachment, and leave app unchanged.
 
 - [x] Complete the approved Mikro product opportunity assessment against the uploaded ten-question framework; evidence-linked draft saved in docs/01-discovery/product-opportunity-assessment.md, operations updated, and documentation validated. No app changes; experiment plan and full-product decision remain unapproved.

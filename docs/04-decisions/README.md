@@ -27,3 +27,4 @@ related: [../templates/decision.md]
 | [D-013](D-013-dark-vivid-green-direction.md) | اتجاه داكن وأخضر حيوي بدلاً من لوحة D-011 | approved | 2026-11-06 |
 | [D-014](D-014-cairo-latin-digits-glass-reference.md) | Cairo للعربية وأرقام لاتينية ودراسة الزجاج والترتيب | approved | 2026-11-06 |
 | [D-015](D-015-product-ux-interaction-review.md) | مراجعة فرصة المنتج واقتصادياته وتجربته وتفاعله في كل مهمة بحسب صلتها | approved | 2026-11-08 |
+| [D-016](D-016-conversion-first-landing-page.md) | تقديم صفحة التسويق الموجهة للتحويل مع بقاء بوابات الموافقة | approved | 2026-11-08 |
