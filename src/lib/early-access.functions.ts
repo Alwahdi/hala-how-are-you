@@ -7,9 +7,9 @@ export const requestEarlyAccess = createServerFn({ method: 'POST' })
     // Public, intentionally insert-only operation. No credentials or existing
     // subscriber information are ever returned. RLS denies all visitor reads.
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { error } = await supabaseAdmin.from('early_access_requests').upsert(
-      { email: data.email, language: data.language, source: data.source },
-      { onConflict: 'email', ignoreDuplicates: true },
+    const { error } = await supabaseAdmin.from('early_access_contacts').upsert(
+      { contact_method: data.contactMethod, contact_value: data.contactValue, language: data.language, source: data.source },
+      { onConflict: 'contact_method,contact_value', ignoreDuplicates: true },
     );
     if (error) return { ok: false };
     return { ok: true };
