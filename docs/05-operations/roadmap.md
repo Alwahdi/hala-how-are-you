@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] حفظ أولوية صفحة التسويق وفق [D-016](../04-decisions/D-016-conversion-first-landing-page.md) وإعداد خطة تنفيذ؛ التنفيذ ينتظر اعتماد المؤسس. [confirmed]
 - [x] حفظ متطلب مراجعة المراجع في كل مهمة وفق [D-015](../04-decisions/D-015-product-ux-interaction-review.md)؛ ليس اعتماد تنفيذ أو تغيير مرحلة. [confirmed]
 - [x] إعداد [تقييم فرصة مبدئي بالأسئلة العشرة](../01-discovery/product-opportunity-assessment.md) ضمن الخطة المعتمدة؛ لا ينقل الشركة للمرحلة 3 ولا يغلق التحقق. [confirmed]
 - [x] اعتماد المسار المحدود للهوية قبل صفحة الهبوط وفق [D-005](../04-decisions/D-005-identity-before-landing-page.md). [confirmed]
