@@ -15,11 +15,18 @@ function Landing() {
  const { ar, toggleLanguage } = useLanguage();
  const { state } = useEarlyAccess();
  const [requestVisible, setRequestVisible] = useState(false);
+ const [previewVisible, setPreviewVisible] = useState(false);
  useEffect(() => {
    const section = document.getElementById('early-access');
    if (!section) return;
    const observer = new IntersectionObserver(([entry]) => setRequestVisible(entry?.isIntersecting ?? false));
    observer.observe(section); return () => observer.disconnect();
+ }, []);
+ useEffect(() => {
+   const preview = document.querySelector('.hero-preview');
+   if (!preview) return;
+   const observer = new IntersectionObserver(([entry]) => setPreviewVisible(entry?.isIntersecting ?? false));
+   observer.observe(preview); return () => observer.disconnect();
  }, []);
  useEffect(() => { document.title = ar ? 'Mikro — إدارة شبكات MikroTik | الوصول المبكر' : 'Mikro — MikroTik network management | Early access'; }, [ar]);
  const t=(a:string,b:string)=>ar?a:b;
@@ -52,6 +59,6 @@ function Landing() {
   <section className="faq-section landing-width"><div className="section-heading"><p className="text-primary text-xs font-semibold">{t('كل شيء بوضوح','NO GUESSWORK')}</p><h2>{t('أسئلتك، قبل الخطوة التالية.','Your questions. Clear answers.')}</h2></div><div className="faq-list">{faq.map(([question,answer])=><details key={question}><summary>{question}<Plus size={20}/></summary><p>{answer}</p></details>)}</div></section>
   <section id="early-access" className="request-section"><div className="landing-width request-layout"><div><p className="text-primary text-xs font-semibold">{t('الوصول المبكر','EARLY ACCESS')}</p><h2>{t('تريد تجربة Mikro','Want to try Mikro')}<br/>{t('عندما يصبح جاهزاً؟','when it’s ready?')}</h2><p className="text-muted-foreground leading-8 mt-5">{t('اختر WhatsApp أو البريد واترك وسيلة التواصل. نحفظ اهتمامك لمتابعة الوصول المبكر؛ لا التزام بالدفع ولا موعد مؤكد للتجربة.','Choose WhatsApp or email and leave your contact details. We save your interest for early-access follow-up. No payment commitment or confirmed trial date.')}</p></div><div className="request-pane glass"><EarlyAccessForm ar={ar}/></div></div></section>
   <footer className="landing-width landing-footer"><div dir="ltr" className="brand-word">Mikro<span className="text-primary">.</span> <span className="text-muted-foreground text-xs font-normal">by Alwahdi</span></div><span className="text-muted-foreground text-xs">{t('قيد التطوير · لا خدمة شبكة حية بعد','In development · No live network service yet')}</span><Link to="/privacy" className="text-sm text-muted-foreground underline underline-offset-4">{t('الخصوصية','Privacy')}</Link></footer>
-  {!requestVisible && state !== 'success' && <Button className="mobile-request" onClick={request}>{t('سجّل اهتمامك','Join early access')}<Arrow/></Button>}
+  {!requestVisible && !previewVisible && state !== 'success' && <Button className="mobile-request" onClick={request}>{t('سجّل اهتمامك','Join early access')}<Arrow/></Button>}
  </main>;
 }
