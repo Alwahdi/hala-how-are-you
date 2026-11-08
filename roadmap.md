@@ -1,6 +1,6 @@
 # Current task
 
-- [ ] Audit every Nielsen heuristic against the current landing before any UI edits; present minimal gap-remediation plan for founder approval.
+- [x] Audit all ten Nielsen heuristics before UI edits; implement approved remediation, verify focus/errors/offline retry/draft privacy return/sticky CTA/success, run 24 tests and check stored test row then delete it. All ten review outcomes documented; privacy details still await founder.
 
 - [x] Revise landing copy, narrative, saved browser-language preference and early-access contact choice under approved plan and D-017/D-018; 20 tests and both real submission paths passed, duplicates and legacy preservation checked, test rows removed. No publishing or automatic messages.
 

@@ -253,6 +253,8 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .request-fields input,.request-fields button { height:50px; }
 .phone-fields { display:grid; grid-template-columns:90px minmax(0,1fr); gap:10px; }
 .phone-fields input { min-width:0; }
+.phone-field { min-width:0; }
+#request-start:focus-visible,#request-confirmation:focus-visible,#page-top:focus-visible { outline:2px solid var(--ring); outline-offset:6px; }
 .request-form [aria-invalid='true'] { border-color:var(--destructive); }
 .request-form button { min-height:48px; }
 .form-trap { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
@@ -260,4 +262,5 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .request-success h3 { font-size:22px; font-weight:650; }.request-success p { color:var(--muted-foreground); font-size:14px; line-height:1.9; }
 .landing-footer { min-height:100px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
 .mobile-request { display:none; }
+@media(max-width:760px) { .landing .mobile-request { bottom:calc(16px + env(safe-area-inset-bottom)); } }
 @media(max-width:760px){.landing-width {width:calc(100% - 40px)}.landing-header{height:78px}.landing-header>div:first-child{gap:8px}.landing-header>div:first-child>span:last-child{display:none}.landing-hero{padding-top:36px}.landing-hero h1{font-size:88px;margin-top:20px}.landing-hero h2{font-size:23px;line-height:1.6}.hero-description{font-size:14px}.hero-preview{margin-top:34px}.preview-caption{padding:12px;font-size:10px}.landing-band,.journey-section{padding-block:58px}.section-heading h2{font-size:29px}.benefit-grid,.journey-grid{grid-template-columns:1fr;gap:30px}.benefit-item h3,.journey-grid h3{margin-top:15px}.journey-grid li{border-top:1px solid var(--border);padding-top:22px}.faq-section{grid-template-columns:1fr;gap:20px;padding-block:30px 58px}.faq-list summary{font-size:14px}.request-layout{grid-template-columns:1fr;gap:28px}.request-layout h2{font-size:34px}.request-section{padding-block:52px}.request-pane{padding:24px}.landing-footer{flex-wrap:wrap;padding-block:28px;margin-bottom:72px}.mobile-request{display:flex;position:fixed;bottom:16px;inset-inline:20px;width:calc(100% - 40px);height:50px;z-index:20;box-shadow:var(--glass-shadow)}.hero-eyebrow{font-size:10px}.company-note{align-items:flex-start}}
