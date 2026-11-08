@@ -2,7 +2,7 @@
 type: roadmap
 status: approved
 owner: founder
-updated: 2026-11-06
+updated: 2026-11-08
 related: [status.md]
 ---
 # خارطة الطريق
@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] إعداد [تقييم فرصة مبدئي بالأسئلة العشرة](../01-discovery/product-opportunity-assessment.md) ضمن الخطة المعتمدة؛ لا ينقل الشركة للمرحلة 3 ولا يغلق التحقق. [confirmed]
 - [x] اعتماد المسار المحدود للهوية قبل صفحة الهبوط وفق [D-005](../04-decisions/D-005-identity-before-landing-page.md). [confirmed]
 - [x] اختيار محور التموضع وفق [D-007](../04-decisions/D-007-connected-work-positioning.md). [confirmed]
 - [x] حسم اسم العمل والوصف وفق [D-008](../04-decisions/D-008-temporary-name-direct-description.md)؛ لا يغلق بوابة الاسم التجاري النهائي. [confirmed]
@@ -31,7 +32,7 @@ related: [status.md]
 - [ ] تقدير حجم السوق
 - [ ] طرق الدفع المحلية (H-007)
 - [ ] الوصول التقني للراوترات (H-005)
-- [ ] مقابلات مع 5 إلى 10 أصحاب شبكات، و3 إلى 5 مهندسين
+- [ ] اعتماد خطة تحقق عن بعد وفق [مرجع المؤسس](../01-discovery/in-product-validation.md)؛ تحفظ المقابلات كوسيلة اختيارية دون زيارات، ولا تجربة منفذة بعد. [confirmed]
 - [ ] تحديث المشاكل والشخصيات بعد المقابلات
 
 ## المرحلة 3: تقييم الفكرة
