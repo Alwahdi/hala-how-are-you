@@ -5,7 +5,7 @@ import { useLanguage } from '@/components/language-provider';
 import { ArrowUpLeft, ArrowUpRight, Globe2, Ticket, Search, Activity, ShieldCheck, Plus, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EarlyAccessForm } from '@/components/early-access-form';
-import interfaceImage from '@/assets/mikro-interface.jpg';
+import { InterfaceConcept } from '@/components/interface-concept';
 
 export const Route = createFileRoute('/')({
   head: () => ({ meta: [{title:'Mikro — إدارة شبكات MikroTik | الوصول المبكر'},{name:'description',content:'Mikro من شركة الواحدي: اتجاه أبسط لإدارة شبكات MikroTik. سجّل اهتمامك؛ المنتج قيد التطوير.'},{property:'og:title',content:'Mikro by Alwahdi — Early access'},{property:'og:description',content:'A clearer direction for MikroTik network operations. Join early access. Product in development.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}] }),
@@ -41,7 +41,7 @@ function Landing() {
    <p className="hero-description">{t('الزبون يسأل عن الكرت، والكروت تحتاج ترتيب، والشبكة تحتاج متابعة. نطوّر Mikro ليجمع هذه الأعمال في مكان واحد، دون أن تحتاج مهندساً لكل خطوة.','Customers ask about internet access cards (vouchers). Printing needs organizing. Your network needs attention. We’re building Mikro to bring this work together, without needing an engineer for every step.')}</p>
    <Button size="lg" className="landing-cta" onClick={request}>{state === 'success' ? t('تم حفظ طلبك','Request saved') : t('سجّل اهتمامك','Join early access')}<Arrow/></Button>
    <p className="hero-reassurance">{t('رقم WhatsApp أو بريدك. لا دفع، ولا بيانات راوتر.','WhatsApp number or email. No payment. No router credentials.')}</p>
-   <div className="hero-preview"><div className="preview-caption"><span className="flex items-center gap-2"><span className="status-dot"/>{t('تصور الواجهة · بيانات تجريبية فقط','Interface concept · Demonstration data only')}</span><span className="hidden sm:inline" dir="ltr">MIKRO / WORKSPACE</span></div><img src={interfaceImage} alt={t('عينة توضيحية لواجهة Mikro، ليست بيانات شبكة حقيقية','Illustrative Mikro interface, not a live network')} width="1152" height="518" fetchPriority="high"/><div className="preview-bottom"><ShieldCheck size={16}/>{t('لا اتصال بشبكات فعلية في هذا العرض','No live network connection in this preview')}</div></div>
+   <InterfaceConcept ar={ar}/>
   </section>
   <section className="landing-band"><div className="landing-width"><div className="section-heading"><p className="text-primary text-xs font-semibold">{t('من يومك في الشبكة','YOUR EVERYDAY NETWORK WORK')}</p><h2>{t('الكرت خلص بسرعة؟','A card ran out too soon?')}<br/><span className="text-muted-foreground">{t('تحتاج جواب، مش تخمين.','You need an answer, not a guess.')}</span></h2><p>{t('من هنا نبدأ: أسئلة تتكرر وأعمال تأخذ من وقتك. هذه المشاكل التي ندرسها، وما نريد أن يصبح أبسط معها؛ الميزات ليست متاحة بعد.','Recurring questions and work that takes your time. These are the problems we’re exploring and the work we want to simplify. Features are not available yet.')}</p></div><div className="benefit-grid">{[
     [Ticket,t('كروت جاهزة للطباعة، بدون لخبطة','Printing cards, without the mess'),t('اختيار القالب وترتيب الصفوف ومراجعة الدفعة قبل الطباعة: ندرس كيف نجمعها في خطوات واضحة.','Choose a template, arrange the rows and review your batch before printing. We’re exploring a clearer way to bring those steps together.')],
