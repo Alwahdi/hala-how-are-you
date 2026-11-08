@@ -12,6 +12,7 @@ related: [roadmap.md]
 الخطوة الجاية: حسم قواعد العمل المفتوحة مع المؤسس؛ ثم استكمال التحقق والمنافسين والسوق.
 
 ## وين وصلنا
+- [confirmed] حُفظ طلب المراجعة الدائمة للمراجع في [D-015](../04-decisions/D-015-product-ux-interaction-review.md)؛ يطبق بحسب صلة المهمة ولا يجيز البناء.
 - [confirmed] اكتمل [تقييم فرصة Mikro](../01-discovery/product-opportunity-assessment.md) ضمن خطته المعتمدة؛ التوصية مسودة وليست قرار بناء أو إغلاقاً للاستكشاف.
 - الرؤية والأطراف الأربعة مكتوبة: [vision](../00-company/vision.md).
 - المشاكل مرقمة: 3 مؤكدة من المؤسس، و12 افتراض: [problems](../01-discovery/problems.md).
@@ -37,6 +38,7 @@ related: [roadmap.md]
 - أسئلة دورة الكرت مفهرسة في [التحليل](../01-discovery/voucher-lifecycle.md#ما-يتوقف-على-المؤسس)؛ لا إجابات مفترضة. [confirmed]
 
 ## آخر تحديث
+2026-11-08: حُفظ طلب المؤسس تطبيق مراجعة فرصة المنتج واقتصادياته وتجربته وتفاعله في كل مهمة وفق [D-015](../04-decisions/D-015-product-ux-interaction-review.md)، دون تغيير التطبيق. [confirmed]
 2026-11-08: أُعد [تقييم فرصة Mikro](../01-discovery/product-opportunity-assessment.md) وفق الملف المرفق وخطة المؤسس المعتمدة؛ لم يتغير التطبيق، وبقيت التوصية وخطة الاختبار لاعتماد مستقل. [confirmed]
 2026-11-06: اكتملت العينة التفاعلية؛ نطاقها ونتائج التحقق في [سجل العينة](../00-company/interactive-design-specimen.md)، وتنتظر اعتماد التصميم النهائي. [confirmed]
 2026-11-06: توثيق [D-014](../04-decisions/D-014-cairo-latin-digits-glass-reference.md) ودراسة المرجع؛ لا صورة مولدة جديدة ولا تغيير للتطبيق ضمن البحث. [confirmed]
