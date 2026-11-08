@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { useEarlyAccess } from '@/components/early-access-context';
 import { useLanguage } from '@/components/language-provider';
 import { ArrowUpLeft, ArrowUpRight, Globe2, Ticket, Search, Activity, ShieldCheck, Plus, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,24 +13,33 @@ export const Route = createFileRoute('/')({
 });
 function Landing() {
  const { ar, toggleLanguage } = useLanguage();
+ const { state } = useEarlyAccess();
+ const [requestVisible, setRequestVisible] = useState(false);
+ useEffect(() => {
+   const section = document.getElementById('early-access');
+   if (!section) return;
+   const observer = new IntersectionObserver(([entry]) => setRequestVisible(entry?.isIntersecting ?? false));
+   observer.observe(section); return () => observer.disconnect();
+ }, []);
+ useEffect(() => { document.title = ar ? 'Mikro — إدارة شبكات MikroTik | الوصول المبكر' : 'Mikro — MikroTik network management | Early access'; }, [ar]);
  const t=(a:string,b:string)=>ar?a:b;
  const Arrow=ar?ArrowUpLeft:ArrowUpRight;
- const request=()=>{document.getElementById('early-access')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('early-contact')?.focus({preventScroll:true});};
+ const request=()=>{document.getElementById('early-access')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById(state === 'success' ? 'request-confirmation' : 'request-start')?.focus({preventScroll:true});};
  const faq=[
   [t('هل أستطيع استخدام Mikro الآن؟','Can I use Mikro now?'),t('المنتج قيد التطوير. يمكنك طلب الوصول المبكر؛ التسجيل لا يفعّل حساباً أو يضمن موعداً للتجربة.','Mikro is in development. Requesting early access does not activate an account or guarantee a trial date.')],
-  [t('كيف سيتم ربط شبكتي؟','How will my network connect?'),t('نستهدف ربطاً ذاتياً واضحاً بعد تفويضك. طريقة الوصول خلف CGNAT والتوافق مع RouterOS v6 وv7 ما زالا قيد التحقق، ولا يوجد ربط فعلي في هذه الصفحة.','We are working toward clear, self-serve setup with your permission. CGNAT access and RouterOS v6/v7 compatibility are still being validated. This page does not connect to a router.')],
+  [t('كيف سيتم ربط شبكتي؟','How will my network connect?'),t('نريد أن تربط شبكتك بنفسك بعد موافقتك. نختبر الربط حتى لو مزود الإنترنت لا يعطيك عنواناً يمكن الوصول إليه من الخارج (CGNAT)، ونتحقق من إصداري RouterOS v6 وv7. هذه الصفحة لا تربط أي راوتر.','We want you to connect your network yourself, with your permission. We are testing connections even when your provider shares a public address (CGNAT), and checking RouterOS v6/v7 compatibility. This page does not connect to a router.')],
   [t('هل تطلبون كلمة مرور الراوتر؟','Do you need my router password?'),t('لا. نطلب رقم WhatsApp أو بريدك فقط. لا ترسل كلمة مرور أو معلومات زبائن؛ أي صلاحيات للتجربة سنوضحها قبل الربط.','No. We only ask for your WhatsApp number or email. Do not send passwords or customer information. Any trial permissions will be explained before connecting.')],
   [t('كم سعر الاشتراك؟','How much will it cost?'),t('لم نعتمد الأسعار أو حدود الخطط بعد. طلب الوصول المبكر لا يتطلب دفعاً ولا ينشئ اشتراكاً مدفوعاً.','Pricing and plan limits are not finalized. An early-access request requires no payment and creates no paid subscription.')],
   [t('ماذا يحدث بعد إرسال الطلب؟','What happens after I submit?'),t('نحفظ وسيلة التواصل التي اخترتها لمتابعة اهتمامك. لا تصلك رسالة تلقائية الآن، ولم نحدد موعد إطلاق بعد.','We save your chosen contact details for early-access follow-up. No automatic message is sent now, and a launch date has not been set.')],
  ];
  return <main className="landing" lang={ar?'ar':'en'} dir={ar?'rtl':'ltr'}>
-  <header className="landing-header landing-width"><div className="flex items-center gap-4"><span className="brand-word text-2xl" dir="ltr">Mikro<span className="text-primary">.</span></span><span className="text-muted-foreground text-xs border-s border-border ps-4">{t('من شركة الواحدي','by Alwahdi')}</span></div><div className="flex items-center gap-2"><Button variant="ghost" onClick={()=>toggleLanguage()} aria-label={ar?'Switch to English':'التبديل إلى العربية'}><Globe2/>{ar?'English':'العربية'}</Button><Button className="hidden sm:inline-flex" variant="outline" onClick={request}>{t('الوصول المبكر','Early access')}<Arrow/></Button></div></header>
+  <header id="page-top" tabIndex={-1} className="landing-header landing-width"><div className="flex items-center gap-4"><span className="brand-word text-2xl" dir="ltr">Mikro<span className="text-primary">.</span></span><span className="text-muted-foreground text-xs border-s border-border ps-4">{t('من شركة الواحدي','by Alwahdi')}</span></div><div className="flex items-center gap-2"><Button variant="ghost" onClick={()=>toggleLanguage()} aria-label={ar?'Switch to English':'التبديل إلى العربية'}><Globe2/>{ar?'English':'العربية'}</Button><Button className="hidden sm:inline-flex" variant="outline" onClick={request}>{state === 'success' ? t('تم حفظ طلبك','Request saved') : t('سجّل اهتمامك','Join early access')}<Arrow/></Button></div></header>
   <section className="landing-hero landing-width">
    <p className="hero-eyebrow"><span className="status-dot"/>{t('لصاحب شبكة MikroTik · قيد التطوير','For MikroTik network owners · In development')}</p>
    <h1 className="brand-word" dir="ltr">Mikro<span className="text-primary">.</span></h1>
    <h2>{t('إدارة متكاملة لشبكات MikroTik','Integrated MikroTik network operations')}</h2>
-   <p className="hero-description">{t('الزبون يسأل عن الكرت، والكروت تحتاج ترتيب، والشبكة تحتاج متابعة. نطوّر Mikro ليجمع هذه الأعمال في مكان واحد، دون أن تحتاج مهندساً لكل خطوة.','Customers ask about cards. Printing needs organizing. Your network needs attention. We’re building Mikro to bring this work together, without needing an engineer for every step.')}</p>
-   <Button size="lg" className="landing-cta" onClick={request}>{t('سجّل اهتمامك','Join early access')}<Arrow/></Button>
+   <p className="hero-description">{t('الزبون يسأل عن الكرت، والكروت تحتاج ترتيب، والشبكة تحتاج متابعة. نطوّر Mikro ليجمع هذه الأعمال في مكان واحد، دون أن تحتاج مهندساً لكل خطوة.','Customers ask about internet access cards (vouchers). Printing needs organizing. Your network needs attention. We’re building Mikro to bring this work together, without needing an engineer for every step.')}</p>
+   <Button size="lg" className="landing-cta" onClick={request}>{state === 'success' ? t('تم حفظ طلبك','Request saved') : t('سجّل اهتمامك','Join early access')}<Arrow/></Button>
    <p className="hero-reassurance">{t('رقم WhatsApp أو بريدك. لا دفع، ولا بيانات راوتر.','WhatsApp number or email. No payment. No router credentials.')}</p>
    <div className="hero-preview"><div className="preview-caption"><span className="flex items-center gap-2"><span className="status-dot"/>{t('تصور الواجهة · بيانات تجريبية فقط','Interface concept · Demonstration data only')}</span><span className="hidden sm:inline" dir="ltr">MIKRO / WORKSPACE</span></div><img src={interfaceImage} alt={t('عينة توضيحية لواجهة Mikro، ليست بيانات شبكة حقيقية','Illustrative Mikro interface, not a live network')} width="1152" height="518" fetchPriority="high"/><div className="preview-bottom"><ShieldCheck size={16}/>{t('لا اتصال بشبكات فعلية في هذا العرض','No live network connection in this preview')}</div></div>
   </section>
@@ -41,6 +52,6 @@ function Landing() {
   <section className="faq-section landing-width"><div className="section-heading"><p className="text-primary text-xs font-semibold">{t('كل شيء بوضوح','NO GUESSWORK')}</p><h2>{t('أسئلتك، قبل الخطوة التالية.','Your questions. Clear answers.')}</h2></div><div className="faq-list">{faq.map(([question,answer])=><details key={question}><summary>{question}<Plus size={20}/></summary><p>{answer}</p></details>)}</div></section>
   <section id="early-access" className="request-section"><div className="landing-width request-layout"><div><p className="text-primary text-xs font-semibold">{t('الوصول المبكر','EARLY ACCESS')}</p><h2>{t('تريد تجربة Mikro','Want to try Mikro')}<br/>{t('عندما يصبح جاهزاً؟','when it’s ready?')}</h2><p className="text-muted-foreground leading-8 mt-5">{t('اختر WhatsApp أو البريد واترك وسيلة التواصل. نحفظ اهتمامك لمتابعة الوصول المبكر؛ لا التزام بالدفع ولا موعد مؤكد للتجربة.','Choose WhatsApp or email and leave your contact details. We save your interest for early-access follow-up. No payment commitment or confirmed trial date.')}</p></div><div className="request-pane glass"><EarlyAccessForm ar={ar}/></div></div></section>
   <footer className="landing-width landing-footer"><div dir="ltr" className="brand-word">Mikro<span className="text-primary">.</span> <span className="text-muted-foreground text-xs font-normal">by Alwahdi</span></div><span className="text-muted-foreground text-xs">{t('قيد التطوير · لا خدمة شبكة حية بعد','In development · No live network service yet')}</span><Link to="/privacy" className="text-sm text-muted-foreground underline underline-offset-4">{t('الخصوصية','Privacy')}</Link></footer>
-  <Button className="mobile-request" onClick={request}>{t('سجّل اهتمامك','Join early access')}<Arrow/></Button>
+  {!requestVisible && state !== 'success' && <Button className="mobile-request" onClick={request}>{state === 'success' ? t('تم حفظ طلبك','Request saved') : t('سجّل اهتمامك','Join early access')}<Arrow/></Button>}
  </main>;
 }
