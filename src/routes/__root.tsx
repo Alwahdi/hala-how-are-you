@@ -79,13 +79,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Mikro by Alwahdi" },
-      { name: "description", content: "Mikro visual design study by Alwahdi" },
-      { name: "author", content: "Lovable" },
+      { name: "description", content: "Mikro network operations by Alwahdi" },
+      { name: "author", content: "Alwahdi" },
       { property: "og:title", content: "Mikro by Alwahdi" },
-      { property: "og:description", content: "Mikro visual design study by Alwahdi" },
+      { property: "og:description", content: "Mikro network operations by Alwahdi" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
