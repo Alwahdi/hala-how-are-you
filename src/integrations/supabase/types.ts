@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      early_access_contacts: {
+        Row: {
+          contact_method: string
+          contact_value: string
+          created_at: string
+          id: string
+          language: string
+          source: string
+        }
+        Insert: {
+          contact_method: string
+          contact_value: string
+          created_at?: string
+          id?: string
+          language: string
+          source?: string
+        }
+        Update: {
+          contact_method?: string
+          contact_value?: string
+          created_at?: string
+          id?: string
+          language?: string
+          source?: string
+        }
+        Relationships: []
+      }
       early_access_requests: {
         Row: {
           created_at: string

@@ -8,7 +8,10 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { getInitialLanguage } from '@/lib/locale.functions';
+import { LanguageContext } from '@/components/language-provider';
+import type { Language } from '@/lib/locale';
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -74,6 +77,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: () => getInitialLanguage(),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -101,13 +105,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const initialLanguage = Route.useLoaderData();
+  const [language, updateLanguage] = useState<Language>(initialLanguage ?? 'ar');
+  const setLanguage = (value: Language) => {
+    document.cookie = `mikro-language=${value}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+    updateLanguage(value);
+  };
   return (
-    <html lang="ar" dir="rtl">
+    <html lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LanguageContext.Provider value={{ language, setLanguage }}>{children}</LanguageContext.Provider>
         <Scripts />
       </body>
     </html>

@@ -8,6 +8,13 @@
       "when": 1794117220581,
       "tag": "0000_mikro_early_access",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794118336453,
+      "tag": "0001_early_access_contact_choices",
+      "breakpoints": true
     }
   ]
 }
