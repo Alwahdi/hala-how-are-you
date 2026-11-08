@@ -11,27 +11,26 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { getInitialLanguage } from '@/lib/locale.functions';
 import { LanguageContext } from '@/components/language-provider';
+import { useLanguage } from '@/components/language-provider';
+import { EarlyAccessProvider } from '@/components/early-access-context';
+import { Button } from '@/components/ui/button';
 import type { Language } from '@/lib/locale';
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
+  const { ar } = useLanguage();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{ar ? 'الصفحة غير موجودة' : 'Page not found'}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          {ar ? 'الرابط غير صحيح أو الصفحة انتقلت. تقدر ترجع إلى Mikro.' : 'This page may have moved or the link is incorrect. You can return to Mikro.'}
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
+          <Button asChild><Link to="/">{ar ? 'العودة إلى Mikro' : 'Back to Mikro'}</Link></Button>
         </div>
       </div>
     </div>
@@ -39,6 +38,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const { ar } = useLanguage();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -49,27 +49,22 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          {ar ? 'ما قدرنا نفتح الصفحة' : "This page didn't load"}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          {ar ? 'حصل خطأ عندنا. جرّب مرة ثانية أو ارجع إلى Mikro.' : 'Something went wrong on our end. Try again or return to Mikro.'}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+          <Button
             onClick={() => {
               router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+            {ar ? 'جرّب مرة ثانية' : 'Try again'}
+          </Button>
+          <Button asChild variant="outline"><Link to="/">{ar ? 'العودة إلى Mikro' : 'Back to Mikro'}</Link></Button>
         </div>
       </div>
     </div>
@@ -117,7 +112,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <LanguageContext.Provider value={{ language, setLanguage }}>{children}</LanguageContext.Provider>
+        <LanguageContext.Provider value={{ language, setLanguage }}><EarlyAccessProvider>{children}</EarlyAccessProvider></LanguageContext.Provider>
         <Scripts />
       </body>
     </html>
