@@ -1,5 +1,7 @@
 # Current task
 
+- [ ] Complete the approved Mikro product opportunity assessment against the uploaded ten-question framework; save evidence-linked draft, update operations, and validate documentation. No app changes.
+
 - [x] Record Cairo/Latin-digit requirements and glass/organization feedback in D-014; inspect Flowrbit page and main image, save study. No app implementation.
 - [x] Implement approved true-font glass design-system specimen; number tests and browser search/dialog/language/responsive checks passed. Final design review pending.
 

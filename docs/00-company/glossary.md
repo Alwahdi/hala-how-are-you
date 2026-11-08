@@ -2,7 +2,7 @@
 type: glossary
 status: draft
 owner: founder
-updated: 2026-11-06
+updated: 2026-11-08
 related: [vision.md]
 ---
 # قاموس المصطلحات
@@ -57,6 +57,7 @@ related: [vision.md]
 | الشركة ككود | Company as Code | كل معرفة الشركة في ملفات منظمة، وهي مصدر الحقيقة الوحيد |
 | النسخة الأولى | MVP | أصغر نسخة من المنتج تحل الوجع الأساسي |
 | مؤكد / افتراض / فرضية | confirmed / assumption / hypothesis | درجة التأكد من أي معلومة |
+| تقييم فرصة المنتج | Product Opportunity Assessment | [confirmed] تقييم خفيف للمشكلة والعميل والسوق والبدائل والتميز والتوقيت والوصول للسوق والإيرادات وشروط النجاح، ينتهي بتوصية لا بمواصفات حل؛ المصدر: مقال «Assessing Product Opportunities» المرفق من المؤسس بتاريخ 2026-11-08. |
 
 ## النمو والتسعير
 | المصطلح | English | المعنى |
