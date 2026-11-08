@@ -2,7 +2,7 @@
 type: brand-brief
 status: draft
 owner: founder
-updated: 2026-11-06
+updated: 2026-11-08
 related: [vision.md, brand-positioning.md, ../01-discovery/self-serve-growth.md, ../05-operations/status.md, ../04-decisions/D-005-identity-before-landing-page.md]
 ---
 # موجز الهوية وصفحة الهبوط
@@ -28,5 +28,6 @@ related: [vision.md, brand-positioning.md, ../01-discovery/self-serve-growth.md,
 - [assumption] الصفحة تقدم المنتج المستقل مع إسناد واضح للشركة؛ جمهورها الأول يستند إلى [الرؤية](vision.md) والقرارات المرتبطة بها، ولا تكرر تلك الحقائق هنا.
 
 ## حدود الاعتماد
+- [confirmed] نفذت نسخة الصفحة بعد اعتماد خطتها الأحدث؛ النتيجة والفحوص وحدود النشر في [سجل الصفحة](conversion-landing-page.md)، ولا يعني ذلك اعتماداً نهائياً للهوية أو جاهزية المنتج.
 - [confirmed] اعتمدت الخطة، ويحدد [D-005](../04-decisions/D-005-identity-before-landing-page.md) بوابات الاختيار قبل التنفيذ؛ خط العربية محسوم في D-014، ويتبقى خط الإنجليزية والشعار والتصميم النهائي.
 - [confirmed] حدثت [الحالة](../05-operations/status.md) وخارطة الطريق لتسجيل بدء المسار المعتمد دون إغلاق دراسة المنتج.
