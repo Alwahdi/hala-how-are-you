@@ -60,6 +60,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - `docs/05-operations/roadmap.md` checkbox updated if a task closed.
 
 ## Architecture rules
+- Interface concepts and the design specimen share browser-safe voucher controls and demo data; this keeps mobile inspection, detail dialogs and non-live labeling consistent without router calls.
 - The app has a public early-access landing page and a separate client-only design specimen, not live network operations; keep demo data and Latin-number formatting browser-safe to avoid implying live integrations.
 - Early-access capture uses a validated public server function with private Cloud storage and no visitor read policies; return no subscriber details and handle duplicates identically to protect leads.
 - Early-access contacts share one method/value schema with library-validated international phone numbers; preserve the legacy capture table and backfill new storage so earlier leads are not lost.

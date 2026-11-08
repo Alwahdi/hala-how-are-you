@@ -1,6 +1,7 @@
 # Current task
 
-- [ ] Review founder's rejected control wording, mobile interface concept and voucher click affordance; findings reproduced, focused plan awaiting explicit approval. General visitor-growth advice is deferred until this page review is resolved.
+- [x] Implement approved mobile interface concept, replace rejected wording and make demo cards open matching details on landing/specimen; six tests and bilingual mobile/desktop browser checks passed. No publishing.
+- [ ] Return to visitor-growth advice after founder reviews the revised page; public campaign privacy details still await founder.
 
 - [x] Audit all ten Nielsen heuristics before UI edits; implement approved remediation, verify focus/errors/offline retry/draft privacy return/sticky CTA/success, run 24 tests and check stored test row then delete it. All ten review outcomes documented; privacy details still await founder.
 

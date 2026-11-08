@@ -30,3 +30,4 @@ related: [../templates/decision.md]
 | [D-016](D-016-conversion-first-landing-page.md) | تقديم صفحة التسويق الموجهة للتحويل مع بقاء بوابات الموافقة | approved | 2026-11-08 |
 | [D-017](D-017-usability-content-context-review.md) | مراجعة مبادئ Nielsen والمحتوى البشري والسياق قبل كل خطوة | approved | 2026-11-08 |
 | [D-018](D-018-early-access-contact-choice.md) | اختيار رقم WhatsApp أو البريد لطلب الوصول المبكر دون إرسال تلقائي | approved | 2026-11-08 |
+| [D-019](D-019-readable-demo-card-preview.md) | تصور كروت مقروء للجوال وتفاصيل تجريبية قابلة للفتح | approved | 2026-11-08 |
