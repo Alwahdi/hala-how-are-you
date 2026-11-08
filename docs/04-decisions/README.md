@@ -29,3 +29,4 @@ related: [../templates/decision.md]
 | [D-015](D-015-product-ux-interaction-review.md) | مراجعة فرصة المنتج واقتصادياته وتجربته وتفاعله في كل مهمة بحسب صلتها | approved | 2026-11-08 |
 | [D-016](D-016-conversion-first-landing-page.md) | تقديم صفحة التسويق الموجهة للتحويل مع بقاء بوابات الموافقة | approved | 2026-11-08 |
 | [D-017](D-017-usability-content-context-review.md) | مراجعة مبادئ Nielsen والمحتوى البشري والسياق قبل كل خطوة | approved | 2026-11-08 |
+| [D-018](D-018-early-access-contact-choice.md) | اختيار رقم WhatsApp أو البريد لطلب الوصول المبكر دون إرسال تلقائي | approved | 2026-11-08 |
