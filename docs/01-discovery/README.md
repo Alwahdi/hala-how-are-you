@@ -2,7 +2,7 @@
 type: index
 status: draft
 owner: founder
-updated: 2026-11-06
+updated: 2026-11-08
 related: [../05-operations/roadmap.md]
 ---
 # الاستكشاف
@@ -33,6 +33,7 @@ related: [../05-operations/roadmap.md]
 | [local-payment-context.md](local-payment-context.md) | قنوات دفع معلنة وقيود محلية | أهلية التاجر والتحصيل غير محسومة |
 | [self-serve-growth.md](self-serve-growth.md) | متطلبات التهيئة الذاتية والنمو بقيادة المنتج ومصادرها | هدف مؤسس؛ الأسعار والحدود والإمكان الفني غير معتمدة |
 | [in-product-validation.md](in-product-validation.md) | تفضيل التحقق دون زيارات من منتج صغير وأسئلة استخدام | اختيار المهمة وخطة التجربة غير معتمدين |
+| [product-opportunity-assessment.md](product-opportunity-assessment.md) | تقييم الفرصة بالأسئلة العشرة وروابط الأدلة والفجوات [confirmed] | مسودة توصية؛ ليست قرار بناء أو إغلاق استكشاف |
 
 ## وش الباقي
 1. التأكد من المشاكل مع 5 إلى 10 أصحاب شبكات.
