@@ -1,5 +1,7 @@
 # Current task
 
+- [ ] Refine spacing, benefit icon/number overlap, demo card information, early-access popup, studied background pattern and favicon; focused plan awaiting founder approval before app changes.
+
 - [x] Implement approved mobile interface concept, replace rejected wording and make demo cards open matching details on landing/specimen; six tests and bilingual mobile/desktop browser checks passed. No publishing.
 - [ ] Return to visitor-growth advice after founder reviews the revised page; public campaign privacy details still await founder.
 
