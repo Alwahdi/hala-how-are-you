@@ -2,7 +2,7 @@
 type: roadmap
 status: approved
 owner: founder
-updated: 2026-11-08
+updated: 2026-11-10
 related: [status.md]
 ---
 # خارطة الطريق
@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] تنفيذ تحسين نافذة التسجيل والمسافات والكروت والخلفية والأيقونة وفق [D-020](../04-decisions/D-020-landing-dialog-and-detail-refinement.md) والتحقق؛ لا نشر. [confirmed]
 - [x] تحسين تصور الجوال وإشارات فتح الكروت وفق [D-019](../04-decisions/D-019-readable-demo-card-preview.md) والتحقق باللغتين؛ لا تشغيل شبكة أو نشر. [confirmed]
 - [x] مراجعة المبادئ العشرة بلا إغفال وإصلاح النواقص ضمن الخطة المعتمدة؛ النتائج لكل مبدأ في [سجل الصفحة](../00-company/conversion-landing-page.md). [confirmed]
 - [x] تحسين نص الصفحة واللغة وطلب التواصل ضمن الخطة المعتمدة، والتحقق من الطلبين وحفظ السجلات السابقة؛ [سجل الصفحة](../00-company/conversion-landing-page.md). [confirmed]
