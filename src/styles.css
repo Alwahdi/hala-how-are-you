@@ -208,7 +208,8 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 
 /* Conversion page roles and layout, scoped away from the design specimen. */
 :root { --landing-band: oklch(.145 .012 165); --landing-rule: oklch(.65 .015 165 / .18); --preview-shadow: 0 35px 90px oklch(.02 0 0 / .6); }
-.landing { overflow:clip; background:var(--background); }
+.landing { overflow:clip; background:var(--background); position:relative; isolation:isolate; }
+.landing-pattern { position:absolute; inset:0 0 auto; height:900px; z-index:-1; pointer-events:none; background-image:repeating-linear-gradient(135deg,transparent 0 90px,var(--landing-rule) 90px 91px,transparent 91px 180px),repeating-linear-gradient(45deg,transparent 0 90px,var(--landing-rule) 90px 91px,transparent 91px 180px); mask-image:linear-gradient(to right,var(--foreground),transparent 35%,transparent 65%,var(--foreground)); opacity:.45; }
 .landing-width { width:calc(100% - 80px); max-width:1160px; margin-inline:auto; }
 .landing-header { height:100px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
 .landing-hero { text-align:center; padding-top:52px; }
@@ -240,6 +241,8 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-usage { display:flex; flex-direction:column; gap:7px; text-align:end; }
 .demo-card-usage>span { color:var(--muted-foreground); font-size:12px; }
 .demo-card-usage bdi { font-size:15px; }
+.demo-card-summary { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:12px 24px; font-size:12px; color:var(--muted-foreground); padding-top:4px; }
+.demo-card-summary bdi { color:var(--foreground); margin-inline-start:6px; }
 .demo-card-dialog { width:calc(100% - 32px); max-width:480px; border-radius:8px; max-height:calc(100dvh - 32px); overflow-y:auto; }
 .demo-card-dialog>button { min-width:44px; min-height:44px; top:8px; right:auto; inset-inline-end:8px; display:grid; place-items:center; }
 .demo-card-dialog h2 { padding-inline-end:32px; letter-spacing:0; }
@@ -253,7 +256,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .section-heading>p:last-child { color:var(--muted-foreground); font-size:15px; line-height:1.9; }
 .benefit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:36px; margin-top:46px; }
 .benefit-item { border-top:1px solid var(--border); padding-top:24px; position:relative; }
-.benefit-item>span { position:absolute; inset-inline-end:0; top:28px; }
+.benefit-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px; }
 .benefit-item h3,.journey-grid h3 { font-size:20px; font-weight:650; margin:24px 0 12px; }
 .benefit-item p,.journey-grid p { font-size:14px; line-height:1.9; color:var(--muted-foreground); }
 .journey-section { padding-block:90px; }
@@ -276,7 +279,14 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .request-pane { padding:32px; }
 .request-fields { display:flex; flex-direction:column; gap:12px; }
 .request-fields input,.request-fields button { height:50px; }
-.phone-fields { display:grid; grid-template-columns:90px minmax(0,1fr); gap:10px; }
+.phone-fields { display:grid; grid-template-columns:minmax(90px,.35fr) minmax(0,1fr); gap:12px; align-items:end; }
+.phone-field label { min-height:34px; line-height:17px; }
+.request-dialog { max-width:560px; padding:28px; gap:20px; }
+.request-dialog .request-form { margin-top:4px; }
+.request-dialog .request-form button { min-height:48px; }
+.request-dialog .request-fields>p { line-height:1.7; margin-block:4px 8px; }
+.request-dialog .request-form legend { margin-bottom:16px; }
+.request-dialog .request-form { padding-top:8px; }
 .phone-fields input { min-width:0; }
 .phone-field { min-width:0; }
 #request-start:focus-visible,#request-confirmation:focus-visible,#page-top:focus-visible { outline:2px solid var(--ring); outline-offset:6px; }

@@ -60,6 +60,8 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - `docs/05-operations/roadmap.md` checkbox updated if a task closed.
 
 ## Architecture rules
+- Early-access CTAs open one controlled dialog with the shared in-memory draft; a single mounted form prevents duplicate field IDs and preserves privacy navigation without storing contacts locally.
+- Serve the browser icon as a real public SVG referenced by root head links; this avoids CDN-pointer incompatibility and stale template icons.
 - Interface concepts and the design specimen share browser-safe voucher controls and demo data; this keeps mobile inspection, detail dialogs and non-live labeling consistent without router calls.
 - The app has a public early-access landing page and a separate client-only design specimen, not live network operations; keep demo data and Latin-number formatting browser-safe to avoid implying live integrations.
 - Early-access capture uses a validated public server function with private Cloud storage and no visitor read policies; return no subscriber details and handle duplicates identically to protect leads.
