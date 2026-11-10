@@ -2,7 +2,7 @@
 type: index
 status: approved
 owner: founder
-updated: 2026-11-08
+updated: 2026-11-10
 related: [../templates/decision.md]
 ---
 # سجل القرارات
@@ -31,3 +31,4 @@ related: [../templates/decision.md]
 | [D-017](D-017-usability-content-context-review.md) | مراجعة مبادئ Nielsen والمحتوى البشري والسياق قبل كل خطوة | approved | 2026-11-08 |
 | [D-018](D-018-early-access-contact-choice.md) | اختيار رقم WhatsApp أو البريد لطلب الوصول المبكر دون إرسال تلقائي | approved | 2026-11-08 |
 | [D-019](D-019-readable-demo-card-preview.md) | تصور كروت مقروء للجوال وتفاصيل تجريبية قابلة للفتح | approved | 2026-11-08 |
+| [D-020](D-020-landing-dialog-and-detail-refinement.md) | نافذة التسجيل وتحسين المسافات والكروت والخلفية وأيقونة المتصفح | approved | 2026-11-10 |

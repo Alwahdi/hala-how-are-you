@@ -2,7 +2,7 @@
 type: status
 status: approved
 owner: founder
-updated: 2026-11-08
+updated: 2026-11-10
 related: [roadmap.md]
 ---
 # الحالة الحالية
@@ -12,6 +12,7 @@ related: [roadmap.md]
 الخطوة الجاية: حسم قواعد العمل المفتوحة مع المؤسس؛ ثم استكمال التحقق والمنافسين والسوق.
 
 ## وين وصلنا
+- [confirmed] اكتملت خطة [D-020](../04-decisions/D-020-landing-dialog-and-detail-refinement.md) وتحقيقاتها في [سجل الصفحة](../00-company/conversion-landing-page.md)؛ التالي مراجعة المؤسس واستكمال الخصوصية، ولا نشر منفذ للتغييرات.
 - [confirmed] نفذت تحسينات تصور الكروت للجوال ضمن [D-019](../04-decisions/D-019-readable-demo-card-preview.md)؛ نتائج القراءة والفتح والبحث واللغتين في [سجل الصفحة](../00-company/conversion-landing-page.md)، ولم تنشر هذه التغييرات.
 - [confirmed] أكد المؤسس وجوب مراجعة المبادئ العشرة كلها قبل أي بكسل وفق [D-017](../04-decisions/D-017-usability-content-context-review.md)؛ بدأت مراجعة الصفحة، وخطة سد الفجوات تنتظر الاعتماد قبل أي تعديل مرئي.
 - [confirmed] نفذت تحسينات النص واللغة وطلب التواصل ضمن الخطة المعتمدة؛ النتيجة والتحقق في [سجل الصفحة](../00-company/conversion-landing-page.md)، وخيار التواصل في [D-018](../04-decisions/D-018-early-access-contact-choice.md).
