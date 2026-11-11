@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cardsScriptSource, reportScriptSource, FULL_EVERY_CARDS, FULL_EVERY_RUNS, CARD_BATCH } from '@/lib/router-script';
-import { nextRun, cardReadSecs } from '@/lib/card-runs';
+import { cardReadSecs } from '@/lib/card-runs';
 import { checkHealth } from '@/lib/router-health';
 import { BASE, CARDS } from '@/lib/ip-cloud-probe';
 
@@ -32,10 +32,8 @@ describe('router load', () => {
     expect(JSON.stringify([...BASE, ...CARDS])).not.toContain('user-manager');
   });
   it('records how long a complete card read took and warns above 4 minutes', () => {
-    const a = nextRun({}, 'usermanager', 0, false, '2026-11-11T08:00:00.000Z').runs;
-    const b = nextRun(a, 'usermanager', 1, true, '2026-11-11T08:09:30.000Z');
-    expect(b.complete).toBe('2026-11-11T08:00:00.000Z');
-    expect(cardReadSecs(b.runs)).toBe(570);
+    expect(cardReadSecs({ took: { hotspot: { secs: 12, at: 'x' }, usermanager: { secs: 570, at: 'y' } } })).toBe(570);
+    expect(cardReadSecs({ usermanager: { at: 'x', pages: 3 } })).toBeNull();
     expect(checkHealth({ cardsSecs: 570 }).some((i) => i.id === 'cards_slow')).toBe(true);
     expect(checkHealth({ cardsSecs: 40 }).some((i) => i.id === 'cards_slow')).toBe(false);
   });
