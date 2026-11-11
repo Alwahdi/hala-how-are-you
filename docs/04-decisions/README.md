@@ -47,3 +47,4 @@ related: [../templates/decision.md]
 - [D-033](D-033-alerts-watcher-and-router-tasks.md) — تنبيهات الجوال، المراقب الخلفي، صحة الراوتر وإجراءاته (approved)
 - [D-034](D-034-short-setup-command.md) — أمر ربط قصير يُنزّل الإعداد بكود صالح لساعة (approved)
 - [D-035](D-035-card-control-um-v6-packages.md) — التحكم بالكروت، إصلاح User Manager v6، وقراءة الباقات (approved)
+- [D-036](D-036-packages-card-quick-actions-expiry.md) — الباقات وإضافتها، إجراءات الكرت السريعة، الكروت المنتهية والصفحات (approved)

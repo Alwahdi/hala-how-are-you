@@ -1,28 +1,42 @@
 import { useMemo, useState } from 'react';
-import { ChevronRight, Copy, Info, Layers, MessageCircle, Search, Ticket, Users, Gauge as GaugeIcon, Server } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckSquare, Info, Layers, Loader2, Pencil, Plus, RotateCcw, Search, Trash2, Ban, Play, Wifi, Wrench, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { cardState, formatBytes, formatDuration, usedShare, type CardRow, type CardState } from '@/lib/card-status';
+import { CARD_STATES, cardState, type CardRow, type CardState } from '@/lib/card-status';
 import type { ProfileRow, RouterRow, Session, Source } from './types';
 import { UserManagerSetup } from './user-manager-setup';
 import { useServerFn } from '@tanstack/react-start';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { requestRemoveFinished } from '@/lib/alerts.functions';
-import { Trash2, Loader2, Wifi, AlertTriangle, Wrench } from 'lucide-react';
+import { requestBulkAction, requestCardAction } from '@/lib/card-actions.functions';
 import { Link } from '@tanstack/react-router';
-import { CardControls } from './card-controls';
-import { humanDevices, humanRate, humanValidity, umStatus } from '@/lib/card-actions';
+import { BULK_MAX, SAFE_VALUE, umStatus } from '@/lib/card-actions';
+import { packageFacts } from '@/lib/packages';
+import { isOnline } from '@/lib/router-script';
+import { CardListRow, STATE_LABEL, STATE_TONE, type QuickAction, type RowJob } from './card-row';
+import { CardDetail } from './card-detail';
+import { EngineerDetails, PackageCard, PackageHelp, type PkgSummary } from './package-card';
+import { PackageForm } from './package-form';
 
-export const STATE_LABEL: Record<CardState, [string, string]> = { unused: ['جديد', 'Unused'], active: ['قيد الاستخدام', 'In use'], almost: ['قارب على الانتهاء', 'Almost used'], finished: ['منتهي', 'Finished'], disabled: ['معطّل', 'Disabled'] };
-export const STATE_TONE: Record<CardState, string> = { unused: 'bg-primary/15 text-primary', active: 'bg-secondary/20 text-foreground', almost: 'bg-destructive/10 text-destructive', finished: 'bg-muted text-muted-foreground', disabled: 'bg-muted text-muted-foreground' };
+export { STATE_LABEL, STATE_TONE };
 
-const LOW_READY = 20;
+const PAGE = 50;
+const SELECT_MAX = BULK_MAX * 5;
 
-type Props = { cards: CardRow[]; profiles: ProfileRow[]; routers: RouterRow[]; sessions: Session[]; ar: boolean; initialFilter?: CardState | undefined };
+type Load = { loaded: number; total: number | null; fetching: boolean } | null;
+type Props = { cards: CardRow[]; profiles: ProfileRow[]; routers: RouterRow[]; sessions: Session[]; ar: boolean; initialFilter?: CardState | undefined; load?: Load };
+const key = (c: Pick<CardRow, 'router_id' | 'source' | 'name'>) => `${c.router_id}|${c.source}|${c.name}`;
 
-export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter }: Props) {
+const REQ_ERR: Record<string, [string, string]> = {
+  offline: ['الراوتر غير متصل الآن.', 'The router is offline.'],
+  busy: ['فيه أمر على هذا الكرت قيد التنفيذ.', 'An action on this card is still running.'],
+  missing: ['ما لقينا الكرت.', 'Card not found.'],
+  no_package: ['ما نعرف باقة هذا الكرت، فما نقدر نجدده.', "We don't know this card's package."],
+};
+
+export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter, load }: Props) {
   const t = (a: string, b: string) => (ar ? a : b);
   const hasUm = cards.some((c) => c.source === 'usermanager') || profiles.some((p) => p.source === 'usermanager');
   const hasHs = cards.some((c) => c.source === 'hotspot') || profiles.some((p) => p.source === 'hotspot') || !hasUm;
@@ -31,16 +45,31 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<CardState | 'all' | 'online'>(initialFilter ?? 'all');
   const [pkg, setPkg] = useState<string | null>(null);
-  const [limit, setLimit] = useState(100);
-  const [openRaw, setOpen] = useState<CardRow | null>(null);
-  // Follow the latest copy of the open card, so an action's result (off/on, rename) shows without reopening.
-  const open = openRaw ? (cards.find((c) => c.router_id === openRaw.router_id && c.source === openRaw.source && c.name === openRaw.name) ?? openRaw) : null;
+  const [page, setPage] = useState(0);
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const [explained, setExplained] = useState(false);
+  const [pkgHelp, setPkgHelp] = useState(false);
+  const [form, setForm] = useState<{ edit?: ProfileRow | undefined } | null>(null);
   const [confirmClean, setConfirmClean] = useState(false);
   const [cleanMsg, setCleanMsg] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<{ action: 'renew' | 'off' | 'del'; card: CardRow } | null>(null);
+  const [jobs, setJobs] = useState<Record<string, RowJob>>({});
+  const [msg, setMsg] = useState<string | null>(null);
+  const [selecting, setSelecting] = useState(false);
+  const [sel, setSel] = useState<Set<string>>(new Set());
+  const [bulkConfirm, setBulkConfirm] = useState<'off' | 'on' | 'del' | null>(null);
+  const [bulkJobs, setBulkJobs] = useState<string[]>([]);
   const removeFinished = useServerFn(requestRemoveFinished);
+  const sendAction = useServerFn(requestCardAction);
+  const sendBulk = useServerFn(requestBulkAction);
   const qc = useQueryClient();
+  const refresh = () => { qc.invalidateQueries({ queryKey: ['cards'] }); qc.invalidateQueries({ queryKey: ['sessions'] }); };
   const { data: pendingClean = 0 } = useQuery({ queryKey: ['clean-jobs'], queryFn: async () => { const { count } = await supabase.from('router_jobs').select('id', { count: 'exact', head: true }).eq('kind', 'remove_cards').in('status', ['pending', 'sent']); return count ?? 0; }, refetchInterval: 10_000 });
+  const { data: bulkState = [] } = useQuery({
+    queryKey: ['bulk-jobs', bulkJobs], enabled: bulkJobs.length > 0,
+    queryFn: async () => { const { data } = await supabase.from('router_jobs').select('id, status, result').in('id', bulkJobs); const rows = data ?? []; if (rows.every((r) => ['done', 'failed', 'expired'].includes(r.status))) refresh(); return rows; },
+    refetchInterval: (qq) => ((qq.state.data as { status: string }[] | undefined)?.every((r) => ['done', 'failed', 'expired'].includes(r.status)) ? false : 3000),
+  });
   const finishedHs = useMemo(() => cards.filter((c) => c.source === 'hotspot' && cardState(c) === 'finished'), [cards]);
   async function cleanAll() {
     setConfirmClean(false);
@@ -51,37 +80,79 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   }
 
   const mine = useMemo(() => cards.filter((c) => c.source === source), [cards, source]);
-  // A card is online when the router lists its name among connected users (Hotspot or User Manager).
   const onlineSet = useMemo(() => new Set(sessions.map((s) => `${s.router_id}|${s.username}`)), [sessions]);
   const isLive = (c: CardRow) => onlineSet.has(`${c.router_id}|${c.name}`);
-  const onlineCount = useMemo(() => mine.filter((c) => onlineSet.has(`${c.router_id}|${c.name}`)).length, [mine, onlineSet]);
+  const readyRouter = (id: string) => { const r = routers.find((x) => x.id === id); return (r?.last_status as { umi?: string } | null)?.umi !== undefined; };
+  const counts = useMemo(() => { const c: Record<string, number> = { online: 0 }; for (const s of CARD_STATES) c[s] = 0; for (const x of mine) { c[cardState(x)]!++; if (onlineSet.has(`${x.router_id}|${x.name}`)) c['online']!++; } return c; }, [mine, onlineSet]);
   const umStates = routers.map((r) => ({ r, st: umStatus(r.last_status as { umi?: string; umr?: number } | null) }));
   const packages = useMemo(() => {
-    type Pkg = { name: string; total: number; ready: number; live: number; today: number; p?: ProfileRow };
-    const m = new Map<string, Pkg>();
-    const blank = (name: string, p?: ProfileRow): Pkg => ({ name, total: 0, ready: 0, live: 0, today: 0, ...(p ? { p } : {}) });
+    const m = new Map<string, Omit<PkgSummary, 'facts'> & { cards: CardRow[] }>();
+    const blank = (name: string, p?: ProfileRow) => ({ name, total: 0, ready: 0, live: 0, today: 0, cards: [] as CardRow[], ...(p ? { p } : {}) });
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    for (const p of profiles.filter((x) => x.source === source)) m.set(p.name, blank(p.name, p));
+    for (const p of profiles.filter((x) => x.source === source)) if (!m.has(p.name)) m.set(p.name, blank(p.name, p));
     for (const c of mine) {
-      const k = c.profile || '-'; const e = m.get(k) ?? blank(k); e.total++;
+      const k = c.profile || '-'; const e = m.get(k) ?? blank(k); e.total++; e.cards.push(c);
       if (cardState(c) === 'unused') e.ready++;
       if (onlineSet.has(`${c.router_id}|${c.name}`)) e.live++;
       if (c.first_used_at && new Date(c.first_used_at) >= today) e.today++;
       m.set(k, e);
     }
-    return [...m.values()].filter((e) => e.name !== 'default' || e.total > 0).sort((a, b) => b.total - a.total);
+    return [...m.values()].filter((e) => e.name !== 'default' || e.total > 0).sort((a, b) => b.total - a.total).map(({ cards: cs, ...e }) => ({ ...e, facts: packageFacts(e.p, cs) }) as PkgSummary);
   }, [profiles, mine, source, onlineSet]);
   const selectedPkg = packages.find((e) => e.name === pkg);
-  const list = useMemo(() => mine.filter((c) => (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || (c.profile || '-') === pkg) && (!q || c.name.toLowerCase().includes(q.toLowerCase()) || (c.comment ?? '').toLowerCase().includes(q.toLowerCase()))), [mine, filter, pkg, q, onlineSet]);
-  const routerName = (id: string) => routers.find((r) => r.id === id)?.name ?? '';
+  const list = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    return mine.filter((c) => (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || (c.profile || '-') === pkg) && (!ql || c.name.toLowerCase().includes(ql) || (c.comment ?? '').toLowerCase().includes(ql)));
+  }, [mine, filter, pkg, q, onlineSet]);
+  const pages = Math.max(1, Math.ceil(list.length / PAGE));
+  const pg = Math.min(page, pages - 1);
+  const shown = list.slice(pg * PAGE, pg * PAGE + PAGE);
+  const open = openKey ? cards.find((c) => key(c) === openKey) ?? null : null;
   const live = open ? sessions.find((s) => s.username === open.name && s.router_id === open.router_id) : undefined;
+  const lastSync = routers.map((r) => r.cards_synced_at).filter(Boolean).sort().pop();
+  const syncAgo = lastSync ? Math.max(0, Math.round((Date.now() - Date.parse(lastSync)) / 60000)) : null;
+  const canAdd = routers.length > 0 && (source === 'hotspot' || umStates.some((s) => s.st === 'on' || s.st === 'on_no_reader' || s.st === 'off'));
+
+  const resetPage = () => setPage(0);
+  async function runAction(card: CardRow, action: 'renew' | 'off' | 'on' | 'del' | 'kick') {
+    setMsg(null);
+    const res = await sendAction({ data: { routerId: card.router_id, source: card.source as Source, name: card.name, action } }).catch(() => ({ ok: false as const, error: 'error' as const }));
+    if (!res.ok) { setMsg((REQ_ERR[res.error] ?? ['ما قدرنا نرسل الأمر. جرّب مرة ثانية.', "We couldn't send it. Try again."])[ar ? 0 : 1]); return; }
+    setJobs((j) => ({ ...j, [key(card)]: { id: res.id, action } }));
+  }
+  function onQuick(card: CardRow, a: QuickAction) {
+    if (a === 'copy') { navigator.clipboard.writeText(card.name); setMsg(t(`نسخنا ${card.name}`, `Copied ${card.name}`)); return; }
+    if (a === 'send') { window.open(`https://wa.me/?text=${encodeURIComponent(t(`كرت الإنترنت: ${card.name}`, `Internet card: ${card.name}`))}`, '_blank', 'noreferrer'); return; }
+    if (a === 'renew' || a === 'off' || a === 'del') { setConfirm({ action: a, card }); return; }
+    runAction(card, a);
+  }
+  const selected = useMemo(() => mine.filter((c) => sel.has(key(c))), [mine, sel]);
+  function toggle(c: CardRow, v: boolean) { setSel((s) => { const n = new Set(s); if (v && n.size < SELECT_MAX) n.add(key(c)); else n.delete(key(c)); return n; }); }
+  function selectPage() { setSel((s) => { const n = new Set(s); for (const c of shown) if (SAFE_VALUE.test(c.name) && readyRouter(c.router_id) && n.size < SELECT_MAX) n.add(key(c)); return n; }); }
+  async function runBulk(action: 'off' | 'on' | 'del') {
+    setBulkConfirm(null); setMsg(null);
+    const byRouter = new Map<string, string[]>();
+    for (const c of selected) byRouter.set(c.router_id, [...(byRouter.get(c.router_id) ?? []), c.name]);
+    const ids: string[] = []; let failed = 0;
+    for (const [routerId, names] of byRouter) for (let i = 0; i < names.length; i += BULK_MAX) {
+      const res = await sendBulk({ data: { routerId, source, action, names: names.slice(i, i + BULK_MAX) } }).catch(() => ({ ok: false as const, error: 'error' as const }));
+      if (res.ok) ids.push(res.id); else failed++;
+    }
+    setBulkJobs(ids); setSel(new Set()); setSelecting(false);
+    if (failed) setMsg(t('بعض الكروت ما انرسلت: الراوتر غير متصل. جرّب بعدين.', 'Some cards were not sent: the router is offline.'));
+  }
+  const bulkDone = bulkState.filter((r) => r.status === 'done').reduce((n, r) => n + (Number((r.result ?? '').split(':')[1]) || 0), 0);
+  const bulkOver = bulkState.length > 0 && bulkState.every((r) => ['done', 'failed', 'expired'].includes(r.status));
+
+  const filterChips: (CardState | 'all' | 'online')[] = ['all', 'online', 'unused', 'active', 'almost', 'finished', 'expired', 'disabled'];
+  const chipLabel = (f: (typeof filterChips)[number]) => f === 'all' ? t('الكل', 'All') : f === 'online' ? t('متصل الآن', 'Online now') : t(...STATE_LABEL[f]);
 
   return (
     <div className="mt-6 space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="seg" role="group" aria-label={t('نوع الكروت', 'Card system')}>
-          <button type="button" aria-pressed={source === 'hotspot'} onClick={() => { setSource('hotspot'); setPkg(null); }}>Hotspot</button>
-          <button type="button" aria-pressed={source === 'usermanager'} onClick={() => { setSource('usermanager'); setPkg(null); }}>User Manager</button>
+          <button type="button" aria-pressed={source === 'hotspot'} onClick={() => { setSource('hotspot'); setPkg(null); resetPage(); setSel(new Set()); }}>Hotspot</button>
+          <button type="button" aria-pressed={source === 'usermanager'} onClick={() => { setSource('usermanager'); setPkg(null); resetPage(); setSel(new Set()); }}>User Manager</button>
         </div>
         <button type="button" onClick={() => setExplained(!explained)} aria-expanded={explained} className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground"><Info className="size-4" />{t('ما الفرق؟', "What's the difference?")}</button>
       </div>
@@ -92,82 +163,97 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
         </p>
       )}
 
-      {source === 'usermanager' && !hasUm ? <UmEmpty states={umStates} ar={ar} v7={v7} /> : (
+      {load && (
+        <div role="status" className="app-panel space-y-2 p-4">
+          <p className="flex items-center gap-2 text-sm"><Loader2 className="size-4 animate-spin text-primary" />{load.total ? t(`نحمّل الكروت... ${load.loaded.toLocaleString('en')} من ${load.total.toLocaleString('en')}`, `Loading cards... ${load.loaded.toLocaleString('en')} of ${load.total.toLocaleString('en')}`) : t('نحمّل الكروت...', 'Loading cards...')}</p>
+          <div className="meter h-3" role="progressbar" aria-valuemin={0} aria-valuemax={load.total ?? 100} aria-valuenow={load.loaded}><span style={{ width: `${load.total ? Math.max(4, (load.loaded / load.total) * 100) : 10}%` }} /></div>
+        </div>
+      )}
+
+      {source === 'usermanager' && !hasUm && !load ? <UmEmpty states={umStates} ar={ar} v7={v7} /> : (
         <>
           <section aria-label={t('الباقات', 'Packages')}>
-            <h2 className="mb-2 flex items-center gap-2 font-bold"><Layers className="size-4 text-primary" />{t('الباقات', 'Packages')}</h2>
-            {packages.length === 0 ? <p className="app-panel p-4 text-sm text-muted-foreground">{t('ما وصلت باقات بعد. تصل مع أول قائمة كروت (خلال 5 دقائق).', 'No packages yet. They arrive with the first card list (within 5 minutes).')}</p> : (
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 font-bold"><Layers className="size-4 text-primary" />{t('الباقات', 'Packages')}
+                <button type="button" onClick={() => setPkgHelp(!pkgHelp)} aria-expanded={pkgHelp} aria-label={t('وش الفرق بين الوقت والصلاحية؟', 'Time vs validity?')} className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"><Info className="size-4" /></button>
+              </h2>
+              {canAdd && <Button variant="outline" className="h-10" onClick={() => setForm({})}><Plus />{t('باقة جديدة', 'New package')}</Button>}
+            </div>
+            {pkgHelp && <div className="mb-3"><PackageHelp ar={ar} /></div>}
+            {packages.length === 0 ? <p className="app-panel p-4 text-sm text-muted-foreground">{t('ما وصلت باقات بعد. تصل مع أول قراءة للكروت (خلال 5 دقائق)، أو أضف باقة جديدة.', 'No packages yet. They arrive with the first card read (within 5 minutes), or add a new one.')}</p> : (
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {packages.map((e) => (
-                  <button key={e.name} type="button" aria-pressed={pkg === e.name} onClick={() => { setPkg(pkg === e.name ? null : e.name); setLimit(100); }} className={`app-panel tap-card p-4 text-start ${pkg === e.name ? 'border-primary' : ''}`}>
-                    <span className="flex items-center justify-between gap-1"><b className="truncate" dir="auto">{e.name === '-' ? t('بدون باقة', 'No package') : e.name}</b><ChevronRight className="tap-chevron" /></span>
-                    {e.p?.price ? <span className="mt-1 block text-lg font-bold text-primary" dir="auto">{e.p.price}{e.p.sell_price && e.p.sell_price !== e.p.price ? <span className="ms-1 text-xs font-normal text-muted-foreground">{t(`(بيع ${e.p.sell_price})`, `(sells ${e.p.sell_price})`)}</span> : null}</span> : null}
-                    <span className="mt-1 block space-y-0.5 text-xs text-muted-foreground">
-                      {[humanValidity(e.p?.validity, ar), humanRate(e.p?.rate_limit, ar), humanDevices(e.p?.shared_users, ar)].filter(Boolean).map((x) => <span key={x} className="block">{x}</span>)}
-                      {!e.p?.price && !e.p?.validity && !e.p?.rate_limit && !e.p?.shared_users ? <span className="block">{t('بدون حدود مسجلة', 'No limits set')}</span> : null}
-                    </span>
-                    <span className="mt-3 flex items-end justify-between gap-2">
-                      <span><b className="block text-2xl" dir="ltr">{e.ready}</b><span className="text-xs text-muted-foreground">{t('جاهز للبيع', 'ready')}</span></span>
-                      <span className="text-end text-xs text-muted-foreground">
-                        {e.live > 0 && <span className="flex items-center justify-end gap-1 text-primary"><span className="size-1.5 rounded-full bg-primary" />{t(`${e.live} متصل`, `${e.live} online`)}</span>}
-                        {e.today > 0 && <span className="block">{t(`${e.today} بدأ اليوم`, `${e.today} started today`)}</span>}
-                        <span className="block" dir="ltr">/ {e.total}</span>
-                      </span>
-                    </span>
-                    {e.p && e.total > 0 && (e.ready === 0 || (e.total >= 30 && e.ready < LOW_READY)) && <span className="mt-2 flex items-center gap-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive"><AlertTriangle className="size-3.5" />{e.ready === 0 ? t('خلص الجاهز', 'None left') : t('الجاهز قليل', 'Running low')}</span>}
-                  </button>
-                ))}
+                {packages.map((e) => <PackageCard key={e.name} e={e} ar={ar} selected={pkg === e.name} onClick={() => { setPkg(pkg === e.name ? null : e.name); resetPage(); }} />)}
               </div>
             )}
           </section>
-          {selectedPkg?.p && <EngineerDetails p={selectedPkg.p} ar={ar} />}
+          {selectedPkg?.p && (
+            <div className="space-y-3">
+              <Button variant="outline" className="h-11 w-full" onClick={() => setForm({ edit: selectedPkg.p })}><Pencil />{t(`تعديل الباقة ${selectedPkg.name}`, `Edit package ${selectedPkg.name}`)}</Button>
+              <EngineerDetails p={selectedPkg.p} ar={ar} />
+            </div>
+          )}
 
           <div className="relative">
             <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => { setQ(e.target.value); setLimit(100); }} placeholder={t('ابحث برقم الكرت أو الملاحظة', 'Search by card number or note')} className="h-12 ps-10" dir="auto" />
+            <Input value={q} onChange={(e) => { setQ(e.target.value); resetPage(); }} placeholder={t('ابحث برقم الكرت أو الملاحظة', 'Search by card number or note')} className="h-12 ps-10" dir="auto" />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t('الحالة', 'Status')}>
-            <button type="button" aria-pressed={filter === 'all'} onClick={() => setFilter('all')} className="chip">{t('الكل', 'All')}</button>
-            <button type="button" aria-pressed={filter === 'online'} onClick={() => setFilter('online')} className="chip inline-flex items-center gap-1.5"><span className={`size-2 rounded-full ${onlineCount ? 'bg-primary' : 'bg-muted-foreground/40'}`} />{t(`متصل الآن (${onlineCount})`, `Online now (${onlineCount})`)}</button>
-            {(['unused', 'active', 'almost', 'finished', 'disabled'] as const).map((f) => <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)} className="chip">{t(...STATE_LABEL[f])}</button>)}
+            {filterChips.map((f) => (
+              <button key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">
+                {f === 'online' && <span className={`size-2 rounded-full ${counts['online'] ? 'bg-primary' : 'bg-muted-foreground/40'}`} />}
+                {chipLabel(f)}{f !== 'all' && <span className="chip-count" dir="ltr">{counts[f] ?? 0}</span>}
+              </button>
+            ))}
           </div>
-          <p className="text-xs text-muted-foreground">{t(`${list.length} كرت`, `${list.length} cards`)}{pkg ? ` · ${pkg}` : ''}</p>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>{list.length ? t(`${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} من ${list.length.toLocaleString('en')} كرت`, `${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} of ${list.length.toLocaleString('en')} cards`) : t('0 كرت', '0 cards')}{pkg ? ` · ${pkg}` : ''}{syncAgo != null ? t(` · آخر قراءة من الراوتر قبل ${syncAgo} د`, ` · read from router ${syncAgo} min ago`) : ''}</span>
+            {mine.length > 0 && (selecting
+              ? <span className="flex gap-2"><Button variant="ghost" className="h-9" onClick={selectPage}>{t('حدد الصفحة', 'Select page')}</Button><Button variant="ghost" className="h-9" onClick={() => { setSelecting(false); setSel(new Set()); }}><X />{t('إلغاء', 'Cancel')}</Button></span>
+              : <Button variant="ghost" className="h-9" onClick={() => setSelecting(true)}><CheckSquare />{t('تحديد', 'Select')}</Button>)}
+          </div>
+
           {source === 'hotspot' && filter === 'finished' && finishedHs.length > 0 && (
             <div className="app-panel flex flex-wrap items-center gap-3 p-4">
-              <span className="flex-1 text-sm">{pendingClean ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin text-primary" />{t('جاري الحذف على الراوتر...', 'Removing on the router...')}</span> : t('الكروت المنتهية تأخذ مساحة وتبطئ البحث في الراوتر.', 'Used-up cards take space and slow searches on the router.')}</span>
+              <span className="flex-1 text-sm">{pendingClean ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin text-primary" />{t('جاري الحذف على الراوتر...', 'Removing on the router...')}</span> : t('الكروت اللي خلص رصيدها تأخذ مساحة وتبطئ البحث في الراوتر.', 'Used-up cards take space and slow searches on the router.')}</span>
               <Button variant="destructive" className="h-11" disabled={pendingClean > 0} onClick={() => setConfirmClean(true)}><Trash2 />{t(`احذف الكل (${finishedHs.length})`, `Remove all (${finishedHs.length})`)}</Button>
             </div>
           )}
           {cleanMsg && <p role="status" className="rounded-xl bg-primary/10 p-3 text-sm">{cleanMsg}</p>}
-          {mine.length === 0 ? <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما وصلت قائمة الكروت بعد.', 'No card list yet.')}</p> : (
+          {msg && <p role="status" className="rounded-xl bg-muted p-3 text-sm">{msg}</p>}
+          {bulkJobs.length > 0 && (
+            <p role="status" className="flex items-center gap-2 rounded-xl bg-primary/10 p-3 text-sm">
+              {bulkOver ? <>{t(`خلص: تم على ${bulkDone} كرت.`, `Finished: done on ${bulkDone} cards.`)}<button type="button" className="ms-auto text-xs underline" onClick={() => setBulkJobs([])}>{t('إخفاء', 'Hide')}</button></> : <><Loader2 className="size-4 animate-spin" />{t('الراوتر ينفذ على الكروت المحددة...', 'The router is working through the selected cards...')}</>}
+            </p>
+          )}
+
+          {mine.length === 0 && !load ? <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما وصلت قائمة الكروت بعد.', 'No card list yet.')}</p> : list.length === 0 && !load ? (
+            <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما في كروت بهذا البحث أو الفلتر.', 'No cards match this search or filter.')}</p>
+          ) : (
             <ul className="space-y-2">
-              {list.slice(0, limit).map((c) => {
-                const st = cardState(c); const share = usedShare(c); const on = isLive(c);
-                return (
-                  <li key={`${c.router_id}-${c.source}-${c.name}`}>
-                    <button type="button" onClick={() => setOpen(c)} className="app-panel tap-card flex w-full items-center gap-3 p-3 text-start">
-                      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><Ticket className="size-5" />{on && <span className="absolute -end-0.5 -top-0.5 size-3 rounded-full border-2 border-background bg-primary" aria-label={t('متصل الآن', 'Online now')} />}</span>
-                      <span className="min-w-0 flex-1">
-                        <b className="block truncate font-mono" dir="ltr">{c.name}</b>
-                        <span className="text-xs text-muted-foreground">{on && <b className="text-primary">{t('متصل · ', 'Online · ')}</b>}{c.profile || '-'} · {formatDuration(c.uptime_s, ar)} · <bdi dir="ltr">{formatBytes(c.bytes)}</bdi></span>
-                        {share != null && <span className="meter mt-1.5 block" data-tone={share >= 0.8 ? 'warn' : undefined}><span style={{ width: `${Math.min(100, share * 100)}%` }} /></span>}
-                      </span>
-                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${STATE_TONE[st]}`}>{t(...STATE_LABEL[st])}</span>
-                      <ChevronRight className="tap-chevron" />
-                    </button>
-                  </li>
-                );
-              })}
+              {shown.map((c) => (
+                <CardListRow key={key(c)} c={c} ar={ar} live={isLive(c)} ready={readyRouter(c.router_id) && isOnline(routers.find((r) => r.id === c.router_id)?.last_seen_at ?? null)} selecting={selecting} selected={sel.has(key(c))} job={jobs[key(c)]}
+                  onOpen={() => setOpenKey(key(c))} onSelect={(v) => toggle(c, v)} onAction={(a) => onQuick(c, a)} onJobOver={refresh} />
+              ))}
             </ul>
           )}
-          {list.length > limit && <Button variant="outline" className="h-11 w-full" onClick={() => setLimit(limit + 200)}>{t('عرض المزيد', 'Show more')}</Button>}
+
+          {pages > 1 && <Pager page={pg} pages={pages} onPage={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} ar={ar} />}
+          {selecting && (
+            <div className="sticky bottom-24 z-20 app-panel flex flex-wrap items-center gap-2 p-3 sm:bottom-4">
+              <b className="flex-1 text-sm">{t(`${sel.size} محدد`, `${sel.size} selected`)}{sel.size >= SELECT_MAX ? t(` (الحد ${SELECT_MAX})`, ` (max ${SELECT_MAX})`) : ''}</b>
+              <Button variant="outline" className="h-11" disabled={!sel.size} onClick={() => setBulkConfirm('off')}><Ban />{t('إيقاف', 'Off')}</Button>
+              <Button variant="outline" className="h-11" disabled={!sel.size} onClick={() => setBulkConfirm('on')}><Play />{t('تشغيل', 'On')}</Button>
+              <Button variant="destructive" className="h-11" disabled={!sel.size} onClick={() => setBulkConfirm('del')}><Trash2 />{t('حذف', 'Remove')}</Button>
+            </div>
+          )}
         </>
       )}
 
       <Dialog open={confirmClean} onOpenChange={setConfirmClean}>
         <DialogContent dir={ar ? 'rtl' : 'ltr'}>
           <DialogHeader>
-            <DialogTitle>{t(`حذف ${finishedHs.length} كرت منتهي؟`, `Remove ${finishedHs.length} used-up cards?`)}</DialogTitle>
+            <DialogTitle>{t(`حذف ${finishedHs.length} كرت خلص رصيده؟`, `Remove ${finishedHs.length} used-up cards?`)}</DialogTitle>
             <DialogDescription>{t('تنحذف من الراوتر نهائياً. الراوتر يتأكد بنفسه أن كل كرت خلص فعلاً قبل حذفه، والكرت اللي فيه رصيد ما ينحذف.', 'They are removed from the router for good. The router checks each card is really used up first; a card with balance left is never removed.')}</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-2">
@@ -177,57 +263,66 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
-        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
-          {open && (() => {
-            const st = cardState(open); const share = usedShare(open); const pct = share == null ? null : Math.min(100, Math.round(share * 100));
-            const msg = t(`كرت الإنترنت: ${open.name}`, `Internet card: ${open.name}`);
-            return (
-              <>
-                <DialogHeader>
-                  <DialogTitle dir="ltr" className="font-mono text-2xl">{open.name}</DialogTitle>
-                  <DialogDescription><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATE_TONE[st]}`}>{t(...STATE_LABEL[st])}</span> {open.source === 'usermanager' ? 'User Manager' : 'Hotspot'}</DialogDescription>
-                </DialogHeader>
-                <div className="flex items-center gap-4">
-                  <div className="gauge" data-tone={pct != null && pct >= 80 ? 'warn' : undefined} style={{ ['--v' as string]: pct ?? 0 }} role="img" aria-label={pct == null ? t('بدون حد', 'No limit') : t(`مستخدم ${pct}%`, `${pct}% used`)}><span dir="ltr">{pct == null ? '∞' : `${pct}%`}</span></div>
-                  <div className="space-y-1 text-sm">
-                    <p><b>{formatDuration(open.uptime_s, ar)}</b> <span className="text-muted-foreground">{open.limit_uptime_s ? t(`من ${formatDuration(open.limit_uptime_s, ar)}`, `of ${formatDuration(open.limit_uptime_s, ar)}`) : t('وقت مستخدم', 'time used')}</span></p>
-                    <p><b dir="ltr">{formatBytes(open.bytes)}</b> <span className="text-muted-foreground">{open.limit_bytes ? t(`من ${formatBytes(open.limit_bytes)}`, `of ${formatBytes(open.limit_bytes)}`) : t('بيانات مستخدمة', 'data used')}</span></p>
-
-                  </div>
-                </div>
-                {live ? (
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
-                    <p className="flex items-center gap-1.5 font-semibold text-primary"><Wifi className="size-4" />{t('متصل الآن', 'Online now')}</p>
-                    <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                      <div><dt className="text-muted-foreground">{t('من', 'For')}</dt><dd className="font-semibold">{formatDuration(live.uptime_s, ar)}</dd></div>
-                      <div><dt className="text-muted-foreground">{t('هذي الجلسة', 'This session')}</dt><dd className="font-semibold" dir="ltr">{formatBytes(live.bytes)}</dd></div>
-                      <div className="min-w-0"><dt className="text-muted-foreground">{t('الجهاز', 'Device')}</dt><dd className="truncate font-mono" dir="ltr">{live.mac || live.address || '-'}</dd></div>
-                    </dl>
-                  </div>
-                ) : <p className="text-sm text-muted-foreground">{t('غير متصل الآن', 'Not online now')}</p>}
-                <dl className="grid grid-cols-2 gap-3 text-sm">
-                  <Item icon={<Layers />} label={t('الباقة', 'Package')} value={open.profile || '-'} />
-                  <Item icon={<Server />} label={t('الراوتر', 'Router')} value={routerName(open.router_id)} />
-                  <Item icon={<GaugeIcon />} label={open.first_used_at ? t('أول استخدام', 'First used') : t('أول ظهور في Mikro', 'First seen in Mikro')} value={new Date(open.first_used_at ?? open.first_seen_at).toLocaleDateString('en-GB')} />
-                  <Item icon={<Users />} label={t('ملاحظة', 'Note')} value={open.comment || '-'} />
-                </dl>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="h-11" onClick={() => navigator.clipboard.writeText(open.name)}><Copy />{t('نسخ الرقم', 'Copy number')}</Button>
-                  <Button className="h-11" asChild><a href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer"><MessageCircle />{t('أرسل للزبون', 'Send to customer')}</a></Button>
-                </div>
-                <CardControls key={`${open.router_id}-${open.source}-${open.name}`} card={open} router={routers.find((r) => r.id === open.router_id)} live={!!live} ar={ar} onRenamed={(name) => setOpen((o) => (o ? { ...o, name } : o))} />
-              </>
-            );
-          })()}
+      <Dialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+          {confirm && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{confirm.action === 'renew' ? t(`تجديد ${confirm.card.name}؟`, `Renew ${confirm.card.name}?`) : confirm.action === 'off' ? t(`إيقاف ${confirm.card.name}؟`, `Turn off ${confirm.card.name}?`) : t(`حذف ${confirm.card.name}؟`, `Remove ${confirm.card.name}?`)}</DialogTitle>
+                <DialogDescription>{confirm.action === 'renew' ? t('الزبون يبدأ من صفر بنفس الرقم: الوقت والبيانات ترجع كاملة، والصلاحية تبدأ من أول دخول جديد.', 'The customer starts from zero with the same number; validity restarts at the next login.') : confirm.action === 'off' ? t('ما يقدر أحد يدخل فيه حتى تشغله. لو أحد متصل، ينفصل.', 'Nobody can log in until you turn it on. Anyone connected is cut off.') : t('ينحذف من الراوتر نهائياً، ولو أحد متصل ينفصل. ما نقدر نرجعه.', 'Removed from the router for good; anyone connected is cut off. This cannot be undone.')}</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="h-11" onClick={() => setConfirm(null)}>{t('إلغاء', 'Cancel')}</Button>
+                <Button variant={confirm.action === 'del' ? 'destructive' : 'default'} className="h-11" onClick={() => { const c = confirm; setConfirm(null); runAction(c.card, c.action); }}>
+                  {confirm.action === 'renew' ? <><RotateCcw />{t('جدّد', 'Renew')}</> : confirm.action === 'off' ? <><Ban />{t('أوقف', 'Turn off')}</> : <><Trash2 />{t('احذف', 'Remove')}</>}
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => !o && setBulkConfirm(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle>{bulkConfirm === 'del' ? t(`حذف ${sel.size} كرت؟`, `Remove ${sel.size} cards?`) : bulkConfirm === 'off' ? t(`إيقاف ${sel.size} كرت؟`, `Turn off ${sel.size} cards?`) : t(`تشغيل ${sel.size} كرت؟`, `Turn on ${sel.size} cards?`)}</DialogTitle>
+            <DialogDescription>{bulkConfirm === 'del' ? t('تنحذف من الراوتر نهائياً، واللي متصل ينفصل. ما نقدر نرجعها.', 'Removed for good; connected customers are cut off. This cannot be undone.') : bulkConfirm === 'off' ? t('ما يقدر أحد يدخل فيها حتى تشغلها، واللي متصل ينفصل.', 'Nobody can log in until turned on; connected customers are cut off.') : t('ترجع تشتغل عادي.', 'They work again as normal.')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="h-11" onClick={() => setBulkConfirm(null)}>{t('إلغاء', 'Cancel')}</Button>
+            <Button variant={bulkConfirm === 'del' ? 'destructive' : 'default'} className="h-11" onClick={() => bulkConfirm && runBulk(bulkConfirm)}>{t('تأكيد', 'Confirm')}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!open} onOpenChange={(o) => !o && setOpenKey(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
+          {open && <CardDetail card={open} pkg={profiles.find((p) => p.router_id === open.router_id && p.source === open.source && p.name === open.profile)} router={routers.find((r) => r.id === open.router_id)} routers={routers} live={live} ar={ar} onRenamed={(name) => setOpenKey(key({ ...open, name }))} />}
+        </DialogContent>
+      </Dialog>
+
+      {form && <PackageForm open onClose={() => setForm(null)} source={source} routers={routers} edit={form.edit} cardCount={form.edit ? (packages.find((p) => p.name === form.edit!.name)?.total ?? 0) : 0} ar={ar} />}
     </div>
   );
 }
 
-function Item({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return <div className="stat-tile"><dt className="flex items-center gap-1 text-xs text-muted-foreground [&>svg]:size-3.5">{icon}{label}</dt><dd className="mt-1 truncate font-semibold" dir="auto">{value}</dd></div>;
+/** Numbered pages: previous / a few numbers around the current page / next. */
+function Pager({ page, pages, onPage, ar }: { page: number; pages: number; onPage: (p: number) => void; ar: boolean }) {
+  const t = (a: string, b: string) => (ar ? a : b);
+  const nums = [...new Set([0, page - 1, page, page + 1, pages - 1].filter((p) => p >= 0 && p < pages))].sort((a, b) => a - b);
+  const Prev = ar ? ChevronRight : ChevronLeft; const Next = ar ? ChevronLeft : ChevronRight;
+  return (
+    <nav aria-label={t('الصفحات', 'Pages')} className="flex items-center justify-center gap-1">
+      <Button variant="outline" size="icon" className="size-11" disabled={page === 0} onClick={() => onPage(page - 1)} aria-label={t('السابق', 'Previous')}><Prev /></Button>
+      {nums.map((p, i) => (
+        <span key={p} className="flex items-center gap-1">
+          {i > 0 && p - nums[i - 1]! > 1 && <span className="px-1 text-muted-foreground">…</span>}
+          <Button variant={p === page ? 'default' : 'ghost'} className="size-11 p-0" aria-current={p === page ? 'page' : undefined} onClick={() => onPage(p)}><span dir="ltr">{p + 1}</span></Button>
+        </span>
+      ))}
+      <Button variant="outline" size="icon" className="size-11" disabled={page >= pages - 1} onClick={() => onPage(page + 1)} aria-label={t('التالي', 'Next')}><Next /></Button>
+    </nav>
+  );
 }
 
 type UmState = ReturnType<typeof umStatus>;
@@ -253,22 +348,4 @@ function UmEmpty({ states, ar, v7 }: { states: { r: RouterRow; st: UmState }[]; 
     </div>
   );
   return <UserManagerSetup ar={ar} v7={v7} />;
-}
-
-/** Package settings an engineer looks for, hidden by default so owners see only price, time, speed and devices. */
-function EngineerDetails({ p, ar }: { p: ProfileRow; ar: boolean }) {
-  const t = (a: string, b: string) => (ar ? a : b);
-  const x = p.extra ?? {};
-  const rows: [string, string | null | undefined][] = [
-    ['rate-limit', p.rate_limit], ['shared-users', p.shared_users], ['session-timeout', x['sessionTimeout']], ['idle-timeout', x['idle']], ['keepalive-timeout', x['keepalive']], ['address-pool', x['pool']],
-    ['Mikhmon', x['expiry'] ? `${x['expiry']}${x['lock'] ? ` · lock ${x['lock']}` : ''}` : null], ['name-for-users', x['forUsers']], ['uptime-limit', x['uptimeLimit']], ['transfer-limit', x['transferLimit']],
-  ];
-  const shown = rows.filter(([, v]) => !!v);
-  if (!shown.length) return null;
-  return (
-    <details className="app-panel p-4 text-sm">
-      <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-semibold"><Wrench className="size-4 text-muted-foreground" />{t(`تفاصيل للمهندس: ${p.name}`, `Engineer details: ${p.name}`)}</summary>
-      <dl className="mt-3 grid grid-cols-2 gap-2">{shown.map(([k, v]) => <div key={k} className="stat-tile"><dt className="text-xs text-muted-foreground" dir="ltr">{k}</dt><dd className="mt-1 truncate font-mono" dir="ltr">{v}</dd></div>)}</dl>
-    </details>
-  );
 }

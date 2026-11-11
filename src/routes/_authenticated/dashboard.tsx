@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Link } from '@tanstack/react-router';
 import { NetworkPanel, routerAlerts } from '@/components/dashboard/network-panel';
-import { cardState, formatBytes, formatDuration, type CardRow, type CardState } from '@/lib/card-status';
+import { CARD_STATES, cardState, formatBytes, formatDuration, withPackage, type CardRow, type CardState } from '@/lib/card-status';
 import { CardsTab } from '@/components/dashboard/cards-tab';
 import { HomeTab } from '@/components/dashboard/home-tab';
 import { EnableAlerts } from '@/components/alerts/enable-alerts';
@@ -19,7 +19,7 @@ import { isOnline } from '@/lib/router-script';
 
 type Tab = 'home' | 'cards' | 'active' | 'more';
 const TABS: Tab[] = ['home', 'cards', 'active', 'more'];
-const FILTERS: CardState[] = ['unused', 'active', 'almost', 'finished', 'disabled'];
+const FILTERS: CardState[] = CARD_STATES;
 type Search = { tab?: Tab; filter?: CardState };
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -40,12 +40,17 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
 });
 
 
-async function allCards(): Promise<CardRow[]> {
+/** Loads every card in pages of 1000, reporting progress so the cards page can show the list from the first page on. */
+async function allCards(onProgress?: (loaded: CardRow[], total: number | null) => void): Promise<CardRow[]> {
+  const { count } = await supabase.from('router_cards').select('name', { count: 'exact', head: true });
+  const total = count ?? null;
   const out: CardRow[] = [];
+  onProgress?.([], total);
   for (let from = 0; from < 20000; from += 1000) {
     const { data, error } = await supabase.from('router_cards').select('*').order('name').range(from, from + 999);
     if (error) throw error;
     out.push(...(data as CardRow[]));
+    onProgress?.([...out], total);
     if (!data || data.length < 1000) break;
   }
   return out;
@@ -79,8 +84,13 @@ function Dashboard() {
     },
     refetchInterval: 15_000,
   });
-  const { data: cards = [] } = useQuery({ queryKey: ['cards'], queryFn: allCards, refetchInterval: 60_000 });
+  // First load shows each page of 1000 as it arrives, with a progress bar; later refreshes swap the list quietly.
+  const [partial, setPartial] = useState<{ cards: CardRow[]; total: number | null } | null>(null);
+  const { data: loadedCards, isFetching: cardsFetching } = useQuery({ queryKey: ['cards'], queryFn: () => allCards((c, total) => setPartial((p) => (p === null || c.length >= p.cards.length ? { cards: c, total } : p))), refetchInterval: 60_000 });
   const { data: pkgs = [] } = useQuery({ queryKey: ['profiles-pkg'], queryFn: async () => { const { data, error } = await supabase.from('router_profiles').select('*'); if (error) throw error; return data as ProfileRow[]; }, refetchInterval: 120_000 });
+  const rawCards = loadedCards ?? partial?.cards ?? [];
+  const cards = useMemo(() => withPackage(rawCards, pkgs), [rawCards, pkgs]);
+  const cardsLoad = loadedCards ? null : { loaded: partial?.cards.length ?? 0, total: partial?.total ?? null, fetching: cardsFetching };
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions'],
     queryFn: async () => { const { data, error } = await supabase.from('router_sessions').select('*').order('uptime_s', { ascending: false }).limit(1000); if (error) throw error; return data as Session[]; },
@@ -103,7 +113,7 @@ function Dashboard() {
   const onlineCount = routers.filter((r) => isOnline(r.last_seen_at)).length;
   const reportedActive = routers.reduce((n, r) => { const s = (r.last_status ?? {}) as { hotspotActive?: number; umActive?: number }; return n + (s.hotspotActive ?? 0) + (s.umActive ?? 0); }, 0);
   const activeNow = sessions.length || reportedActive;
-  const counts = useMemo(() => { const c: Record<CardState, number> = { unused: 0, active: 0, almost: 0, finished: 0, disabled: 0 }; for (const card of cards) c[cardState(card)]++; return c; }, [cards]);
+  const counts = useMemo(() => { const c: Record<CardState, number> = { unused: 0, active: 0, almost: 0, finished: 0, expired: 0, disabled: 0 }; for (const card of cards) c[cardState(card)]++; return c; }, [cards]);
   const lowPackages = useMemo(() => {
     const m = new Map<string, { total: number; ready: number }>();
     for (const c of cards) { const k = c.profile || '-'; const e = m.get(k) ?? { total: 0, ready: 0 }; e.total++; if (cardState(c) === 'unused') e.ready++; m.set(k, e); }
@@ -149,7 +159,7 @@ function Dashboard() {
 
       {tab === 'home' && <div className="mt-6"><EnableAlerts ar={ar} compact /></div>}
       {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => go(n, f)} />}
-      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={sessions} ar={ar} initialFilter={search.filter} />}
+      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={sessions} ar={ar} initialFilter={search.filter} load={cardsLoad} />}
       {tab === 'active' && <ActiveTab sessions={sessions} reported={reportedActive} routers={routers} ar={ar} />}
       {tab === 'more' && (
         <div className="mt-6 space-y-6">

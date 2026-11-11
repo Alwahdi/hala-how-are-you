@@ -2,6 +2,7 @@
 import { API_USER, mapResource } from './ip-cloud';
 import { apiSession, type ApiError } from './routeros-api';
 import { mapHotspotActive, mapHotspotProfile, mapHotspotUser, mapUmSession, mapUmUser, storeCards, storeProfilesFor, storeSessions, type CardIn, type ProfileIn } from './router-sync';
+import { tzSeconds } from './ros-date';
 
 async function aesKey(secret: string) {
   const raw = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
@@ -70,8 +71,9 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
       ros_version: status.version?.startsWith('6') ? 'v6' : 'v7',
     };
     if (withCards) {
-      const hs = (hsUsers ?? []).map(mapHotspotUser).filter((x): x is CardIn => !!x);
-      const um = [...(umUsers ?? []), ...(umOld ?? [])].map(mapUmUser).filter((x): x is CardIn => !!x);
+      const tz = tzSeconds((r.last_status as { tz?: string } | null)?.tz);
+      const hs = (hsUsers ?? []).map((x) => mapHotspotUser(x, tz)).filter((x): x is CardIn => !!x);
+      const um = [...(umUsers ?? []), ...(umOld ?? [])].map((x) => mapUmUser(x, tz)).filter((x): x is CardIn => !!x);
       if (hsUsers) await storeCards(sb, id, 'hotspot', hs, now);
       if (umUsers || umOld) await storeCards(sb, id, 'usermanager', um, now);
       // Only Hotspot packages here: User Manager packages (with their limits) come from the router's own reader script.
