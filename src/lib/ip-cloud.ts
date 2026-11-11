@@ -22,13 +22,14 @@ export function normalizeCloudAddress(input: string, port?: number | string | nu
   return p === 443 ? host : `${host}:${p}`;
 }
 
-/** One-line command (mobile terminals drop newlines): read-only group and user for Mikro. */
-export function buildReadOnlyUserCommand(password: string): string {
+/** Read-only group and user for Mikro, joined by "; ". The password is alphanumeric, so it needs no quotes. */
+export function readOnlyUserCommands(password: string): string {
+  if (!/^[A-Za-z0-9]+$/.test(password)) throw new Error('API password must be alphanumeric');
   return [
     `/user group remove [find name=${API_GROUP}]`,
     `/user group add name=${API_GROUP} policy=read,api,rest-api,!write,!policy,!sensitive,!ftp,!ssh,!telnet,!winbox,!web,!reboot,!test,!sniff,!romon`,
     `/user remove [find name=${API_USER}]`,
-    `/user add name=${API_USER} group=${API_GROUP} password="${password}"`,
+    `/user add name=${API_USER} group=${API_GROUP} password=${password}`,
   ].join('; ');
 }
 
