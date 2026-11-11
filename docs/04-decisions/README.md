@@ -43,3 +43,4 @@ related: [../templates/decision.md]
 - [D-029](D-029-external-ux-review-fixes.md) — تطبيق ملاحظات مراجعة UX خارجية (approved)
 - [D-030](D-030-phone-first-signin-and-router-onboarding.md) — الدخول برقم الجوال ومعالج أول راوتر (approved)
 - [D-031](D-031-auto-direct-access-dashboard-account-type.md) — اتصال مباشر تلقائي، لوحة الراوترات، نوع الحساب والمدينة
+- [D-032](D-032-network-dashboard-and-routeros-api-direct-access.md) — لوحة الشبكة والاتصال المباشر عبر RouterOS API

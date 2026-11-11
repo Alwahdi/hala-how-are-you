@@ -73,6 +73,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
 - Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without storing the raw code or trusting the client.
 - Every router links with one self-contained single-line paste command (push reports work behind CGNAT and on v6/v7; v7-only steps run via :parse); on v7 it also creates an encrypted read-only REST user so an owner can opt into direct IP Cloud polling, which runs only while they view their routers.
-- Direct IP Cloud access is attempted automatically by the report endpoint only when the router reports it owns its public address, IP Cloud and HTTPS are on; push stays the fallback, so owners never type host or port.
-- Account type (owner/engineer) is stored in user_roles and written only by a server function; profile holds network name and city.
+- Direct access: RouterOS API over TCP (8729 TLS, then 8728) to IP Cloud, auto-tried only when the router owns its public IP; push stays the fallback, so owners never type host/port.
+- Cards/sessions/profiles are owner-readable snapshots written only by server code; card passwords are never stored.
+- Account type lives in user_roles, written only server-side; profile holds network name and city.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.
