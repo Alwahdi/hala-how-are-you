@@ -22,6 +22,8 @@ related: [../README.md, risks-register.md]
 | [security.md](security.md) | الأمان والثغرات والصلاحيات |
 | [troubleshooting.md](troubleshooting.md) | تشخيص الأعطال |
 | [hardware.md](hardware.md) | العتاد وحدوده |
+| [common-faults.md](common-faults.md) | أكثر الأعطال وحلولها |
+| [certification-coverage.md](certification-coverage.md) | تغطية مناهج MTCNA/MTCRE/MTCINE |
 | [doc-index.md](doc-index.md) | أقسام غير مدروسة بعمق |
 | [risks-register.md](risks-register.md) | سجل المخاطر الموحد |
 
