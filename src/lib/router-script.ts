@@ -98,7 +98,7 @@ export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager'
     um6: { menu: '/tool user-manager user', name: 'username', fields: ['username', 'actual-profile', 'uptime-used', 'download-used', 'upload-used', 'disabled'], pmenu: '/tool user-manager profile', smenu: '/tool user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-ip' },
     um7: { menu: '/user-manager user', name: 'name', fields: ['name', '-', '-', '-', '-', 'disabled'], pmenu: '/user-manager profile', smenu: '/user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-address' },
   }[k];
-  const userRow = [...T.fields.map((f) => (f === '-' ? '"\\"\\""' : fld(f))), ...(k === 'hotspot' ? [fld('limit-bytes-total').replace(/.*/, (x) => x)] : [])];
+  const userRow = T.fields.map((f) => (f === '-' ? '"\\"\\""' : fld(f)));
   // Hotspot rows: name,profile,uptime,in,out,limit-uptime,limit-bytes,disabled,comment,pw. UM rows: name,profile,uptime,down,up,disabled,comment,pw.
   const hsRow = [fld('name'), fld('profile'), fld('uptime'), fld('bytes-in'), fld('bytes-out'), fld('limit-uptime'), fld('limit-bytes-total'), fld('disabled'), q('$cm'), q('$pm')];
   const umRow = [...userRow, q('$cm'), q('$pm')];
@@ -117,7 +117,6 @@ export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager'
     // Packages: name,name-for-users,validity,price,devices,rate(rx/tx),uptime-limit,transfer-limit (from the first linked limitation).
     const lim = k === 'um6' ? { pl: '/tool user-manager profile profile-limitation', l: '/tool user-manager profile limitation', shared: 'override-shared-users' } : { pl: '/user-manager profile-limitation', l: '/user-manager limitation', shared: '-' };
     const prow = [fld('name'), fld('name-for-users'), fld('validity'), fld('price'), lim.shared === '-' ? '"\\"\\""' : fld(lim.shared), q('$rl'), q('$ul'), q('$tl')].join(' . "," . ');
-    lines.push(String.raw`:foreach u in=[${lim.pl.replace(/ profile-limitation$| profile-limitation$/, '').replace(/\/(tool user-manager profile|user-manager)$/, (m) => m)} find] do={}`.replace(/.*/, ''));
     lines.push(`:foreach u in=[${T.pmenu} find] do={:local r [${T.pmenu} get $u]; :local rl ""; :local ul ""; :local tl ""; :do {:foreach x in=[${lim.pl} find where profile=($r->"name")] do={:local ln [${lim.pl} get $x limitation]; :local l [${lim.l} find where name=$ln]; :if (([:len $l] > 0) && ($rl = "")) do={:local lr [${lim.l} get [:pick $l 0]]; :set rl ([:tostr ($lr->"rate-limit-rx")] . "/" . [:tostr ($lr->"rate-limit-tx")]); :set ul [:tostr ($lr->"uptime-limit")]; :set tl [:tostr ($lr->"transfer-limit")]}}} on-error={}; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${prow} . "]"); :set n ($n + 1)}}`);
   }
   lines.push(send('true', `${src}-profiles`), reset);
