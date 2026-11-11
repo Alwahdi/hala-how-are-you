@@ -70,8 +70,8 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
       ros_version: status.version?.startsWith('6') ? 'v6' : 'v7',
     };
     if (withCards) {
-      const hs = (hsUsers ?? []).map(mapHotspotUser).filter((x): x is CardIn => !!x);
-      const um = [...(umUsers ?? []), ...(umOld ?? [])].map(mapUmUser).filter((x): x is CardIn => !!x);
+      const hs = (hsUsers ?? []).map((r) => mapHotspotUser(r)).filter((x): x is CardIn => !!x);
+      const um = [...(umUsers ?? []), ...(umOld ?? [])].map((r) => mapUmUser(r)).filter((x): x is CardIn => !!x);
       if (hsUsers) await storeCards(sb, id, 'hotspot', hs, now);
       if (umUsers || umOld) await storeCards(sb, id, 'usermanager', um, now);
       // Only Hotspot packages here: User Manager packages (with their limits) come from the router's own reader script.
