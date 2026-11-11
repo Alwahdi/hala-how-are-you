@@ -4,6 +4,16 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { API_USER, newApiPassword, normalizeCloudHost } from './ip-cloud';
 import { checkOne, encrypt } from './ip-cloud-probe';
 import { directAccessState, hashToken, newToken, shouldTryDirect } from './router-script';
+import { newSetupCode, sealSetup, setupCodeHash, SETUP_TTL_MS } from './setup-code';
+
+/** Stores a sealed one-hour setup for the short command; returns the code (null if saving failed, the full command still works). */
+async function issueSetup(routerId: string, token: string, password: string): Promise<string | null> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const code = newSetupCode();
+  await supabaseAdmin.from('router_setups').delete().eq('router_id', routerId);
+  const { error } = await supabaseAdmin.from('router_setups').insert({ code_hash: await setupCodeHash(code), router_id: routerId, sealed: await sealSetup(code, { token, password }), expires_at: new Date(Date.now() + SETUP_TTL_MS).toISOString() });
+  return error ? null : code;
+}
 
 /** Creates a router for the paste command: report token plus an encrypted read-only API password (used later for direct IP Cloud access on v7). */
 export const createPushRouter = createServerFn({ method: 'POST' })
@@ -17,7 +27,7 @@ export const createPushRouter = createServerFn({ method: 'POST' })
       owner_id: context.userId, name: data.name, connection_method: 'push', token_hash: await hashToken(token), api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
     }).select('id').single();
     if (error || !row) return { ok: false as const };
-    return { ok: true as const, id: row.id, token, password };
+    return { ok: true as const, id: row.id, token, password, code: await issueSetup(row.id, token, password) };
   });
 
 /** Issues a fresh token and API password for an existing router (Reconnect). RLS limits it to the owner. */
@@ -33,7 +43,7 @@ export const rotatePushRouter = createServerFn({ method: 'POST' })
       cloud_host: null, direct_port: null, direct_tls: null, direct_checked_at: null, last_check_error: null,
     }).eq('id', data.id).select('id').maybeSingle();
     if (error || !row) return { ok: false as const };
-    return { ok: true as const, token, password };
+    return { ok: true as const, token, password, code: await issueSetup(row.id, token, password) };
   });
 
 /** Refreshes direct links of the signed-in owner while their page is open, with the same automatic rules as the router reports. */

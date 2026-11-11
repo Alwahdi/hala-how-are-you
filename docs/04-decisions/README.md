@@ -45,3 +45,4 @@ related: [../templates/decision.md]
 - [D-031](D-031-auto-direct-access-dashboard-account-type.md) — اتصال مباشر تلقائي، لوحة الراوترات، نوع الحساب والمدينة
 - [D-032](D-032-network-dashboard-and-routeros-api-direct-access.md) — لوحة الشبكة والاتصال المباشر عبر RouterOS API
 - [D-033](D-033-alerts-watcher-and-router-tasks.md) — تنبيهات الجوال، المراقب الخلفي، صحة الراوتر وإجراءاته (approved)
+- [D-034](D-034-short-setup-command.md) — أمر ربط قصير يُنزّل الإعداد بكود صالح لساعة (approved)

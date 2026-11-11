@@ -95,6 +95,15 @@ import { readOnlyUserCommands } from './ip-cloud';
  * When an API password is given, the router also gets the read-only API user (v6 and v7) used for automatic direct access.
  */
 export function buildPasteCommand(token: string, apiPassword?: string, url = REPORT_URL): string {
+  return setupParts(token, apiPassword, url).join('; ');
+}
+
+/** The same steps one per line, served as the downloadable setup file for the short command. */
+export function buildSetupScript(token: string, apiPassword?: string, url = REPORT_URL): string {
+  return [...setupParts(token, apiPassword, url), ':put "Mikro: setup finished. Go back to the app."'].join('\r\n') + '\r\n';
+}
+
+function setupParts(token: string, apiPassword?: string, url = REPORT_URL): string[] {
   const parts = [
     `/system scheduler remove [find name=${SCRIPT_NAME}]`,
     `/system script remove [find name=${SCRIPT_NAME}]`,
@@ -110,7 +119,7 @@ export function buildPasteCommand(token: string, apiPassword?: string, url = REP
   // User Manager (v7 package) only where it is installed; its menu does not exist elsewhere.
   parts.push(`:if (([:len [/system package find name=user-manager]] > 0) && ([:pick [/system resource get version] 0 1] = "7")) do={/system script add name=${UM_SCRIPT} policy=read,write,test,sensitive source="${escapeRos((cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
   parts.push(`/system script run ${SCRIPT_NAME}`, `:do {/system script run ${CARDS_SCRIPT}} on-error={}`);
-  return parts.join('; ');
+  return parts;
 }
 
 export function buildRemoveCommand(): string {
