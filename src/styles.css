@@ -369,9 +369,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 
 /* D-026 card actions, two-step add, keyboard-safe mobile */
 .demo-card-item .demo-card-top { padding-inline-end:150px; }
-.demo-card-actions { position:absolute; top:12px; inset-inline-end:12px; display:flex; gap:6px; z-index:1; }
 .demo-card-quick { min-height:40px; border-radius:999px; gap:6px; }
-.demo-card-quick--renew { background:var(--warning); color:var(--background); } .demo-card-quick--renew:hover { background:color-mix(in oklab,var(--warning) 85%,white); }
 .demo-card-more { width:40px; height:40px; border-radius:999px; }
 .demo-card-item.is-disabled .demo-card-row { opacity:.6; }
 .status-chip--disabled { color:var(--destructive); border-color:color-mix(in oklab,var(--destructive) 45%,transparent); }
@@ -397,7 +395,6 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .reply-preview { white-space:pre-wrap; }
 @media(max-width:760px){
   .demo-card-item .demo-card-top { padding-inline-end:132px; flex-wrap:wrap; row-gap:8px; min-height:40px; }
-  .demo-card-actions { top:12px; }
   .reply-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .demo-card-dialog input, .demo-card-dialog textarea { font-size:16px; }
 }
@@ -413,7 +410,8 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-item:hover { border-color:color-mix(in oklab,var(--primary) 50%,transparent); }
 .demo-card-row, .demo-card-row:hover { border:0; background:transparent; padding:20px 20px 12px; border-radius:14px; gap:14px; }
 .demo-card-item .demo-card-top { padding-inline-end:44px; }
-.demo-card-actions { display:flex; padding:0 20px 16px; }
+.demo-card-actions { display:flex; padding:0 20px 16px; position:static; }
+.demo-card-more { z-index:1; }
 .demo-card-more { position:absolute; top:10px; inset-inline-end:8px; width:44px; height:44px; border-radius:12px; color:var(--muted-foreground); }
 .demo-card-quick { min-height:40px; border-radius:999px; gap:6px; }
 .demo-card-item svg, .filter-chips svg { stroke-width:2; }
