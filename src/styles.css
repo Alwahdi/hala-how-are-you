@@ -418,3 +418,9 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-identity svg { width:18px; height:18px; }
 .status-chip svg { width:14px; height:14px; }
 @media(max-width:760px){ .demo-card-row, .demo-card-row:hover { padding:18px 16px 10px; } .demo-card-actions { padding:0 16px 14px; } .concept-heading-row { align-items:center; } }
+/* keep every card header on one line: number + status chip side by side */
+@media(max-width:760px){
+  .demo-card-item .demo-card-top { gap:8px; }
+  .demo-card-item .demo-card-identity { font-size:15px; gap:6px; }
+  .demo-card-item .status-chip { padding-inline:8px; gap:5px; }
+}
