@@ -93,12 +93,12 @@ export const refreshIpCloudRouters = createServerFn({ method: 'POST' })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkOne(sb: any, id: string, host: string) {
   const key = process.env['ROUTER_SECRET_KEY'];
-  const { data: r } = await sb.from('routers').select('api_secret_encrypted').eq('id', id).maybeSingle();
+  const { data: r } = await sb.from('routers').select('api_secret_encrypted, last_status').eq('id', id).maybeSingle();
   if (!key || !r?.api_secret_encrypted) return { ok: false as const, error: 'no_user' as const };
   const result = await probe(host, await decrypt(key, r.api_secret_encrypted));
   const now = new Date().toISOString();
   await sb.from('routers').update(result.ok
-    ? { cloud_host: host, last_seen_at: now, last_status: result.status, last_check_error: null, ros_version: result.status.version?.startsWith('6') ? 'v6' : 'v7' }
+    ? { cloud_host: host, last_seen_at: now, last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(result.status).filter(([, v]) => v !== undefined)) }, last_check_error: null, ros_version: result.status.version?.startsWith('6') ? 'v6' : 'v7' }
     : { cloud_host: host, last_check_error: result.error }).eq('id', id);
   return result.ok ? { ok: true as const, status: result.status } : { ok: false as const, error: result.error };
 }
