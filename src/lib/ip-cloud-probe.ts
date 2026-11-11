@@ -1,7 +1,9 @@
-// Server-side direct access: RouterOS API over IP Cloud (8729 encrypted first, then 8728), REST as a last resort.
+// Server-side direct access: RouterOS API over IP Cloud (8729 encrypted first, then the router's plain API port).
+// Kept light on purpose: User Manager lists are never read here (the router's own script reads them), because on
+// weak routers they take minutes and keep the CPU busy after we hang up.
 import { API_USER, mapResource } from './ip-cloud';
 import { apiSession, type ApiError } from './routeros-api';
-import { mapHotspotActive, mapHotspotProfile, mapHotspotUser, mapUmSession, mapUmUser, storeCards, storeProfilesFor, storeSessions, type CardIn, type ProfileIn } from './router-sync';
+import { mapHotspotActive, mapHotspotProfile, mapHotspotUser, storeCards, storeProfilesFor, storeSessions, type CardIn, type ProfileIn } from './router-sync';
 import { tzSeconds } from './ros-date';
 
 async function aesKey(secret: string) {
@@ -34,12 +36,12 @@ export function candidatePorts(s: { apiSslPort?: string; apiSslDisabled?: string
   return out;
 }
 
-const BASE = [['/system/resource/print'], ['/system/identity/print'], ['/ip/hotspot/active/print'], ['/user-manager/session/print', '?active=true'], ['/tool/user-manager/session/print', '?active=true']];
-const CARDS = [
+/** The connection check: login plus three quick reads (well under a second on any router). */
+export const BASE = [['/system/resource/print'], ['/system/identity/print'], ['/ip/hotspot/active/print']];
+/** Hotspot cards and packages, only when the router's own script has not sent them lately. */
+export const CARDS = [
   ['/ip/hotspot/user/print', '=.proplist=name,profile,uptime,bytes-in,bytes-out,limit-uptime,limit-bytes-total,disabled,comment'],
   ['/ip/hotspot/user/profile/print', '=.proplist=name,rate-limit,shared-users,session-timeout,idle-timeout,keepalive-timeout,address-pool,on-login'],
-  ['/user-manager/user/print', '=.proplist=name,group,disabled,comment'],
-  ['/tool/user-manager/user/print', '=.proplist=username,actual-profile,uptime-used,download-used,upload-used,disabled,comment'],
 ];
 
 /** Connects to one router and stores everything we can read. Works with the user client (RLS) or the admin client. */
@@ -58,25 +60,23 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
   const commands = withCards ? [...BASE, ...CARDS] : BASE;
   let lastError: ProbeError = 'unreachable';
   for (const c of list) {
-    const res = await apiSession({ host, port: c.port, tls: c.tls, user: API_USER, password, commands, timeoutMs: 9000 }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
+    const res = await apiSession({ host, port: c.port, tls: c.tls, user: API_USER, password, commands, timeoutMs: 8000 }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
     if (!res.ok) { console.error('api probe failed', host, c.port, c.tls, res.error); if (res.error === 'auth' || lastError === 'unreachable') lastError = res.error; continue; }
-    const [resource, identity, hsActive, umActive, umActiveOld, hsUsers, hsProfiles, umUsers, umOld] = res.results;
+    const [resource, identity, hsActive, hsUsers, hsProfiles] = res.results;
     const status = mapResource(resource?.[0] ?? {}, identity?.[0]?.['name'], hsActive ? hsActive.length : undefined);
     const now = new Date().toISOString();
-    const sessions = [...(hsActive ?? []).map(mapHotspotActive), ...(umActive ?? []).map(mapUmSession), ...(umActiveOld ?? []).map((x) => mapUmSession({ ...x, 'user-address': x['user-ip'] ?? '' }))].filter((x) => !!x);
+    const sessions = (hsActive ?? []).map(mapHotspotActive).filter((x) => !!x);
     await storeSessions(sb, id, sessions);
     const patch: Record<string, unknown> = {
       cloud_host: host, direct_port: c.port, direct_tls: c.tls, direct_checked_at: now, last_seen_at: now, last_check_error: null,
-      last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(status).filter(([, v]) => v !== undefined)), umActive: umActive ? umActive.length : umActiveOld ? umActiveOld.length : undefined },
+      last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(status).filter(([, v]) => v !== undefined)) },
       ros_version: status.version?.startsWith('6') ? 'v6' : 'v7',
     };
     if (withCards) {
       const tz = tzSeconds((r.last_status as { tz?: string } | null)?.tz);
       const hs = (hsUsers ?? []).map((x) => mapHotspotUser(x, tz)).filter((x): x is CardIn => !!x);
-      const um = [...(umUsers ?? []), ...(umOld ?? [])].map((x) => mapUmUser(x, tz)).filter((x): x is CardIn => !!x);
       if (hsUsers) await storeCards(sb, id, 'hotspot', hs, now);
-      if (umUsers || umOld) await storeCards(sb, id, 'usermanager', um, now);
-      // Only Hotspot packages here: User Manager packages (with their limits) come from the router's own reader script.
+      // Only Hotspot here: User Manager cards and packages come from the router's own reader script.
       if (hsProfiles) await storeProfilesFor(sb, id, 'hotspot', hsProfiles.map(mapHotspotProfile).filter((p): p is ProfileIn => !!p));
       patch['cards_synced_at'] = now;
     }

@@ -29,10 +29,9 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set sd [:tostr [/ip service get www-ssl disabled]]} on-error={}',
     ':local ap ""', ':local apd ""', ':local asp ""', ':local asd ""',
     ':do {:set ap [:tostr [/ip service get api port]]; :set apd [:tostr [/ip service get api disabled]]; :set asp [:tostr [/ip service get api-ssl port]]; :set asd [:tostr [/ip service get api-ssl disabled]]} on-error={}',
+    // Online User Manager cards log in through Hotspot, so they are already in the Hotspot count. Scanning User Manager's
+    // session history every 30 seconds kept weak v6 routers at 100% CPU, so it is no longer read here.
     ':local um 0',
-    ':do {:set um [:len [[:parse "/user-manager session find where active"]]]} on-error={}',
-    // User Manager v6 lives under /tool; the other version's path is compiled at run time so it never breaks the script.
-    ':if ($um = 0) do={:do {:set um [:len [[:parse "/tool user-manager session find where active"]]]} on-error={}}',
     // umi: "pkg" when the User Manager package is installed, then ",true|false" (v7 enabled flag). umr: our reader script is installed.
     ':local umi ""',
     ':do {:if ([:len [/system package find where name="user-manager" and disabled=no]] > 0) do={:set umi "pkg"}} on-error={}',
@@ -253,12 +252,13 @@ export function directAccessState(s: { cloudName?: string; behindNat?: string; a
   return s.apiDisabled === 'true' && s.apiSslDisabled === 'true' ? 'needs_api' : 'ready';
 }
 
-const RETRY_FAILED_MS = 3 * 60_000;
+export const RETRY_FAILED_MS = 30 * 60_000;
 const REFRESH_CARDS_MS = 5 * 60_000;
 
 /**
  * Decides when the server tries the direct API link on its own: right away for a new or reconnected router,
- * every 5 minutes when it works (cards), and at most every 3 minutes after a failure so we never hammer the router's login.
+ * every 5 minutes when it works, and only every 30 minutes after a failure: a busy router is not woken again and again,
+ * and "Try now" or Reconnect still checks at once.
  */
 export function shouldTryDirect(
   r: { cloud_host: string | null; direct_port: number | null; last_check_error: string | null; direct_checked_at: string | null; cards_synced_at: string | null },
