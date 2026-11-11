@@ -56,7 +56,7 @@ export function NetworkPanel() {
     const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
-  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; full?: string } | null>(null);
+  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; full?: string | undefined } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);

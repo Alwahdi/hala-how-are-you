@@ -11,7 +11,7 @@ export function newSetupCode(): string {
   const out: string[] = [];
   while (out.length < CODE_LENGTH) {
     for (const b of crypto.getRandomValues(new Uint8Array(16))) {
-      if (b < 248 && out.length < CODE_LENGTH) out.push(ALPHABET[b % 31]); // 248 = 31*8, no modulo bias
+      if (b < 248 && out.length < CODE_LENGTH) out.push(ALPHABET.charAt(b % 31)); // 248 = 31*8, no modulo bias
     }
   }
   return out.join('');

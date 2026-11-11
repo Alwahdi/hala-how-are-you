@@ -3,7 +3,7 @@ import { ChevronDown, Copy, Monitor, Smartphone, TerminalSquare } from 'lucide-r
 import { Button } from '@/components/ui/button';
 
 // Shared paste step: a short one-line command (the router downloads its own setup), plus the full command as a fallback.
-export function PasteCommandPanel({ command, full, ar }: { command: string; full?: string; ar: boolean }) {
+export function PasteCommandPanel({ command, full, ar }: { command: string; full?: string | undefined; ar: boolean }) {
   const t = (a: string, b: string) => (ar ? a : b);
   const [copied, setCopied] = useState<'short' | 'full' | null>(null);
   useEffect(() => { if (!copied) return; const id = setTimeout(() => setCopied(null), 2000); return () => clearTimeout(id); }, [copied]);
