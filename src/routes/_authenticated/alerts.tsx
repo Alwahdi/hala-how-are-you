@@ -60,7 +60,7 @@ function AlertsPage() {
               <li key={a.id}>
                 <button type="button" onClick={() => navigate({ href: a.path })} className={`app-panel tap-card flex w-full items-start gap-3 p-4 text-start ${a.read_at ? '' : 'border-primary/50'}`}>
                   <span className="mt-0.5 shrink-0">{ICON[a.severity] ?? ICON['info']}</span>
-                  <span className="min-w-0 flex-1"><b className="block">{a.title}</b><span className="text-sm text-muted-foreground">{a.body}</span><span className="mt-1 block text-xs text-muted-foreground">{when(a.created_at, ar)}</span></span>
+                  <span className="min-w-0 flex-1"><b className="block" dir="auto">{a.title}</b><span className="block text-sm text-muted-foreground" dir="auto">{a.body}</span><span className="mt-1 block text-xs text-muted-foreground">{when(a.created_at, ar)}</span></span>
                   <ChevronRight className="tap-chevron mt-1" />
                 </button>
               </li>
