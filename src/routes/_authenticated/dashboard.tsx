@@ -40,12 +40,17 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
 });
 
 
-async function allCards(): Promise<CardRow[]> {
+/** Loads every card in pages of 1000, reporting progress so the cards page can show the list from the first page on. */
+async function allCards(onProgress?: (loaded: CardRow[], total: number | null) => void): Promise<CardRow[]> {
+  const { count } = await supabase.from('router_cards').select('name', { count: 'exact', head: true });
+  const total = count ?? null;
   const out: CardRow[] = [];
+  onProgress?.(out, total);
   for (let from = 0; from < 20000; from += 1000) {
     const { data, error } = await supabase.from('router_cards').select('*').order('name').range(from, from + 999);
     if (error) throw error;
     out.push(...(data as CardRow[]));
+    onProgress?.([...out], total);
     if (!data || data.length < 1000) break;
   }
   return out;
@@ -79,8 +84,13 @@ function Dashboard() {
     },
     refetchInterval: 15_000,
   });
-  const { data: cards = [] } = useQuery({ queryKey: ['cards'], queryFn: allCards, refetchInterval: 60_000 });
+  // First load shows each page of 1000 as it arrives, with a progress bar; later refreshes swap the list quietly.
+  const [partial, setPartial] = useState<{ cards: CardRow[]; total: number | null } | null>(null);
+  const { data: loadedCards, isFetching: cardsFetching } = useQuery({ queryKey: ['cards'], queryFn: () => allCards((c, total) => setPartial((p) => (p === null || c.length >= p.cards.length ? { cards: c, total } : p))), refetchInterval: 60_000 });
   const { data: pkgs = [] } = useQuery({ queryKey: ['profiles-pkg'], queryFn: async () => { const { data, error } = await supabase.from('router_profiles').select('*'); if (error) throw error; return data as ProfileRow[]; }, refetchInterval: 120_000 });
+  const rawCards = loadedCards ?? partial?.cards ?? [];
+  const cards = useMemo(() => withPackage(rawCards, pkgs), [rawCards, pkgs]);
+  const cardsLoad = loadedCards ? null : { loaded: partial?.cards.length ?? 0, total: partial?.total ?? null, fetching: cardsFetching };
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions'],
     queryFn: async () => { const { data, error } = await supabase.from('router_sessions').select('*').order('uptime_s', { ascending: false }).limit(1000); if (error) throw error; return data as Session[]; },
@@ -149,7 +159,7 @@ function Dashboard() {
 
       {tab === 'home' && <div className="mt-6"><EnableAlerts ar={ar} compact /></div>}
       {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => go(n, f)} />}
-      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={sessions} ar={ar} initialFilter={search.filter} />}
+      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={sessions} ar={ar} initialFilter={search.filter} load={cardsLoad} />}
       {tab === 'active' && <ActiveTab sessions={sessions} reported={reportedActive} routers={routers} ar={ar} />}
       {tab === 'more' && (
         <div className="mt-6 space-y-6">
