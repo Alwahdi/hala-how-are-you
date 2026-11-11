@@ -6,13 +6,13 @@ export const demoCards = [
   { id: 'DEMO-003', active: true, usage: 68.2, limitMB: 5000, downloadMB: 3000, uploadMB: 410, usedMinutes: 160, limitMinutes: 360 },
   { id: 'DEMO-004', active: true, usage: 85, limitMB: 1000, downloadMB: 780, uploadMB: 70, usedMinutes: 130, limitMinutes: 180 },
 ];
-export type DemoCard = typeof demoCards[number] & { code?: string; isNew?: boolean };
-export type CardState = 'unused' | 'inUse' | 'almostFinished';
+export type DemoCard = typeof demoCards[number] & { code?: string; isNew?: boolean; disabled?: boolean };
+export type CardState = 'unused' | 'inUse' | 'almostFinished' | 'disabled';
 export const LOW_REMAINING_RATIO = 0.2;
 export const remainingMB = (card: DemoCard) => card.limitMB - card.downloadMB - card.uploadMB;
 export const remainingRatio = (card: DemoCard) => card.limitMB ? remainingMB(card) / card.limitMB : 0;
-export const cardState = (card: DemoCard): CardState => !card.active || card.downloadMB + card.uploadMB === 0 ? 'unused' : remainingRatio(card) < LOW_REMAINING_RATIO ? 'almostFinished' : 'inUse';
-const stateOrder: Record<CardState, number> = { almostFinished: 0, inUse: 1, unused: 2 };
+export const cardState = (card: DemoCard): CardState => card.disabled ? 'disabled' : !card.active || card.downloadMB + card.uploadMB === 0 ? 'unused' : remainingRatio(card) < LOW_REMAINING_RATIO ? 'almostFinished' : 'inUse';
+const stateOrder: Record<CardState, number> = { almostFinished: 0, inUse: 1, unused: 2, disabled: 3 };
 export const byAttention = (cards: DemoCard[]) => [...cards].sort((a, b) => stateOrder[cardState(a)] - stateOrder[cardState(b)]);
 /** MB under 1,000 stays MB; otherwise GB with at most one decimal. Latin digits. */
 export const formatDataSize = (mb: number) => mb >= 1000 ? `${formatNumber(Math.round(mb / 100) / 10)} GB` : `${formatNumber(mb)} MB`;
@@ -41,24 +41,52 @@ export const filterCards = (cards: DemoCard[], query: string, state: CardState |
 export type Tone = 'short' | 'detailed';
 /** Wraps Latin values in Unicode isolates so they keep their order inside Arabic text. */
 export const iso = (v: string | number) => `\u2066${v}\u2069`;
+const sessionsWord = (n: number, ar: boolean) => ar ? (n === 1 ? 'جلسة واحدة' : n === 2 ? 'جلستين' : `${iso(n)} جلسات`) : `${n} session${n === 1 ? '' : 's'}`;
+/** Plain, customer-facing explanation of a card's usage. Latin digits; Latin values isolated inside Arabic. */
 export function buildCustomerMessage(card: DemoCard, lang: Language, tone: Tone) {
   const ar = lang === 'ar'; const s = sessionsOf(card); const big = biggestSession(s); const used = card.downloadMB + card.uploadMB;
-  const L = (v: string | number) => ar ? iso(String(v).replace(/ /g, "\u00A0")) : String(v); const D = (mb: number) => L(formatDataSize(mb));
-  const left = D(remainingMB(card)), total = D(card.limitMB), usedS = D(used), time = formatDuration(card.usedMinutes, ar), id = L(card.id);
+  const L = (v: string | number) => ar ? iso(String(v).replace(/ /g, '\u00A0')) : String(v); const D = (mb: number) => L(formatDataSize(mb));
+  const pct = card.limitMB ? Math.round(used / card.limitMB * 100) : 0;
   const downHeavy = used > 0 && card.downloadMB / used > 0.7;
   if (used === 0 && card.code) return buildNewCardMessage([card], lang);
-  if (used === 0) return ar ? `مرحباً، الكرت ${id} لم يُستخدم بعد، والباقة كاملة ${total}.` : `Hello, card ${id} has not been used yet. The full ${total} is available.`;
-  const lines = ar
-    ? [`مرحباً، هذه تفاصيل الكرت ${id}:`, `• الباقة: ${total}`, `• المستهلك: ${usedS}`, `• المتبقي: ${left}`, `• مدة الاتصال: ${time} في ${s.length} جلسة`]
-    : [`Hello, here are the details for card ${id}:`, `• Package: ${total}`, `• Used: ${usedS}`, `• Remaining: ${left}`, `• Connection time: ${time} over ${s.length} session${s.length === 1 ? '' : 's'}`];
-  if (tone === 'detailed') {
-    s.forEach((x, i) => lines.push(ar ? `  ${i + 1}) ${L(x.start)} · ${formatDuration(x.minutes, true)} · ${D(x.downloadMB + x.uploadMB)} · ${L(x.device)}` : `  ${i + 1}) ${x.start} · ${formatDuration(x.minutes, false)} · ${formatDataSize(x.downloadMB + x.uploadMB)} · ${x.device}`));
-    if (big) lines.push(ar ? `أكبر جلسة: ${D(big.downloadMB + big.uploadMB)} على جهاز ${L(big.device)}.` : `Biggest session: ${formatDataSize(big.downloadMB + big.uploadMB)} on ${big.device}.`);
+  if (used === 0) return ar ? `مرحباً، كرتك ${L(card.id)} لم يُستخدم بعد، والباقة كاملة ${D(card.limitMB)} جاهزة لك.` : `Hello, your card ${card.id} has not been used yet. The full ${formatDataSize(card.limitMB)} is ready for you.`;
+  const lines = ar ? [
+    `مرحباً، هذا ملخص كرتك ${L(card.id)}:`, '',
+    `• الباقة: ${D(card.limitMB)}`,
+    `• استخدمت: ${D(used)} (${L(pct + '%')})`,
+    `• المتبقي: ${D(remainingMB(card))}`,
+    `• وقت الاتصال: ${formatDuration(card.usedMinutes, true)} خلال ${sessionsWord(s.length, true)}`,
+  ] : [
+    `Hello, here is a summary of your card ${card.id}:`, '',
+    `• Package: ${formatDataSize(card.limitMB)}`,
+    `• Used: ${formatDataSize(used)} (${pct}%)`,
+    `• Remaining: ${formatDataSize(remainingMB(card))}`,
+    `• Connection time: ${formatDuration(card.usedMinutes, false)} over ${sessionsWord(s.length, false)}`,
+  ];
+  if (tone === 'detailed' && s.length) {
+    lines.push('', ar ? 'الجلسات:' : 'Sessions:');
+    s.forEach((x, i) => lines.push(ar ? `${L(i + 1)}) ${L(x.start)} · ${L(x.device)} · ${formatDuration(x.minutes, true)} · ${D(x.downloadMB + x.uploadMB)}` : `${i + 1}) ${x.start} · ${x.device} · ${formatDuration(x.minutes, false)} · ${formatDataSize(x.downloadMB + x.uploadMB)}`));
   }
-  if (downHeavy) lines.push(ar ? 'أغلب الاستهلاك تحميل، مثل مشاهدة الفيديو، وهذا سبب انتهاء الباقة بسرعة.' : 'Most of the usage was downloading, such as watching video, which is why the package ran out quickly.');
-  lines.push(ar ? 'شكراً لك.' : 'Thank you.');
+  if (big && s.length > 1) lines.push('', ar ? `أكبر استهلاك: ${D(big.downloadMB + big.uploadMB)} على جهاز ${L(big.device)} في جلسة واحدة.` : `Biggest session: ${formatDataSize(big.downloadMB + big.uploadMB)} on ${big.device}.`);
+  if (downHeavy) lines.push(ar ? 'أغلب الاستهلاك تحميل، مثل مشاهدة الفيديو أو تنزيل الملفات، وهذا ما يجعل الباقة تنتهي أسرع.' : 'Most of it was downloading, such as watching video or downloading files, which makes a package run out faster.');
+  lines.push('', ar ? 'شكراً لك.' : 'Thank you.');
   return lines.join('\n');
 }
+export function buildRenewMessage(card: DemoCard, addedMB: number, lang: Language) {
+  const ar = lang === 'ar'; const L = (v: string) => ar ? iso(v.replace(/ /g, '\u00A0')) : v;
+  return ar ? `مرحباً، تم تجديد كرتك ${L(card.id)} بإضافة ${L(formatDataSize(addedMB))}.\nالمتبقي الآن: ${L(formatDataSize(remainingMB(card)))}.\nشكراً لك.` : `Hello, your card ${card.id} was renewed with ${formatDataSize(addedMB)}.\nRemaining now: ${formatDataSize(remainingMB(card))}.\nThank you.`;
+}
+/** Demo renew: adds data to the same card and re-enables it. */
+export const renewCard = (card: DemoCard, addMB: number): DemoCard => ({ ...card, limitMB: card.limitMB + addMB, usage: Math.round((card.downloadMB + card.uploadMB) / (card.limitMB + addMB) * 1000) / 10, disabled: false });
+export type ManualIdError = 'empty' | 'format' | 'taken';
+export const normalizeCardId = (v: string) => v.trim().toUpperCase();
+export function validateManualId(existing: DemoCard[], raw: string): ManualIdError | null {
+  const id = normalizeCardId(raw); if (!id) return 'empty'; if (!/^[A-Z0-9-]{3,16}$/.test(id)) return 'format';
+  return existing.some(c => c.id.toUpperCase() === id) ? 'taken' : null;
+}
+export const phoneDigits = (v: string) => v.replace(/\D/g, '');
+export const whatsappLink = (text: string, phone = '') => `https://wa.me/${phoneDigits(phone)}?text=${encodeURIComponent(text)}`;
+export const smsLink = (text: string, phone = '') => `sms:${phone.trim().startsWith('+') ? '+' : ''}${phoneDigits(phone)}?&body=${encodeURIComponent(text)}`;
 
 export const PACKAGE_OPTIONS_MB = [1000, 3000, 5000, 10000] as const;
 export type Validity = 'day' | 'week' | 'month' | 'none';
@@ -67,9 +95,10 @@ export const MAX_QUICK_ADD = 20;
 export const validityLabel = (v: Validity, ar: boolean) => ({ day: ar ? 'يوم' : '1 day', week: ar ? 'أسبوع' : '1 week', month: ar ? 'شهر' : '1 month', none: ar ? 'بدون حد' : 'No limit' })[v];
 const validityOf = (minutes: number): Validity => (Object.entries(VALIDITY_MINUTES).find(([, m]) => m === minutes)?.[0] as Validity) ?? 'none';
 /** Demo-only: builds unused cards in memory with sequential ids and 8-digit Latin codes. Nothing reaches a router. */
-export function createDemoCards(existing: DemoCard[], count: number, limitMB: number, validity: Validity, rand: () => number = Math.random): DemoCard[] {
+export function createDemoCards(existing: DemoCard[], count: number, limitMB: number, validity: Validity, rand: () => number = Math.random, manualId?: string): DemoCard[] {
+  if (manualId) { if (validateManualId(existing, manualId)) return []; return [{ id: normalizeCardId(manualId), active: false, usage: 0, limitMB, downloadMB: 0, uploadMB: 0, usedMinutes: 0, limitMinutes: VALIDITY_MINUTES[validity], code: String(Math.floor(rand() * 9e7) + 1e7), isNew: true }]; }
   const n = Math.max(1, Math.min(MAX_QUICK_ADD, Math.floor(count)));
-  let next = Math.max(0, ...existing.map(c => Number(c.id.replace(/\D/g, '')) || 0)) + 1;
+  let next = Math.max(0, ...existing.map(c => /^DEMO-\d+$/.test(c.id) ? Number(c.id.slice(5)) : 0)) + 1;
   return Array.from({ length: n }, () => ({ id: `DEMO-${String(next++).padStart(3, '0')}`, active: false, usage: 0, limitMB, downloadMB: 0, uploadMB: 0, usedMinutes: 0, limitMinutes: VALIDITY_MINUTES[validity], code: String(Math.floor(rand() * 9e7) + 1e7), isNew: true }));
 }
 export function buildNewCardMessage(cards: DemoCard[], lang: Language) {

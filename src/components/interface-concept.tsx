@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search, ShieldCheck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DemoCardList } from '@/components/demo-card-list';
+import { DemoCardList, type Notice } from '@/components/demo-card-list';
 import { StateIcon, stateLabel } from '@/components/card-state-chip';
 import { QuickAddCard } from '@/components/quick-add-card';
 import { ComplaintList, type Complaint } from '@/components/complaint-log';
@@ -12,6 +12,7 @@ export function InterfaceConcept({ ar }: { ar: boolean }) {
   const t = (a: string, b: string) => ar ? a : b;
   const [query, setQuery] = useState(''); const [filter, setFilter] = useState<CardState | 'all'>('all');
   const [cards, setCards] = useState<DemoCard[]>(demoCards);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const count = (s: CardState) => cards.filter(c => cardState(c) === s).length;
   const low = count('almostFinished');
@@ -29,13 +30,14 @@ export function InterfaceConcept({ ar }: { ar: boolean }) {
         <Search size={18} aria-hidden="true"/>
         <Input value={query} onChange={e => setQuery(e.target.value)} inputMode="search" dir="ltr" aria-label={t('ابحث برقم الكرت', 'Search by card number')} placeholder={t('اكتب رقم الكرت، مثل 004', 'Type a card number, e.g. 004')}/>
         {query && <Button size="icon" variant="ghost" aria-label={t('مسح البحث', 'Clear search')} onClick={() => setQuery('')}><X/></Button>}
-      </div><QuickAddCard ar={ar} existing={cards} onAdd={c => { setCards(p => [...c, ...p]); setQuery(''); setFilter('all'); }}/></div>
+      </div><QuickAddCard ar={ar} existing={cards} onAdd={c => { setCards(p => [...c, ...p]); setQuery(''); setFilter('all'); setNotice({ text: c.length > 1 ? t(`أُضيفت ${c.length} كروت`, `${c.length} cards added`) : t(`أُضيف ${c[0]?.id}`, `${c[0]?.id} added`) }); }}/></div>
       <div className="filter-chips" role="group" aria-label={t('تصفية حسب الحالة', 'Filter by status')}>
-        {(['all', 'almostFinished', 'inUse', 'unused'] as const).map(f => <Button key={f} size="sm" variant={filter === f ? 'default' : 'outline'} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f === 'all' ? t('الكل', 'All') : stateLabel(f, ar)}</Button>)}
+        {(['all', 'almostFinished', 'inUse', 'unused', 'disabled'] as const).map(f => <Button key={f} size="sm" variant={filter === f ? 'default' : 'outline'} aria-pressed={filter === f} onClick={() => setFilter(f)}>{f === 'all' ? t('الكل', 'All') : stateLabel(f, ar)}</Button>)}
       </div>
       </div>
-      <p className="concept-hint" aria-live="polite">{results.length ? t(`${results.length} كرت · اضغط على أي كرت لرؤية جلساته والرد على الزبون`, `${results.length} cards · Tap a card to see its sessions and reply to the customer`) : ''}</p>
-      {results.length ? <DemoCardList ar={ar} cards={results} onComplaint={c => setComplaints(p => [c, ...p])} onRemove={id => setCards(p => p.filter(c => c.id !== id))}/> :
+      {notice && <div className="action-notice" role="status"><span>{notice.text}</span>{notice.undo && <Button size="sm" variant="ghost" onClick={() => { notice.undo?.(); setNotice({ text: t('تم التراجع', 'Undone') }); }}>{t('تراجع', 'Undo')}</Button>}<Button size="icon" variant="ghost" aria-label={t('إخفاء', 'Dismiss')} onClick={() => setNotice(null)}><X/></Button></div>}
+      <p className="concept-hint" aria-live="polite">{results.length ? t(`${results.length} كرت · اضغط على الكرت للتفاصيل، أو ⋮ للتجديد والتعطيل`, `${results.length} cards · Tap a card for details, or ⋮ to renew or disable`) : ''}</p>
+      {results.length ? <DemoCardList ar={ar} cards={results} onComplaint={c => setComplaints(p => [c, ...p])} onRemove={id => { setCards(p => p.filter(c => c.id !== id)); setNotice({ text: t(`حُذف ${id}`, `${id} deleted`) }); }} onChange={(c, n) => { setCards(p => p.map(x => x.id === c.id ? c : x)); setNotice(n ?? null); }}/> :
         <div className="empty-results"><Search aria-hidden="true"/><p>{t('لم نجد كرتاً مطابقاً', 'No matching card')}</p><Button variant="outline" onClick={reset}>{t('عرض كل الكروت', 'Show all cards')}</Button></div>}
       <ComplaintList items={complaints} ar={ar}/>
     </div>
