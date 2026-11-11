@@ -14,13 +14,17 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DesignSpecimenRouteImport } from './routes/design-specimen'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedHealthRouteImport } from './routes/_authenticated/health'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
+import { Route as ApiPublicRouterJobRouteImport } from './routes/api/public/router-job'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
+import { Route as ApiPublicJobsWatchRouteImport } from './routes/api/public/jobs/watch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,9 +50,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHealthRoute = AuthenticatedHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -76,9 +90,19 @@ const ApiPublicRouterCardsRoute = ApiPublicRouterCardsRouteImport.update({
   path: '/api/public/router-cards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRouterJobRoute = ApiPublicRouterJobRouteImport.update({
+  id: '/api/public/router-job',
+  path: '/api/public/router-job',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   id: '/api/public/router-report',
   path: '/api/public/router-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJobsWatchRoute = ApiPublicJobsWatchRouteImport.update({
+  id: '/api/public/jobs/watch',
+  path: '/api/public/jobs/watch',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -87,26 +111,34 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/alerts': typeof AuthenticatedAlertsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/health': typeof AuthenticatedHealthRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/alerts': typeof AuthenticatedAlertsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/health': typeof AuthenticatedHealthRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,13 +147,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/health': typeof AuthenticatedHealthRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,26 +166,34 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/alerts'
     | '/dashboard'
+    | '/health'
     | '/onboarding'
     | '/routers'
     | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/jobs/watch'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/alerts'
     | '/dashboard'
+    | '/health'
     | '/onboarding'
     | '/routers'
     | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/jobs/watch'
   id:
     | '__root__'
     | '/'
@@ -157,13 +201,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/_authenticated/alerts'
     | '/_authenticated/dashboard'
+    | '/_authenticated/health'
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/_authenticated/settings'
     | '/_authenticated/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/jobs/watch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -173,7 +221,9 @@ export interface RootRouteChildren {
   DesignSpecimenRoute: typeof DesignSpecimenRoute
   PrivacyRoute: typeof PrivacyRoute
   ApiPublicRouterCardsRoute: typeof ApiPublicRouterCardsRoute
+  ApiPublicRouterJobRoute: typeof ApiPublicRouterJobRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
+  ApiPublicJobsWatchRoute: typeof ApiPublicJobsWatchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -213,11 +263,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/alerts': {
+      id: '/_authenticated/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AuthenticatedAlertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/health': {
+      id: '/_authenticated/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof AuthenticatedHealthRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -255,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRouterCardsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/router-job': {
+      id: '/api/public/router-job'
+      path: '/api/public/router-job'
+      fullPath: '/api/public/router-job'
+      preLoaderRoute: typeof ApiPublicRouterJobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/router-report': {
       id: '/api/public/router-report'
       path: '/api/public/router-report'
@@ -262,11 +333,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRouterReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/watch': {
+      id: '/api/public/jobs/watch'
+      path: '/api/public/jobs/watch'
+      fullPath: '/api/public/jobs/watch'
+      preLoaderRoute: typeof ApiPublicJobsWatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHealthRoute: typeof AuthenticatedHealthRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -274,7 +354,9 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHealthRoute: AuthenticatedHealthRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -291,7 +373,9 @@ const rootRouteChildren: RootRouteChildren = {
   DesignSpecimenRoute: DesignSpecimenRoute,
   PrivacyRoute: PrivacyRoute,
   ApiPublicRouterCardsRoute: ApiPublicRouterCardsRoute,
+  ApiPublicRouterJobRoute: ApiPublicRouterJobRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
+  ApiPublicJobsWatchRoute: ApiPublicJobsWatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

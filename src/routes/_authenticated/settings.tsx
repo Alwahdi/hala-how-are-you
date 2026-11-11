@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { DEFAULT_STYLE, detectStyle, sampleCard, type CardStyle } from '@/lib/card-style';
 import { updateNetworkInfo } from '@/lib/profile.functions';
 import type { Source } from '@/components/dashboard/types';
+import { EnableAlerts } from '@/components/alerts/enable-alerts';
+import { AlertPrefs } from '@/components/alerts/alert-prefs';
 
 export const Route = createFileRoute('/_authenticated/settings')({
   head: () => ({ meta: [
@@ -115,6 +117,9 @@ function SettingsPage() {
           </div>
         )}
       </section>
+
+      <div className="mt-6"><EnableAlerts ar={ar} /></div>
+      <AlertPrefs ar={ar} />
 
       <NetworkInfo ar={ar} name={profile?.network_name ?? ''} city={profile?.city ?? ''} />
     </main>
