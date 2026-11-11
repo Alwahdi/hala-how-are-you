@@ -1,9 +1,10 @@
 // Server-side: stores cards, sessions and profiles from either the API pull or the router push.
 import { durationToSeconds } from './routeros-api';
+import { parseMikhmon } from './card-actions';
 
 export type CardIn = { source: 'hotspot' | 'usermanager'; name: string; profile?: string | null; uptime_s?: number; bytes?: number; limit_uptime_s?: number | null; limit_bytes?: number | null; disabled?: boolean; comment?: string | null; pw_mode?: 'same' | 'none' | 'other' | null };
 export type SessionIn = { source: 'hotspot' | 'usermanager'; username: string; address?: string | null; mac?: string | null; uptime_s?: number; bytes?: number };
-export type ProfileIn = { source: 'hotspot' | 'usermanager'; name: string; rate_limit?: string | null; shared_users?: string | null; validity?: string | null; price?: string | null };
+export type ProfileIn = { source: 'hotspot' | 'usermanager'; name: string; rate_limit?: string | null; shared_users?: string | null; validity?: string | null; price?: string | null; sell_price?: string | null; extra?: Record<string, string> };
 
 const n = (v?: string) => (v == null || v === '' ? 0 : Number(v) || 0);
 const lim = (v?: string) => { const x = durationToSeconds(v); return x > 0 ? x : null; };
@@ -50,4 +51,43 @@ export async function storeProfiles(sb: any, routerId: string, profiles: Profile
 export async function storeProfilesFor(sb: any, routerId: string, source: ProfileIn['source'], profiles: ProfileIn[]) {
   await sb.from('router_profiles').delete().eq('router_id', routerId).eq('source', source);
   if (profiles.length) await sb.from('router_profiles').upsert(profiles.map((p) => ({ ...p, router_id: routerId, synced_at: new Date().toISOString() })), { onConflict: 'router_id,source,name' });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function storeSessionsFor(sb: any, routerId: string, source: SessionIn['source'], sessions: SessionIn[], removeBefore?: string) {
+  const now = new Date().toISOString();
+  for (const part of chunk(sessions)) await sb.from('router_sessions').upsert(part.map((s) => ({ ...s, mac: s.mac ?? '', router_id: routerId, synced_at: now })), { onConflict: 'router_id,source,username,mac' });
+  if (removeBefore) await sb.from('router_sessions').delete().eq('router_id', routerId).eq('source', source).lt('synced_at', removeBefore);
+}
+
+const nz = (v?: string | null) => (v && v !== 'none' && v !== '0s' && v !== '0' && v !== '0/0' && v !== '/' ? v : null);
+const drop = (o: Record<string, string | null | undefined>) => Object.fromEntries(Object.entries(o).filter(([, v]) => !!v)) as Record<string, string>;
+
+/** Hotspot package from the push row (name,rate,devices,session-timeout,idle,keepalive,pool,mikhmon) or an API row. Mikhmon wins for price/validity. */
+export function mapHotspotProfile(r: Record<string, string | undefined>): ProfileIn | null {
+  if (!r['name']) return null;
+  const mk = parseMikhmon(r['mikhmon'] ?? r['on-login']);
+  return {
+    source: 'hotspot', name: r['name'], rate_limit: nz(r['rate-limit']), shared_users: nz(r['shared-users']),
+    validity: mk?.validity || nz(r['session-timeout']), price: mk?.price || null, sell_price: mk?.sellPrice || null,
+    extra: drop({ sessionTimeout: nz(r['session-timeout']), idle: nz(r['idle-timeout']), keepalive: nz(r['keepalive-timeout']), pool: nz(r['address-pool']), expiry: mk?.mode, lock: mk?.lock }),
+  };
+}
+/** User Manager package (v6 or v7): name,name-for-users,validity,price,devices,rate rx/tx,uptime-limit,transfer-limit. */
+export function mapUmProfile(r: Record<string, string | undefined>): ProfileIn | null {
+  if (!r['name']) return null;
+  return {
+    source: 'usermanager', name: r['name'], rate_limit: nz(r['rate']), shared_users: nz(r['shared']), validity: nz(r['validity']), price: nz(r['price']),
+    extra: drop({ forUsers: nz(r['name-for-users']), uptimeLimit: nz(r['uptime-limit']), transferLimit: nz(r['transfer-limit']) }),
+  };
+}
+/** Online row from the push: user,mac,uptime,bytes,address. */
+export function mapSessionRow(source: SessionIn['source'], r: string[]): SessionIn | null {
+  if (!r[0]) return null;
+  return { source, username: r[0], mac: r[1] ?? '', uptime_s: durationToSeconds(r[2]), bytes: n(r[3]), address: r[4] || null };
+}
+/** The report's compact online list: "user|mac|uptime|bytes;" repeated. */
+export function parseActiveList(act: string | undefined): SessionIn[] {
+  if (!act) return [];
+  return act.split(';').map((x) => x.split('|')).filter((p) => p[0]).map((p) => mapSessionRow('hotspot', p)).filter((x): x is SessionIn => !!x);
 }
