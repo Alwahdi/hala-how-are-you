@@ -71,7 +71,7 @@ function SettingsPage() {
         </div>
 
         {!current && guess && !editing && (
-          <p className="mt-4 flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm"><Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />{t(`قرأنا ${guess.sample} من كروتك واستنتجنا شكلها. هل هذا صحيح؟`, `We read ${guess.sample} of your cards and worked out their style. Is this right?`)}{!guess.sure && <span className="text-muted-foreground"> {t('(نوع كلمة السر يتأكد بعد إعادة الربط)', '(password type is confirmed after Reconnect)')}</span>}</p>
+          <p className="mt-4 flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm"><Sparkles className="mt-0.5 size-4 shrink-0 text-primary" /><span>{t(`قرأنا ${guess.sample} من كروتك واستنتجنا شكلها. هل هذا صحيح؟`, `We read ${guess.sample} of your cards and worked out their style. Is this right?`)}{!guess.sure && <span className="text-muted-foreground"> {t('(نوع كلمة السر يتأكد بعد إعادة الربط)', '(password type is confirmed after Reconnect)')}</span>}</span></p>
         )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3" aria-label={t('معاينة', 'Preview')}>
