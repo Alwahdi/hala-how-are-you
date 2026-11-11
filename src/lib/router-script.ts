@@ -116,7 +116,7 @@ const REFRESH_CARDS_MS = 5 * 60_000;
  */
 export function shouldTryDirect(
   r: { cloud_host: string | null; direct_port: number | null; last_check_error: string | null; direct_checked_at: string | null; cards_synced_at: string | null },
-  s: Parameters<typeof directAccessState>[0] & { apiUser?: number },
+  s: Parameters<typeof directAccessState>[0] & { apiUser?: number | undefined },
   now = Date.now(),
 ): boolean {
   if (directAccessState(s) !== 'ready') return false;
