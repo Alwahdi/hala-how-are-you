@@ -1,8 +1,9 @@
 // Server-side: stores cards, sessions and profiles from either the API pull or the router push.
 import { durationToSeconds } from './routeros-api';
 import { parseMikhmon } from './card-actions';
+import { parseRosDate } from './ros-date';
 
-export type CardIn = { source: 'hotspot' | 'usermanager'; name: string; profile?: string | null; uptime_s?: number; bytes?: number; limit_uptime_s?: number | null; limit_bytes?: number | null; disabled?: boolean; comment?: string | null; pw_mode?: 'same' | 'none' | 'other' | null };
+export type CardIn = { source: 'hotspot' | 'usermanager'; name: string; profile?: string | null; uptime_s?: number; bytes?: number; limit_uptime_s?: number | null; limit_bytes?: number | null; disabled?: boolean; comment?: string | null; pw_mode?: 'same' | 'none' | 'other' | null; expires_at?: string | null; last_online_at?: string };
 export type SessionIn = { source: 'hotspot' | 'usermanager'; username: string; address?: string | null; mac?: string | null; uptime_s?: number; bytes?: number };
 export type ProfileIn = { source: 'hotspot' | 'usermanager'; name: string; rate_limit?: string | null; shared_users?: string | null; validity?: string | null; price?: string | null; sell_price?: string | null; extra?: Record<string, string> };
 
@@ -11,13 +12,16 @@ const lim = (v?: string) => { const x = durationToSeconds(v); return x > 0 ? x :
 const pwMode = (v?: string) => (v === 'same' || v === 'none' || v === 'other' ? v : undefined);
 const limB = (v?: string) => (v && Number(v) > 0 ? Number(v) : null);
 
-export function mapHotspotUser(r: Record<string, string>): CardIn | null {
+export function mapHotspotUser(r: Record<string, string>, tz = 0): CardIn | null {
   if (!r['name'] || r['name'] === 'default-trial') return null;
-  return { source: 'hotspot', name: r['name'], profile: r['profile'] ?? null, uptime_s: durationToSeconds(r['uptime']), bytes: n(r['bytes-in']) + n(r['bytes-out']), limit_uptime_s: lim(r['limit-uptime']), limit_bytes: limB(r['limit-bytes-total']), disabled: r['disabled'] === 'true', comment: r['comment'] ?? null, ...(pwMode(r['pw']) ? { pw_mode: pwMode(r['pw'])! } : {}) };
+  // Mikhmon (and our own packages) write the expiry date in the card note at first login.
+  const exp = parseRosDate(r['comment'], tz);
+  return { source: 'hotspot', expires_at: exp, name: r['name'], profile: r['profile'] ?? null, uptime_s: durationToSeconds(r['uptime']), bytes: n(r['bytes-in']) + n(r['bytes-out']), limit_uptime_s: lim(r['limit-uptime']), limit_bytes: limB(r['limit-bytes-total']), disabled: r['disabled'] === 'true', comment: r['comment'] ?? null, ...(pwMode(r['pw']) ? { pw_mode: pwMode(r['pw'])! } : {}) };
 }
-export function mapUmUser(r: Record<string, string>): CardIn | null {
+export function mapUmUser(r: Record<string, string>, tz = 0): CardIn | null {
   const name = r['name'] ?? r['username']; if (!name) return null;
-  return { source: 'usermanager', name, profile: r['actual-profile'] ?? r['group'] ?? null, uptime_s: durationToSeconds(r['uptime-used'] ?? r['total-uptime']), bytes: n(r['download-used']) + n(r['upload-used']) + n(r['total-download']) + n(r['total-upload']), disabled: r['disabled'] === 'true', comment: r['comment'] ?? null, ...(pwMode(r['pw']) ? { pw_mode: pwMode(r['pw'])! } : {}) };
+  const seen = parseRosDate(r['last-seen'], tz);
+  return { ...(seen ? { last_online_at: seen } : {}), source: 'usermanager', name, profile: r['actual-profile'] ?? r['group'] ?? null, uptime_s: durationToSeconds(r['uptime-used'] ?? r['total-uptime']), bytes: n(r['download-used']) + n(r['upload-used']) + n(r['total-download']) + n(r['total-upload']), disabled: r['disabled'] === 'true', comment: r['comment'] ?? null, ...(pwMode(r['pw']) ? { pw_mode: pwMode(r['pw'])! } : {}) };
 }
 export function mapHotspotActive(r: Record<string, string>): SessionIn | null {
   if (!r['user']) return null;
@@ -97,11 +101,11 @@ export function parseActiveList(act: string | undefined): SessionIn[] {
   return act.split(';').map((x) => x.split('|')).filter((p) => p[0]).map((p) => mapSessionRow('hotspot', p)).filter((x): x is SessionIn => !!x);
 }
 
-/** Turns one pushed row into a card. Old scripts send shorter rows, so both layouts are read. */
-export function cardFromRow(source: 'hotspot' | 'usermanager', r: string[]): CardIn | null {
-  if (source === 'hotspot') return mapHotspotUser({ name: r[0] ?? '', profile: r[1] ?? '', uptime: r[2] ?? '', 'bytes-in': r[3] ?? '', 'bytes-out': r[4] ?? '', 'limit-uptime': r[5] ?? '', 'limit-bytes-total': r[6] ?? '', disabled: r[7] ?? '', comment: r[8] ?? '', pw: r[9] ?? '' });
-  if (r.length <= 5) return mapUmUser({ name: r[0] ?? '', group: r[1] ?? '', disabled: r[2] ?? '', comment: r[3] ?? '', pw: r[4] ?? '' });
-  const c = mapUmUser({ name: r[0] ?? '', 'actual-profile': r[1] ?? '', 'uptime-used': r[2] ?? '', 'download-used': r[3] ?? '', 'upload-used': r[4] ?? '', disabled: r[5] ?? '', comment: r[6] ?? '', pw: r[7] ?? '' });
+/** Turns one pushed row into a card. Old scripts send shorter rows, so both layouts are read. tz = the router's gmt-offset in seconds. */
+export function cardFromRow(source: 'hotspot' | 'usermanager', r: string[], tz = 0): CardIn | null {
+  if (source === 'hotspot') return mapHotspotUser({ name: r[0] ?? '', profile: r[1] ?? '', uptime: r[2] ?? '', 'bytes-in': r[3] ?? '', 'bytes-out': r[4] ?? '', 'limit-uptime': r[5] ?? '', 'limit-bytes-total': r[6] ?? '', disabled: r[7] ?? '', comment: r[8] ?? '', pw: r[9] ?? '' }, tz);
+  if (r.length <= 5) return mapUmUser({ name: r[0] ?? '', group: r[1] ?? '', disabled: r[2] ?? '', comment: r[3] ?? '', pw: r[4] ?? '' }, tz);
+  const c = mapUmUser({ name: r[0] ?? '', 'actual-profile': r[1] ?? '', 'uptime-used': r[2] ?? '', 'download-used': r[3] ?? '', 'upload-used': r[4] ?? '', disabled: r[5] ?? '', comment: r[6] ?? '', pw: r[7] ?? '', 'last-seen': r[8] ?? '' }, tz);
   if (c && !r[1]) delete c.profile; // v7: the package comes from the links list, keep what we know.
   return c;
 }
