@@ -22,7 +22,7 @@ export function DemoCardList({ ar, cards = demoCards }: { ar: boolean; cards?: D
           <UsageBar ratio={remainingRatio(card)} state={state} label={t('المتبقي من الباقة', 'Remaining allowance')}/>
           <span className="demo-card-line">
             <span><strong><bdi dir="ltr">{formatDataSize(left)}</bdi></strong> {t('متبقي من', 'left of')} <bdi dir="ltr">{formatDataSize(card.limitMB)}</bdi></span>
-            <span className="text-muted-foreground"><bdi dir="ltr">{formatDuration(card.usedMinutes, ar)}</bdi> {t('استخدام', 'used')}</span>
+            <span className="text-muted-foreground"><bdi>{formatDuration(card.usedMinutes, ar)}</bdi> {t('استخدام', 'used')}</span>
           </span>
         </Button>
       </DialogTrigger>
@@ -42,7 +42,7 @@ export function DemoCardList({ ar, cards = demoCards }: { ar: boolean; cards?: D
           <p className="text-xs text-muted-foreground leading-relaxed">{downShare > 0.7 ? t('أغلب الاستهلاك تحميل، مثل مشاهدة الفيديو. هذا غالباً سبب انتهاء الكرت بسرعة.', 'Most usage was downloading, such as watching video. This is usually why a card runs out fast.') : t('الاستهلاك موزع بين التحميل والرفع.', 'Usage is spread between download and upload.')}</p>
         </div>}
         <dl className="demo-card-details">
-          <div><dt>{t('مدة الاستخدام', 'Time used')}</dt><dd><bdi dir="ltr">{formatDuration(card.usedMinutes, ar)}</bdi> / <bdi dir="ltr">{formatDuration(card.limitMinutes, ar)}</bdi></dd></div>
+          <div><dt>{t('مدة الاستخدام', 'Time used')}</dt><dd><bdi>{formatDuration(card.usedMinutes, ar)}</bdi> / <bdi>{formatDuration(card.limitMinutes, ar)}</bdi></dd></div>
         </dl>
         <p className="text-xs text-muted-foreground leading-relaxed">{t('أمثلة مصطنعة؛ البيانات الفعلية تعتمد على نظام الشبكة.', 'Illustrative examples; real data depends on the network system.')}</p>
         <DialogClose asChild><Button variant="outline">{t('إغلاق', 'Close')}</Button></DialogClose>

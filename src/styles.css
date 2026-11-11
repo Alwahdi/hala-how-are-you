@@ -319,4 +319,4 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .dialog-big { font-size:36px; font-weight:750; line-height:1.1; }
 .split-block { display:flex; flex-direction:column; gap:8px; }
 .split-bar { height:10px; border-radius:999px; background:var(--secondary); overflow:hidden; } .split-bar>span { display:block; height:100%; background:var(--primary); }
-.split-legend { display:flex; justify-content:space-between; font-size:13px; } .split-legend span { display:inline-flex; align-items:center; gap:6px; } .split-legend span:first-child svg { color:var(--primary); } .split-legend span:last-child svg { color:var(--secondary); }
+.split-legend { display:flex; justify-content:space-between; font-size:13px; } .split-legend span { display:inline-flex; align-items:center; gap:6px; } .split-legend span:first-child svg { color:var(--primary); } .split-legend span:last-child svg { color:var(--secondary); }.dialog-hero .status-chip { align-self:flex-start; }
