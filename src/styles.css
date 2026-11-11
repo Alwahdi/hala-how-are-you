@@ -424,3 +424,12 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
   .demo-card-item .demo-card-identity { font-size:15px; gap:6px; }
   .demo-card-item .status-chip { padding-inline:8px; gap:5px; }
 }
+
+/* App screens (sign-in, setup, routers) share the landing mesh and one panel surface. */
+.app-shell { position:relative; isolation:isolate; overflow-x:clip; width:100%; padding-inline:max(20px, calc((100% - 1160px) / 2)); background:var(--background); }
+.app-shell > .landing-pattern { position:fixed; }
+.app-panel { border:1px solid var(--glass-edge); border-radius:16px; background:color-mix(in oklab,var(--card) 88%,transparent); backdrop-filter:blur(16px); box-shadow:var(--glass-shadow); }
+.stat-tile { border-radius:12px; padding:12px; background:color-mix(in oklab,var(--muted) 55%,transparent); }
+.meter { height:6px; border-radius:999px; background:var(--muted); overflow:hidden; }
+.meter > span { display:block; height:100%; min-width:4px; border-radius:inherit; background:var(--primary); }
+.meter[data-tone=warn] > span { background:var(--destructive); }
