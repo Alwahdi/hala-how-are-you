@@ -448,3 +448,25 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .state-bar-active { background:color-mix(in oklab,var(--primary) 55%,var(--muted)); }
 .state-bar-almost { background:var(--destructive); }
 .state-bar-finished, .state-bar-disabled { background:color-mix(in oklab,var(--muted-foreground) 40%,transparent); }
+
+/* Tappable surfaces: lift on hover, press on tap, clear focus ring, direction-aware chevron. */
+.tap-card { cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.tap-card:hover { border-color:color-mix(in oklab,var(--primary) 55%,var(--border)); box-shadow:var(--glass-shadow); }
+.tap-card:active { transform:scale(.985); }
+.tap-card:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+.tap-chevron { width:16px; height:16px; color:var(--muted-foreground); flex-shrink:0; }
+[dir=rtl] .tap-chevron { transform:scaleX(-1); }
+/* Five-slot bottom bar with a raised center action. */
+.dash-nav-quick { flex:0 0 auto; display:flex; align-items:center; justify-content:center; width:56px; height:56px; margin-block:-14px; border-radius:999px; background:var(--primary); color:var(--primary-foreground); box-shadow:0 8px 24px -6px color-mix(in oklab,var(--primary) 60%,transparent); transition:transform .15s ease; }
+.dash-nav-quick:active { transform:scale(.94); }
+.dash-nav-quick svg { width:26px; height:26px; }
+.dash-nav-quick:focus-visible { outline:2px solid var(--ring); outline-offset:3px; }
+.gauge { --v:0; width:96px; height:96px; border-radius:999px; background:conic-gradient(var(--primary) calc(var(--v)*1%), var(--muted) 0); display:grid; place-items:center; }
+.gauge[data-tone=warn] { background:conic-gradient(var(--destructive) calc(var(--v)*1%), var(--muted) 0); }
+.gauge > span { width:76px; height:76px; border-radius:999px; background:var(--card); display:grid; place-items:center; font-weight:700; }
+.spark { display:flex; align-items:flex-end; gap:2px; height:48px; }
+.spark > span { flex:1; min-height:2px; border-radius:2px; background:color-mix(in oklab,var(--primary) 70%,transparent); }
+.spark > span[data-empty] { background:var(--muted); }
+.seg { display:inline-flex; padding:4px; gap:4px; border-radius:14px; border:1px solid var(--border); background:color-mix(in oklab,var(--card) 80%,transparent); }
+.seg > button { min-height:40px; padding-inline:16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted-foreground); }
+.seg > button[aria-pressed=true] { background:var(--primary); color:var(--primary-foreground); }
