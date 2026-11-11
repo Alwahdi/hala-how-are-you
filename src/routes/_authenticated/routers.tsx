@@ -120,7 +120,7 @@ function RoutersPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h2 className="text-lg font-bold">{r.name}</h2>
-                    <p className="text-xs text-muted-foreground" dir="ltr">{[s.board, s.version && `RouterOS ${s.version}`].filter(Boolean).join(' · ') || r.ros_version}</p>
+                    <p className="text-xs text-muted-foreground" dir="ltr">{[s.board, s.version && `RouterOS ${s.version}`].filter(Boolean).join(' · ') || t('الإصدار يظهر بعد أول إشارة', 'Version shows after the first signal')}</p>
                   </div>
                   <StatusChip state={online ? 'online' : r.last_seen_at ? 'offline' : 'waiting'} ar={ar} />
                 </div>
