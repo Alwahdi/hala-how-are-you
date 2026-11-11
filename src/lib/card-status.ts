@@ -1,5 +1,5 @@
 // Card state from what the router reports. Browser-safe.
-export type CardRow = { router_id: string; source: string; name: string; profile: string | null; uptime_s: number; bytes: number; limit_uptime_s: number | null; limit_bytes: number | null; disabled: boolean; comment: string | null; first_seen_at: string; synced_at: string };
+export type CardRow = { router_id: string; source: string; name: string; profile: string | null; uptime_s: number; bytes: number; limit_uptime_s: number | null; limit_bytes: number | null; disabled: boolean; comment: string | null; first_seen_at: string; synced_at: string; um_state?: string | null; first_used_at?: string | null };
 export type CardState = 'unused' | 'active' | 'almost' | 'finished' | 'disabled';
 
 /** Share of the limit already used (time or data, whichever is higher), or null when the card has no limit. */
@@ -8,8 +8,12 @@ export function usedShare(c: Pick<CardRow, 'uptime_s' | 'bytes' | 'limit_uptime_
   return parts.length ? Math.max(...parts) : null;
 }
 
-export function cardState(c: Pick<CardRow, 'uptime_s' | 'bytes' | 'limit_uptime_s' | 'limit_bytes' | 'disabled'>): CardState {
+export function cardState(c: Pick<CardRow, 'uptime_s' | 'bytes' | 'limit_uptime_s' | 'limit_bytes' | 'disabled'> & { um_state?: string | null }): CardState {
   if (c.disabled) return 'disabled';
+  // User Manager v7 says it directly: waiting (unused), running (in use), used (finished).
+  if (c.um_state === 'used') return 'finished';
+  if (c.um_state === 'waiting') return 'unused';
+  if (c.um_state?.startsWith('running') && c.uptime_s === 0 && c.bytes === 0) return 'active';
   const share = usedShare(c);
   if (share != null && share >= 1) return 'finished';
   if (c.uptime_s === 0 && c.bytes === 0) return 'unused';
