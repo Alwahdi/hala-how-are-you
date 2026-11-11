@@ -1,11 +1,10 @@
 # Roadmap
 
-## Packages and cards (plan approved 2026-11-11)
-- [x] 1. Reading fix: packages first, protected batches, run-based removal, safe v6 price, UM card limits from package, v7 usage from sessions
-- [x] 2. Package card: price, data, usage time, validity, speed, devices, (i) help
-- [x] 5. Card detail: used/remaining, validity dates, last online
-- [x] 6. Expired cards: used-up vs validity-expired filters
-- [x] 7. Loading progress bar + numbered pages (50/page)
-- [x] 4. Quick actions (⋯), renew, multi-select bulk off/on/delete
-- [x] 3. Add/edit/delete packages (Hotspot Mikhmon-style, UM v6/v7)
-- [x] Verify on CHR v6/v7, tests, mobile check, D-036, status
+## CPU load and direct API (plan approved 2026-11-11)
+- [ ] 1. No overlap: scripts exit when a previous run is still going
+- [ ] 2. Lighter UM v6 read: one print as-value, online from hotspot active, short pauses
+- [ ] 3. Pace by size: full card read every 30 min above 1,000 cards
+- [ ] 4. Direct API: light check, no UM via API, per-command timeout, 30-min backoff, clear reason in UI
+- [ ] 5. Record card read duration, show in router health, alert when too long
+- [ ] 6. Verify on CHR v6 (3,000 UM cards) and v7, tests
+- [ ] 7. D-037, status, AGENTS.md
