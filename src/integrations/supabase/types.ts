@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_prefs: {
+        Row: {
+          auto_cleanup: boolean
+          cards_low: boolean
+          cleanup_after_days: number
+          daily_report: boolean
+          health: boolean
+          last_cleanup_on: string | null
+          last_report_on: string | null
+          owner_id: string
+          report_hour: number
+          router_down: boolean
+          router_strain: boolean
+          updated_at: string
+          utc_offset_min: number
+        }
+        Insert: {
+          auto_cleanup?: boolean
+          cards_low?: boolean
+          cleanup_after_days?: number
+          daily_report?: boolean
+          health?: boolean
+          last_cleanup_on?: string | null
+          last_report_on?: string | null
+          owner_id: string
+          report_hour?: number
+          router_down?: boolean
+          router_strain?: boolean
+          updated_at?: string
+          utc_offset_min?: number
+        }
+        Update: {
+          auto_cleanup?: boolean
+          cards_low?: boolean
+          cleanup_after_days?: number
+          daily_report?: boolean
+          health?: boolean
+          last_cleanup_on?: string | null
+          last_report_on?: string | null
+          owner_id?: string
+          report_hour?: number
+          router_down?: boolean
+          router_strain?: boolean
+          updated_at?: string
+          utc_offset_min?: number
+        }
+        Relationships: []
+      }
+      alerts: {
+        Row: {
+          body: string
+          created_at: string
+          dedup_key: string
+          id: string
+          kind: string
+          owner_id: string
+          path: string
+          read_at: string | null
+          router_id: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dedup_key: string
+          id?: string
+          kind: string
+          owner_id: string
+          path?: string
+          read_at?: string | null
+          router_id?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dedup_key?: string
+          id?: string
+          kind?: string
+          owner_id?: string
+          path?: string
+          read_at?: string | null
+          router_id?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
       early_access_contacts: {
         Row: {
           contact_method: string
@@ -164,11 +254,39 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          owner_id: string
+          p256dh: string
+          user_agent: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          owner_id: string
+          p256dh: string
+          user_agent?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          owner_id?: string
+          p256dh?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       router_cards: {
         Row: {
           bytes: number
           comment: string | null
           disabled: boolean
+          finished_at: string | null
           first_seen_at: string
           limit_bytes: number | null
           limit_uptime_s: number | null
@@ -184,6 +302,7 @@ export type Database = {
           bytes?: number
           comment?: string | null
           disabled?: boolean
+          finished_at?: string | null
           first_seen_at?: string
           limit_bytes?: number | null
           limit_uptime_s?: number | null
@@ -199,6 +318,7 @@ export type Database = {
           bytes?: number
           comment?: string | null
           disabled?: boolean
+          finished_at?: string | null
           first_seen_at?: string
           limit_bytes?: number | null
           limit_uptime_s?: number | null
@@ -213,6 +333,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "router_cards_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_events: {
+        Row: {
+          created_at: string
+          detail: Json
+          id: string
+          kind: string
+          owner_id: string
+          router_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind: string
+          owner_id: string
+          router_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind?: string
+          owner_id?: string
+          router_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_events_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_jobs: {
+        Row: {
+          auto: boolean
+          done_at: string | null
+          id: string
+          kind: string
+          owner_id: string
+          payload: Json
+          requested_at: string
+          result: string | null
+          router_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          auto?: boolean
+          done_at?: string | null
+          id?: string
+          kind: string
+          owner_id: string
+          payload?: Json
+          requested_at?: string
+          result?: string | null
+          router_id: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          auto?: boolean
+          done_at?: string | null
+          id?: string
+          kind?: string
+          owner_id?: string
+          payload?: Json
+          requested_at?: string
+          result?: string | null
+          router_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_jobs_router_id_fkey"
             columns: ["router_id"]
             isOneToOne: false
             referencedRelation: "routers"
@@ -343,6 +548,8 @@ export type Database = {
           direct_checked_at: string | null
           direct_port: number | null
           direct_tls: boolean | null
+          health: Json | null
+          health_checked_at: string | null
           id: string
           last_check_error: string | null
           last_seen_at: string | null
@@ -352,6 +559,7 @@ export type Database = {
           role: string
           ros_version: string
           token_hash: string | null
+          watch_state: Json
         }
         Insert: {
           api_secret_encrypted?: string | null
@@ -364,6 +572,8 @@ export type Database = {
           direct_checked_at?: string | null
           direct_port?: number | null
           direct_tls?: boolean | null
+          health?: Json | null
+          health_checked_at?: string | null
           id?: string
           last_check_error?: string | null
           last_seen_at?: string | null
@@ -373,6 +583,7 @@ export type Database = {
           role?: string
           ros_version?: string
           token_hash?: string | null
+          watch_state?: Json
         }
         Update: {
           api_secret_encrypted?: string | null
@@ -385,6 +596,8 @@ export type Database = {
           direct_checked_at?: string | null
           direct_port?: number | null
           direct_tls?: boolean | null
+          health?: Json | null
+          health_checked_at?: string | null
           id?: string
           last_check_error?: string | null
           last_seen_at?: string | null
@@ -394,6 +607,7 @@ export type Database = {
           role?: string
           ros_version?: string
           token_hash?: string | null
+          watch_state?: Json
         }
         Relationships: []
       }

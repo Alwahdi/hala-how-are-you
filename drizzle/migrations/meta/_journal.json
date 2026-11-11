@@ -71,6 +71,13 @@
       "when": 1794374469583,
       "tag": "0009_profile_details",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794375348056,
+      "tag": "0010_alerts_jobs_push",
+      "breakpoints": true
     }
   ]
 }
