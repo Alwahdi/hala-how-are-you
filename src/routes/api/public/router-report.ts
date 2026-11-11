@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { directAccessState, hashToken, majorVersion } from '@/lib/router-script';
+import { directAccessState, hashToken, majorVersion, shouldTryDirect } from '@/lib/router-script';
 import { normalizeCloudHost } from '@/lib/ip-cloud';
 import { checkOne } from '@/lib/ip-cloud-probe';
 
@@ -12,7 +12,7 @@ const Report = z.object({
   hotspotActive: num, temperature: str.optional().default(''),
   cloudName: str.optional().default(''), sslPort: z.string().max(5).optional().default(''), sslDisabled: z.string().max(5).optional().default(''),
   publicAddress: z.string().max(45).optional().default(''), behindNat: z.string().max(8).optional().default(''),
-  apiPort: z.string().max(5).optional().default(''), apiDisabled: z.string().max(5).optional().default(''), apiSslPort: z.string().max(5).optional().default(''), apiSslDisabled: z.string().max(5).optional().default(''), umActive: num.optional(),
+  apiPort: z.string().max(5).optional().default(''), apiDisabled: z.string().max(5).optional().default(''), apiSslPort: z.string().max(5).optional().default(''), apiSslDisabled: z.string().max(5).optional().default(''), umActive: num.optional(), apiUser: num.optional(),
 });
 
 const LOG_EVERY_MS = 5 * 60_000;
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/api/public/router-report')({
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
         const hash = await hashToken(token);
-        const { data: router } = await supabaseAdmin.from('routers').select('id, last_seen_at, cloud_host, last_check_error, cards_synced_at').eq('token_hash', hash).maybeSingle();
+        const { data: router } = await supabaseAdmin.from('routers').select('id, last_seen_at, cloud_host, direct_port, last_check_error, direct_checked_at, cards_synced_at').eq('token_hash', hash).maybeSingle();
         if (!router) return new Response('unauthorized', { status: 401 });
 
         const now = Date.now();
@@ -44,11 +44,12 @@ export const Route = createFileRoute('/api/public/router-report')({
         if (!last || now - new Date(last.created_at).getTime() >= LOG_EVERY_MS) {
           await supabaseAdmin.from('router_status_log').insert({ router_id: router.id, status });
         }
-        // Not behind NAT + IP Cloud + API on: connect directly on our own (8729 then 8728). Push stays the backup.
-        // Retried after Reconnect (which clears cloud_host); a working link also refreshes cards every 5 minutes.
+        // Not behind NAT + IP Cloud + API on: connect directly on our own (8729 then 8728), no owner input. Push stays the backup.
         const host = normalizeCloudHost(status.cloudName);
-        const stale = !router.cards_synced_at || now - new Date(router.cards_synced_at).getTime() > 5 * 60_000;
-        if (host && directAccessState(status) === 'ready' && (!router.cloud_host || (!router.last_check_error && stale))) {
+        if (host && directAccessState(status) === 'ready' && status.apiUser === 0) {
+          // The router says our read-only user is missing: show that instead of trying a login that cannot work.
+          if (router.last_check_error !== 'no_user') await supabaseAdmin.from('routers').update({ cloud_host: host, direct_port: null, direct_tls: null, last_check_error: 'no_user', direct_checked_at: new Date(now).toISOString() }).eq('id', router.id);
+        } else if (host && shouldTryDirect(router, status, now)) {
           await checkOne(supabaseAdmin, router.id, host).catch(() => null);
         }
         return new Response('ok');

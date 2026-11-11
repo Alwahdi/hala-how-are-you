@@ -46,7 +46,10 @@ const CARDS = [
 export async function checkOne(sb: any, id: string, host: string, candidates?: Candidate[]) {
   const key = process.env['ROUTER_SECRET_KEY'];
   const { data: r } = await sb.from('routers').select('api_secret_encrypted, last_status, direct_port, direct_tls, cards_synced_at').eq('id', id).maybeSingle();
-  if (!key || !r?.api_secret_encrypted) return { ok: false as const, error: 'no_user' as const };
+  if (!key || !r?.api_secret_encrypted) {
+    await sb.from('routers').update({ cloud_host: host, direct_checked_at: new Date().toISOString(), last_check_error: 'no_user' }).eq('id', id);
+    return { ok: false as const, error: 'no_user' as const };
+  }
   const password = await decrypt(key, r.api_secret_encrypted);
   const known: Candidate[] = r.direct_port ? [{ port: r.direct_port, tls: !!r.direct_tls }] : [];
   const list: Candidate[] = candidates ?? [...known, ...candidatePorts(r.last_status).filter((c) => !known.some((k) => k.port === c.port && k.tls === c.tls))];
@@ -62,7 +65,7 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
     const sessions = [...(hsActive ?? []).map(mapHotspotActive), ...(umActive ?? []).map(mapUmSession)].filter((x) => !!x);
     await storeSessions(sb, id, sessions);
     const patch: Record<string, unknown> = {
-      cloud_host: host, direct_port: c.port, direct_tls: c.tls, last_seen_at: now, last_check_error: null,
+      cloud_host: host, direct_port: c.port, direct_tls: c.tls, direct_checked_at: now, last_seen_at: now, last_check_error: null,
       last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(status).filter(([, v]) => v !== undefined)), umActive: umActive ? umActive.length : undefined },
       ros_version: status.version?.startsWith('6') ? 'v6' : 'v7',
     };
@@ -77,6 +80,6 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
     await sb.from('routers').update(patch).eq('id', id);
     return { ok: true as const, status, port: c.port, tls: c.tls };
   }
-  await sb.from('routers').update({ cloud_host: host, last_check_error: lastError }).eq('id', id);
+  await sb.from('routers').update({ cloud_host: host, direct_port: null, direct_tls: null, direct_checked_at: new Date().toISOString(), last_check_error: lastError }).eq('id', id);
   return { ok: false as const, error: lastError };
 }

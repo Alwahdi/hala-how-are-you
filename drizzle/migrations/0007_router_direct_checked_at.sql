@@ -1,0 +1,1 @@
+ALTER TABLE public.routers ADD COLUMN IF NOT EXISTS direct_checked_at timestamptz;

@@ -45,7 +45,7 @@ describe('IP Cloud connection', () => {
   it('setup user can read but never write, in one line', () => {
     const cmd = readOnlyUserCommands('pw');
     expect(cmd).not.toMatch(/[\r\n]/);
-    expect(cmd).toContain('policy=read,api,rest-api,!write');
+    expect(cmd).toContain('policy=read,api}');
     expect(cmd).not.toMatch(/policy=[^\n]*(?<!!)write,/);
   });
 });

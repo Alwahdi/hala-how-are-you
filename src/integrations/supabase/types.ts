@@ -298,6 +298,7 @@ export type Database = {
           cloud_host: string | null
           connection_method: string
           created_at: string
+          direct_checked_at: string | null
           direct_port: number | null
           direct_tls: boolean | null
           id: string
@@ -318,6 +319,7 @@ export type Database = {
           cloud_host?: string | null
           connection_method?: string
           created_at?: string
+          direct_checked_at?: string | null
           direct_port?: number | null
           direct_tls?: boolean | null
           id?: string
@@ -338,6 +340,7 @@ export type Database = {
           cloud_host?: string | null
           connection_method?: string
           created_at?: string
+          direct_checked_at?: string | null
           direct_port?: number | null
           direct_tls?: boolean | null
           id?: string

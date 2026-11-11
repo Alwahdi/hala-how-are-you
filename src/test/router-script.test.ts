@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildPasteCommand, escapeRos, hashToken, isOnline, majorVersion, newToken, reportScriptSource } from '@/lib/router-script';
+import { buildPasteCommand, escapeRos, hashToken, isOnline, majorVersion, newToken, reportScriptSource, shouldTryDirect } from '@/lib/router-script';
 
 describe('router status push', () => {
   it('reports every 30 seconds', () => {
@@ -11,12 +11,26 @@ describe('router status push', () => {
     expect(cmd).not.toContain('router-setup');
     expect(cmd).toContain('[find name=mikro-report]; /system script remove');
   });
-  it('creates the read-only user only on v7, compiled at run time so v6 skips it', () => {
+  it('creates the read-only API user on every version, removing the old user before its group', () => {
     const cmd = buildPasteCommand('a'.repeat(48), 'Abc123');
-    expect(cmd).toContain(':if ([:pick [/system resource get version] 0 1] = "7")');
-    expect(cmd).toContain(':parse "/user group remove');
-    expect(cmd).toContain('password=Abc123');
+    expect(cmd).not.toContain(':if ([:pick [/system resource get version] 0 1] = "7") do={:do {:local f');
+    expect(cmd.indexOf('/user remove [find name=mikro-read]')).toBeLessThan(cmd.indexOf('/user group remove [find name=mikro-read]'));
+    expect(cmd).toContain(':do {/user add name=mikro-read group=mikro-read password=Abc123}');
     expect(buildPasteCommand('a'.repeat(48))).not.toContain('/user add');
+  });
+  it('reports whether the read-only user exists', () => {
+    expect(reportScriptSource('a'.repeat(48))).toContain('[:len [/user find name=mikro-read]]');
+  });
+  it('tries the direct link automatically: at once, then every 3 minutes after a failure, never when the user is missing', () => {
+    const ready = { cloudName: 'x.sn.mynetname.net', behindNat: 'no', apiDisabled: 'false', apiSslDisabled: 'true' };
+    const now = Date.parse('2026-11-11T05:00:00Z');
+    const fresh = { cloud_host: null, direct_port: null, last_check_error: null, direct_checked_at: null, cards_synced_at: null };
+    expect(shouldTryDirect(fresh, ready, now)).toBe(true);
+    const failed = { ...fresh, cloud_host: 'x', last_check_error: 'auth', direct_checked_at: new Date(now - 60_000).toISOString() };
+    expect(shouldTryDirect(failed, ready, now)).toBe(false);
+    expect(shouldTryDirect({ ...failed, direct_checked_at: new Date(now - 180_000).toISOString() }, ready, now)).toBe(true);
+    expect(shouldTryDirect(fresh, { ...ready, apiUser: 0 }, now)).toBe(false);
+    expect(shouldTryDirect(fresh, { ...ready, behindNat: 'yes' }, now)).toBe(false);
   });
   it('reports the IP Cloud name and HTTPS port', () => {
     const src = reportScriptSource('a'.repeat(48));

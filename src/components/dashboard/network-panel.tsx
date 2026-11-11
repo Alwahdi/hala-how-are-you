@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { refreshIpCloudRouters, rotatePushRouter, setRouterRole } from '@/lib/ip-cloud.functions';
-import { CloudConnectForm } from '@/components/cloud-connect-form';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
@@ -10,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
 import { API_ENABLE_COMMAND, buildPasteCommand, buildRemoveCommand, directAccessState, isOnline } from '@/lib/router-script';
-import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle, Settings2, Activity, Radio } from 'lucide-react';
+import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle } from 'lucide-react';
 
-type Status = { identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string; cloudName?: string; sslPort?: string; sslDisabled?: string; behindNat?: string; publicAddress?: string; apiPort?: string; apiDisabled?: string; apiSslPort?: string; apiSslDisabled?: string };
+type Status = { apiUser?: number; identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string; cloudName?: string; sslPort?: string; sslDisabled?: string; behindNat?: string; publicAddress?: string; apiPort?: string; apiDisabled?: string; apiSslPort?: string; apiSslDisabled?: string };
 export type { Status as RouterStatus };
-type Row = { id: string; name: string; role: string; direct_port: number | null; direct_tls: boolean | null; ros_version: string; connection_method: string; cloud_host: string | null; last_seen_at: string | null; last_status: unknown; last_check_error: string | null };
+type Row = { id: string; name: string; role: string; direct_port: number | null; direct_tls: boolean | null; direct_checked_at?: string | null; ros_version: string; connection_method: string; cloud_host: string | null; last_seen_at: string | null; last_status: unknown; last_check_error: string | null };
 
 const pct = (free?: number, total?: number) => (total ? Math.round(((total - (free ?? 0)) / total) * 100) : null);
 
@@ -32,7 +31,7 @@ export function NetworkPanel() {
   const { data: routers = [], isLoading } = useQuery({
     queryKey: ['routers'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('routers').select('id, name, role, ros_version, connection_method, cloud_host, direct_port, direct_tls, last_seen_at, last_status, last_check_error, created_at').order('created_at');
+      const { data, error } = await supabase.from('routers').select('id, name, role, ros_version, connection_method, cloud_host, direct_port, direct_tls, direct_checked_at, last_seen_at, last_status, last_check_error, created_at').order('created_at');
       if (error) throw error;
       return data;
     },
@@ -48,7 +47,6 @@ export function NetworkPanel() {
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
   const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string } | null>(null);
-  const [cloudFor, setCloudFor] = useState<{ id: string; name: string; status: Status } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -60,13 +58,12 @@ export function NetworkPanel() {
     const r = await rotate({ data: { id } }).catch(() => ({ ok: false as const }));
     setBusyId(null);
     if (!r.ok) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
-    setCloudFor(null);
     setReconnect({ id, name: routerName, main: buildPasteCommand(r.token, r.password) });
   }
 
   async function checkCloudNow(id: string) {
     setBusyId(id);
-    await refreshCloud().catch(() => null);
+    await refreshCloud({ data: { id } }).catch(() => null);
     await qc.invalidateQueries({ queryKey: ['routers'] });
     setBusyId(null);
   }
@@ -154,8 +151,18 @@ export function NetworkPanel() {
                       <Button variant="outline" className="h-11 w-full" onClick={() => copy(API_ENABLE_COMMAND + '\n')}><Copy />{copied ? t('تم النسخ ✓', 'Copied ✓') : t('نسخ أمر تشغيل API', 'Copy API command')}</Button>
                     </div>
                   )}
-                  {r.cloud_host && r.last_check_error && (
-                    <p className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">{cloudError(r.last_check_error, ar)}</p>
+                  {!direct && access === 'ready' && !r.last_check_error && (
+                    <p role="status" className="mt-3 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-xs text-muted-foreground"><Loader2 className="size-4 shrink-0 animate-spin text-primary" />{t('راوترك عليه IP عام وIP Cloud شغال — نتصل به مباشرة تلقائياً، بدون أي إدخال منك.', 'Public IP and IP Cloud found — connecting directly on our own, nothing to type.')}</p>
+                  )}
+                  {!direct && access === 'ready' && r.last_check_error && (
+                    <div role="alert" className="mt-3 space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                      <p className="flex items-start gap-2 font-semibold"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />{t('الاتصال المباشر عبر IP Cloud ما اشتغل بعد', 'Direct IP Cloud link is not working yet')}</p>
+                      <p className="text-xs text-muted-foreground">{cloudError(r.last_check_error, ar)}</p>
+                      <p className="text-xs text-muted-foreground">{t('نعيد المحاولة تلقائياً كل 3 دقائق. الإشارات شغالة كاحتياط.', 'We retry on our own every 3 minutes. Reports keep working as backup.')}</p>
+                      {(r.last_check_error === 'auth' || r.last_check_error === 'no_user')
+                        ? <Button className="h-11 w-full" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط (مرة واحدة)', 'Reconnect (once)')}</Button>
+                        : <Button variant="outline" className="h-11 w-full" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('جرّب الآن', 'Try now')}</Button>}
+                    </div>
                   )}
                   {!online && (
                     <p className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
@@ -164,9 +171,8 @@ export function NetworkPanel() {
                     </p>
                   )}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {r.cloud_host && <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحديث الآن', 'Refresh now')}</Button>}
+                    {direct && <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحديث الآن', 'Refresh now')}</Button>}
                     <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
-                    <Button variant="ghost" className="h-11" onClick={() => setCloudFor({ id: r.id, name: r.name, status: s })}><Settings2 />{t('متقدم', 'Advanced')}</Button>
                     <Button variant="ghost" className="h-11 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
                   </div>
                 </article>
@@ -188,18 +194,17 @@ export function NetworkPanel() {
           {reconnect && (() => {
             const r = routers.find((x) => x.id === reconnect.id);
             const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;
-            return <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-3 text-sm">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</div>;
+            const rs = (r?.last_status ?? {}) as Status;
+            const linked = !!r?.direct_port && !r?.last_check_error;
+            return (
+              <div role="status" className="space-y-2 rounded-xl bg-muted p-3 text-sm">
+                <p className="flex items-center gap-3">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</p>
+                {on && directAccessState(rs) === 'ready' && (
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">{linked ? <><Cloud className="size-4 text-primary" />{t(`اتصال مباشر عبر IP Cloud شغال (${r?.direct_port}).`, `Direct IP Cloud link working (${r?.direct_port}).`)}</> : r?.last_check_error ? <><AlertTriangle className="size-4 text-destructive" />{cloudError(r.last_check_error, ar)}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('نتصل مباشرة عبر IP Cloud...', 'Connecting directly via IP Cloud...')}</>}</p>
+                )}
+              </div>
+            );
           })()}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!cloudFor} onOpenChange={(o) => !o && setCloudFor(null)}>
-        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('اتصال مباشر (متقدم)', 'Direct connection (advanced)')} · {cloudFor?.name}</DialogTitle>
-            <DialogDescription>{t('عادة نتصل تلقائياً. استخدم هذا فقط لو عندك DDNS خاص أو منفذ موجّه يدوياً.', 'We normally connect automatically. Use this only for your own DDNS or a manually forwarded port.')}</DialogDescription>
-          </DialogHeader>
-          {cloudFor && <CloudConnectForm routerId={cloudFor.id} ar={ar} defaultHost={cloudFor.status.cloudName} defaultPort={cloudFor.status.sslPort} httpsOff={cloudFor.status.sslDisabled === 'true'} onConnected={() => { setCloudFor(null); qc.invalidateQueries({ queryKey: ['routers'] }); }} onReconnect={() => cloudFor && startReconnect(cloudFor.id, cloudFor.name)} />}
         </DialogContent>
       </Dialog>
 
@@ -233,8 +238,8 @@ function cloudError(code: string, ar: boolean) {
   const m: Record<string, [string, string]> = {
     tls: ['المنفذ المشفّر 8729 رفض الاتصال، وما قدرنا نكمل على 8728.', 'Encrypted 8729 refused and 8728 did not work either.'],
     old_login: ['إصدار الراوتر قديم جداً (قبل 6.43). حدّث RouterOS للاتصال المباشر.', 'RouterOS is too old (before 6.43). Update it for direct access.'],
-    auth: ['مستخدم القراءة غير موجود في الراوتر. اضغط «إعادة الربط» والصق الأمر الجديد.', 'The read-only user is missing. Tap Reconnect and paste the new command.'],
-    no_user: ['مستخدم القراءة غير موجود في الراوتر. اضغط «إعادة الربط» والصق الأمر الجديد.', 'The read-only user is missing. Tap Reconnect and paste the new command.'],
+    auth: ['الراوتر رفض دخول مستخدم القراءة mikro-read — كلمة سره قديمة من أمر سابق. اضغط «إعادة الربط» والصق الأمر الجديد مرة واحدة.', 'The router rejected the read-only user mikro-read — its password is from an older command. Tap Reconnect and paste the new command once.'],
+    no_user: ['مستخدم القراءة mikro-read غير موجود في الراوتر. اضغط «إعادة الربط» والصق الأمر الجديد مرة واحدة.', 'The read-only user mikro-read is not on the router. Tap Reconnect and paste the new command once.'],
     timeout: ['الراوتر ما رد على منفذ API عبر IP Cloud. تأكد أن الجدار الناري ما يحجب 8728/8729 من الإنترنت. الإشارات شغالة كاحتياط.', 'No reply on the API port via IP Cloud. Check the firewall does not block 8728/8729. Reports keep working as backup.'],
     unreachable: ['ما قدرنا نوصل لمنفذ API عبر IP Cloud. تأكد أن خدمة api شغالة وغير مقيدة بعناوين محددة. الإشارات شغالة كاحتياط.', 'Could not reach the API via IP Cloud. Check the api service is on and not limited to certain addresses. Reports keep working as backup.'],
   };
