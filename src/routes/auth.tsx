@@ -41,6 +41,7 @@ function AuthPage() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [resendIn, setResendIn] = useState(0);
+  const [verified, setVerified] = useState(false);
   const [mode, setMode] = useState<'in' | 'up'>('up');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -96,6 +97,7 @@ function AuthPage() {
       return setMessage({ tone: 'error', text: r.reason === 'expired' ? t('انتهت صلاحية الرمز. اطلب رمزاً جديداً.', 'The code expired. Request a new one.') : r.reason === 'too_many' ? t('محاولات كثيرة. اطلب رمزاً جديداً.', 'Too many tries. Request a new code.') : t('الرمز غير صحيح. جرّب مرة ثانية.', 'Wrong code. Try again.') });
     }
     sessionStorage.setItem(PROOF_KEY, r.proof);
+    setVerified(true);
     setStep('account');
   }
 
@@ -127,14 +129,14 @@ function AuthPage() {
       </div>
 
       <div className="mx-auto mt-8 w-full max-w-sm flex-1">
-        <ol className="mb-6 grid grid-cols-3 gap-2" aria-label={t('خطوات الدخول', 'Sign-in steps')}>
+        {(step !== 'account' || verified) && <ol className="mb-6 grid grid-cols-3 gap-2" aria-label={t('خطوات الدخول', 'Sign-in steps')}>
           {[t('الجوال', 'Phone'), t('الرمز', 'Code'), t('الحساب', 'Account')].map((label, i) => (
             <li key={label} className="space-y-1.5" aria-current={i === stepIndex ? 'step' : undefined}>
               <div className={`h-1.5 rounded-full ${i <= stepIndex ? 'bg-primary' : 'bg-muted'}`} />
               <p className={`text-xs ${i === stepIndex ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>{i < stepIndex && <Check className="inline size-3" />} {label}</p>
             </li>
           ))}
-        </ol>
+        </ol>}
 
         <section className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
           {step === 'phone' && (
