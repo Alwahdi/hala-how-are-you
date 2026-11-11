@@ -79,14 +79,14 @@ function Onboarding() {
     const r = await connectCloud({ data: { id: routerId, host } }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
     setBusy(false);
     if (r.ok) { setStatus(r.status); return setStep('done'); }
-    const msgs: Record<string, string> = {
+    const msgs = {
       invalid_host: t('اكتب اسم IP Cloud كما يظهر في الراوتر، مثل xxxx.sn.mynetname.net', 'Enter the IP Cloud name as shown on the router, e.g. xxxx.sn.mynetname.net'),
       auth: t('الراوتر رفض الدخول. الصق الأمر مرة ثانية ثم أعد المحاولة.', 'The router rejected the login. Paste the command again, then retry.'),
       tls: t('الشهادة لم تجهز بعد. انتظر دقيقة ثم أعد المحاولة.', 'The certificate is not ready yet. Wait a minute and retry.'),
       timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
       unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
     };
-    setError(msgs[r.error] ?? msgs.unreachable);
+    setError(msgs[r.error]);
   }
 
   async function switchToPush() {

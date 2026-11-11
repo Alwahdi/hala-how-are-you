@@ -69,7 +69,7 @@ function AuthPage() {
   useEffect(() => { if (resendIn <= 0) return; const id = setTimeout(() => setResendIn(resendIn - 1), 1000); return () => clearTimeout(id); }, [resendIn]);
   useEffect(() => { if (step === 'code') codeRef.current?.focus(); }, [step]);
 
-  const sendErrors: Record<string, string> = {
+  const sendErrors = {
     invalid_phone: t('الرقم غير صحيح. تأكد من رمز الدولة وأنه رقم جوال.', 'That number is not valid. Check the country code and that it is a mobile number.'),
     rate_limited: t('طلبت رموزاً كثيرة. انتظر 10 دقائق ثم حاول.', 'Too many codes requested. Wait 10 minutes and try again.'),
     not_configured: t('خدمة الرمز عبر WhatsApp قيد التفعيل. يمكنك المتابعة بدون رمز الآن.', 'WhatsApp code service is being activated. You can continue without a code for now.'),
