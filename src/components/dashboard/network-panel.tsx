@@ -10,6 +10,7 @@ import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
+import { buildShortCommand } from '@/lib/setup-code';
 import { API_ENABLE_COMMAND, buildPasteCommand, buildRemoveCommand, directAccessState, isOnline } from '@/lib/router-script';
 import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle, Power, HeartPulse } from 'lucide-react';
 
@@ -55,7 +56,7 @@ export function NetworkPanel() {
     const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
-  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string } | null>(null);
+  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; full?: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -67,7 +68,7 @@ export function NetworkPanel() {
     const r = await rotate({ data: { id } }).catch(() => ({ ok: false as const }));
     setBusyId(null);
     if (!r.ok) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
-    setReconnect({ id, name: routerName, main: buildPasteCommand(r.token, r.password) });
+    { const full = buildPasteCommand(r.token, r.password); setReconnect({ id, name: routerName, main: r.code ? buildShortCommand(r.code) : full, full: r.code ? full : undefined }); }
   }
 
   async function checkCloudNow(id: string) {
@@ -207,7 +208,7 @@ export function NetworkPanel() {
             <DialogTitle>{t('إعادة ربط', 'Reconnect')} {reconnect?.name}</DialogTitle>
             <DialogDescription>{t('الصق هذا الأمر في Terminal. الأمر القديم توقف عن العمل، وهذا يستبدله.', 'Paste this into Terminal. The old command no longer works; this replaces it.')}</DialogDescription>
           </DialogHeader>
-          {reconnect && <PasteCommandPanel command={reconnect.main} ar={ar} />}
+          {reconnect && <PasteCommandPanel command={reconnect.main} full={reconnect.full} ar={ar} />}
           {reconnect && (() => {
             const r = routers.find((x) => x.id === reconnect.id);
             const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;

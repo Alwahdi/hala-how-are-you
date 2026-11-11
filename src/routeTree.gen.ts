@@ -25,6 +25,7 @@ import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/ro
 import { Route as ApiPublicRouterJobRouteImport } from './routes/api/public/router-job'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
 import { Route as ApiPublicJobsWatchRouteImport } from './routes/api/public/jobs/watch'
+import { Route as ApiPublicSCodeRouteImport } from './routes/api/public/s/$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -105,6 +106,11 @@ const ApiPublicJobsWatchRoute = ApiPublicJobsWatchRouteImport.update({
   path: '/api/public/jobs/watch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSCodeRoute = ApiPublicSCodeRouteImport.update({
+  id: '/api/public/s/$code',
+  path: '/api/public/s/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
+  '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
+  '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
+  '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/api/public/router-job'
     | '/api/public/router-report'
     | '/api/public/jobs/watch'
+    | '/api/public/s/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/api/public/router-job'
     | '/api/public/router-report'
     | '/api/public/jobs/watch'
+    | '/api/public/s/$code'
   id:
     | '__root__'
     | '/'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/api/public/router-job'
     | '/api/public/router-report'
     | '/api/public/jobs/watch'
+    | '/api/public/s/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,6 +236,7 @@ export interface RootRouteChildren {
   ApiPublicRouterJobRoute: typeof ApiPublicRouterJobRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
   ApiPublicJobsWatchRoute: typeof ApiPublicJobsWatchRoute
+  ApiPublicSCodeRoute: typeof ApiPublicSCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsWatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/s/$code': {
+      id: '/api/public/s/$code'
+      path: '/api/public/s/$code'
+      fullPath: '/api/public/s/$code'
+      preLoaderRoute: typeof ApiPublicSCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -376,6 +396,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRouterJobRoute: ApiPublicRouterJobRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
   ApiPublicJobsWatchRoute: ApiPublicJobsWatchRoute,
+  ApiPublicSCodeRoute: ApiPublicSCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

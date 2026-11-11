@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { buildPasteCommand } from '@/lib/router-script';
+import { buildShortCommand } from '@/lib/setup-code';
 import { createPushRouter } from '@/lib/ip-cloud.functions';
 import { saveAccountProfile } from '@/lib/profile.functions';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
@@ -44,6 +45,7 @@ function Onboarding() {
   const [waited, setWaited] = useState(0);
   const [routerId, setRouterId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
+  const [fullCommand, setFullCommand] = useState<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
@@ -95,7 +97,7 @@ function Onboarding() {
     const r = await createRouter({ data: { name: cleanText(name) } }).catch(() => ({ ok: false as const }));
     setBusy(false);
     if (!r.ok) return setError(t('ما قدرنا نحفظ الراوتر. حاول مرة ثانية.', 'Could not save the router. Try again.'));
-    setRouterId(r.id); setCommand(buildPasteCommand(r.token, r.password)); setWaited(0); setStep('push');
+    setRouterId(r.id); const full = buildPasteCommand(r.token, r.password); setCommand(r.code ? buildShortCommand(r.code) : full); setFullCommand(r.code ? full : undefined); setWaited(0); setStep('push');
   }
 
   const steps = firstTime
@@ -187,7 +189,7 @@ function Onboarding() {
           {step === 'push' && (
             <div className="space-y-4">
               <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('انسخ ← الصق في Terminal، ويتنفذ لحاله', 'Copy → paste in Terminal; it runs by itself')} />
-              <PasteCommandPanel command={command} ar={ar} />
+              <PasteCommandPanel command={command} full={fullCommand} ar={ar} />
               <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" /><span className="flex-1">{t('ننتظر أول إشارة من راوترك... عادة أقل من دقيقة.', 'Waiting for the first signal... usually under a minute.')}</span><bdi dir="ltr" className="tabular-nums text-muted-foreground">{waited}s</bdi></div>
               {waited >= 60 && (
                 <div className="space-y-2 rounded-xl border border-border p-4 text-sm">
