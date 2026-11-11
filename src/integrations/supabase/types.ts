@@ -65,6 +65,68 @@ export type Database = {
         }
         Relationships: []
       }
+      router_status_log: {
+        Row: {
+          created_at: string
+          id: number
+          router_id: string
+          status: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          router_id: string
+          status: Json
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          router_id?: string
+          status?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_status_log_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routers: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string | null
+          last_status: Json | null
+          name: string
+          owner_id: string
+          ros_version: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          last_status?: Json | null
+          name: string
+          owner_id: string
+          ros_version?: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          last_status?: Json | null
+          name?: string
+          owner_id?: string
+          ros_version?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

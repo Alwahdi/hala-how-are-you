@@ -10,12 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DesignSpecimenRouteImport } from './routes/design-specimen'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
+import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesignSpecimenRoute = DesignSpecimenRouteImport.update({
@@ -28,35 +41,78 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoutersRoute = AuthenticatedRoutersRouteImport.update({
+  id: '/routers',
+  path: '/routers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
+  id: '/api/public/router-report',
+  path: '/api/public/router-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/routers': typeof AuthenticatedRoutersRoute
+  '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/routers': typeof AuthenticatedRoutersRoute
+  '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/_authenticated/routers': typeof AuthenticatedRoutersRoute
+  '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/design-specimen' | '/privacy'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/design-specimen'
+    | '/privacy'
+    | '/routers'
+    | '/api/public/router-report'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/design-specimen' | '/privacy'
-  id: '__root__' | '/' | '/design-specimen' | '/privacy'
+  to:
+    | '/'
+    | '/auth'
+    | '/design-specimen'
+    | '/privacy'
+    | '/routers'
+    | '/api/public/router-report'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/design-specimen'
+    | '/privacy'
+    | '/_authenticated/routers'
+    | '/api/public/router-report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   DesignSpecimenRoute: typeof DesignSpecimenRoute
   PrivacyRoute: typeof PrivacyRoute
+  ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +122,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/design-specimen': {
@@ -82,13 +152,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/routers': {
+      id: '/_authenticated/routers'
+      path: '/routers'
+      fullPath: '/routers'
+      preLoaderRoute: typeof AuthenticatedRoutersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/router-report': {
+      id: '/api/public/router-report'
+      path: '/api/public/router-report'
+      fullPath: '/api/public/router-report'
+      preLoaderRoute: typeof ApiPublicRouterReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   DesignSpecimenRoute: DesignSpecimenRoute,
   PrivacyRoute: PrivacyRoute,
+  ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
