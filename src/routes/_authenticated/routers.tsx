@@ -176,7 +176,7 @@ function RoutersPage() {
                     </label>
                   </div>
 
-                  {r.last_status && (
+                  {!!r.last_status && (
                     <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
                       <Stat label={t('المعالج', 'CPU')} value={s.cpu == null ? '-' : `${s.cpu}%`} meter={s.cpu} />
                       <Stat label={t('الذاكرة', 'Memory')} value={mem == null ? '-' : `${mem}%`} meter={mem} />
@@ -288,6 +288,6 @@ function StatusChip({ state, ar }: { state: 'online' | 'offline' | 'waiting'; ar
   return <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tone}`}><span aria-hidden className={`size-2 rounded-full ${dot}`} />{label}</span>;
 }
 
-function Stat({ label, value, meter }: { label: string; value: string; meter?: number | null }) {
+function Stat({ label, value, meter }: { label: string; value: string; meter?: number | null | undefined }) {
   return <div className="stat-tile"><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1 font-bold" dir="ltr">{value}</dd>{meter != null && <div className="meter mt-2" data-tone={meter >= 85 ? 'warn' : undefined} aria-hidden><span style={{ width: `${Math.min(100, meter)}%` }} /></div>}</div>;
 }
