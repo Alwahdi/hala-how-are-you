@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Download, Send, Trash2, MessageSquareReply, MessageSquareWarning, Monitor, Ticket, Upload } from 'lucide-react';
+import { Download, Send, Trash2, MessageSquareReply, MessageSquareWarning, Monitor, Ticket, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CardStateChip, UsageBar } from '@/components/card-state-chip';
@@ -14,7 +14,6 @@ export function DemoCardList({ ar, cards = demoCards, onComplaint, onRemove }: P
 
 function DemoCardItem({ card, ar, onComplaint, onRemove }: { card: DemoCard; ar: boolean; onComplaint?: ((c: Complaint) => void) | undefined; onRemove?: ((id: string) => void) | undefined }) {
   const t = (a: string, b: string) => ar ? a : b;
-  const Arrow = ar ? ChevronLeft : ChevronRight;
   const [step, setStep] = useState<'details' | 'reply' | 'complaint'>('details');
   const state = cardState(card); const left = remainingMB(card); const used = card.downloadMB + card.uploadMB;
   const downShare = used ? card.downloadMB / used : 0; const sessions = sessionsOf(card); const big = biggestSession(sessions);
