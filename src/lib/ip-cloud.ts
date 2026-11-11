@@ -1,0 +1,43 @@
+// Pure helpers for the IP Cloud / DDNS (pull) connection method.
+export const API_USER = 'mikro-read';
+export const API_GROUP = 'mikro-read';
+
+/** Accepts MikroTik IP Cloud names or any public hostname; rejects IPs in private ranges. */
+export function normalizeCloudHost(input: string): string | null {
+  const h = input.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  if (!/^[a-z0-9.-]{4,253}$/.test(h) || !h.includes('.')) return null;
+  if (/^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(h)) return null;
+  if (h === 'localhost' || h.endsWith('.local') || h.endsWith('.internal')) return null;
+  return h;
+}
+
+/** v7 command: enable IP Cloud, get a trusted certificate, read-only user, HTTPS REST only. */
+export function buildIpCloudSetup(password: string): string {
+  return [
+    '/ip cloud set ddns-enabled=yes',
+    ':delay 5s',
+    `/user group remove [find name=${API_GROUP}]`,
+    `/user group add name=${API_GROUP} policy=read,api,rest-api,!write,!policy,!sensitive,!ftp,!ssh,!telnet,!winbox,!web,!reboot,!test,!sniff,!romon`,
+    `/user remove [find name=${API_USER}]`,
+    `/user add name=${API_USER} group=${API_GROUP} password="${password}"`,
+    '/certificate enable-ssl-certificate dns-name=[/ip cloud get dns-name]',
+    ':delay 20s',
+    '/ip service set www-ssl disabled=no certificate=[/certificate find where common-name=[/ip cloud get dns-name]]',
+    ':put ("Mikro host: " . [/ip cloud get dns-name])',
+  ].join('\n');
+}
+
+export function newApiPassword(): string {
+  const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  return Array.from(crypto.getRandomValues(new Uint8Array(20)), (b) => a[b % a.length]).join('');
+}
+
+/** Maps a REST /system/resource response to the status shape used by push reports. */
+export function mapResource(r: Record<string, string>, identity?: string, hotspotActive?: number) {
+  const n = (v?: string) => (v == null ? undefined : Number(v));
+  return {
+    identity, board: r['board-name'], version: r['version'], uptime: r['uptime'], cpu: n(r['cpu-load']),
+    freeMemory: n(r['free-memory']), totalMemory: n(r['total-memory']), freeHdd: n(r['free-hdd-space']), totalHdd: n(r['total-hdd-space']),
+    hotspotActive,
+  };
+}
