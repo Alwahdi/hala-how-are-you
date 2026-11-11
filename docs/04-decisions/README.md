@@ -40,3 +40,4 @@ related: [../templates/decision.md]
 - [D-026](D-026-card-actions-two-step-add-mobile-polish.md) — card actions menu, two-step add, WhatsApp image share, mobile polish (approved)
 - [D-027](D-027-router-connection-spike.md) — تجربة أول ربط حقيقي بالراوتر (approved)
 - [D-028](D-028-router-push-status.md) — الراوتر يرسل حالته كل 30 ثانية (approved)
+- [D-029](D-029-external-ux-review-fixes.md) — تطبيق ملاحظات مراجعة UX خارجية (approved)
