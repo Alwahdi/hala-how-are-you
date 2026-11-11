@@ -71,4 +71,6 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Load Arabic Cairo and the proposed Latin font through installed Fontsource CSS, and define glass/color roles in global semantic tokens; this makes actual font use and readable fallback surfaces verifiable.
 - Company knowledge is plain Markdown in `docs/`, never only in chat or tool memory — keeps it portable across workspaces and tools.
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
+- Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without storing the raw code or trusting the client.
+- IP Cloud routers are polled over HTTPS REST with a read-only RouterOS user and an AES-encrypted secret, only while the owner views their routers; push reports remain the default because they work behind CGNAT.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.

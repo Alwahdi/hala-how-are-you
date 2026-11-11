@@ -12,6 +12,7 @@ related: [roadmap.md]
 الخطوة الجاية: حسم قواعد العمل المفتوحة مع المؤسس؛ ثم استكمال التحقق والمنافسين والسوق.
 
 ## وين وصلنا
+- [confirmed] بُني الدخول برقم الجوال ورمز WhatsApp ومعالج أول راوتر (أمر لصق أو IP Cloud لـ v7) وفق [D-030](../04-decisions/D-030-phone-first-signin-and-router-onboarding.md)؛ ينتظر ربط WhatsApp Business وموافقة قالب الرمز، ثم اختبار راوتر حقيقي.
 - [confirmed] أضيفت [أكثر الأعطال وحلولها](../06-mikrotik/common-faults.md) و[تغطية مناهج الشهادات](../06-mikrotik/certification-coverage.md) و[إشارات المجتمع العربي](../06-mikrotik/arabic-community-signals.md)؛ التالي تأكيد المؤسس لترتيب الأعطال وتجربتها على راوتر v6/v7.
 - [confirmed] اكتملت دراسة توثيق MikroTik في [docs/06-mikrotik](../06-mikrotik/README.md) مع [سجل المخاطر](../06-mikrotik/risks-register.md)؛ التالي اقتراح تحديث أمر الربط (R-001 إلى R-006) للاعتماد.
 - [confirmed] بُنيت صفحة «راوتراتي» وأمر اللصق ونقطة الاستقبال وفق [D-028](../04-decisions/D-028-router-push-status.md)؛ التالي النشر ثم اختبار راوتر v7 ثم v6.
