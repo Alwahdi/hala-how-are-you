@@ -20,6 +20,7 @@ import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
+import { Route as ApiPublicRouterJobRouteImport } from './routes/api/public/router-job'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
 
 const IndexRoute = IndexRouteImport.update({
@@ -76,6 +77,11 @@ const ApiPublicRouterCardsRoute = ApiPublicRouterCardsRouteImport.update({
   path: '/api/public/router-cards',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRouterJobRoute = ApiPublicRouterJobRouteImport.update({
+  id: '/api/public/router-job',
+  path: '/api/public/router-job',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   id: '/api/public/router-report',
   path: '/api/public/router-report',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesByTo {
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesById {
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
+  '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRouteTypes {
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
   id:
     | '__root__'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/welcome'
     | '/api/public/router-cards'
+    | '/api/public/router-job'
     | '/api/public/router-report'
   fileRoutesById: FileRoutesById
 }
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   DesignSpecimenRoute: typeof DesignSpecimenRoute
   PrivacyRoute: typeof PrivacyRoute
   ApiPublicRouterCardsRoute: typeof ApiPublicRouterCardsRoute
+  ApiPublicRouterJobRoute: typeof ApiPublicRouterJobRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
 }
 
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRouterCardsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/router-job': {
+      id: '/api/public/router-job'
+      path: '/api/public/router-job'
+      fullPath: '/api/public/router-job'
+      preLoaderRoute: typeof ApiPublicRouterJobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/router-report': {
       id: '/api/public/router-report'
       path: '/api/public/router-report'
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignSpecimenRoute: DesignSpecimenRoute,
   PrivacyRoute: PrivacyRoute,
   ApiPublicRouterCardsRoute: ApiPublicRouterCardsRoute,
+  ApiPublicRouterJobRoute: ApiPublicRouterJobRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
 }
 export const routeTree = rootRouteImport
