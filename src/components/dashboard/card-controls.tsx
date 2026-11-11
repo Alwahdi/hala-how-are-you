@@ -142,7 +142,7 @@ const REQUEST_ERR: Record<string, [string, string]> = {
 const DONE: Record<CardAction, [string, string]> = {
   pw: ['تغيرت كلمة السر على الراوتر.', 'Password changed on the router.'],
   name: ['تغيّر اسم الكرت على الراوتر.', 'Card renamed on the router.'],
-  off: ['توقف الكرت. لو كان الزبون متصل، انفصل.', 'Card turned off. A connected customer was cut off.'],
+  off: ['توقف الكرت. لو كان أحد متصل فيه، انفصل.', 'Card turned off. Anyone using it was disconnected.'],
   on: ['رجع الكرت يشتغل.', 'Card is on again.'],
   kick: ['انفصل الزبون. يقدر يدخل من جديد بنفس الكرت.', 'Customer disconnected. They can log in again with the same card.'],
   del: ['انحذف الكرت من الراوتر.', 'Card removed from the router.'],
