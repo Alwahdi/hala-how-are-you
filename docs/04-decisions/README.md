@@ -38,3 +38,4 @@ related: [../templates/decision.md]
 - [D-024](D-024-customer-reply-assistant-demo.md) — customer reply assistant and card search, demo only (approved)
 - [D-025](D-025-quick-add-send-and-mobile-first.md) — quick add card, quick send, mobile-first sheets (approved)
 - [D-026](D-026-card-actions-two-step-add-mobile-polish.md) — card actions menu, two-step add, WhatsApp image share, mobile polish (approved)
+- [D-027](D-027-router-connection-spike.md) — تجربة أول ربط حقيقي بالراوتر (approved)
