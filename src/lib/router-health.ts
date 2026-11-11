@@ -1,7 +1,10 @@
 // Read-only router health check built from the documented common faults (docs/06-mikrotik/common-faults.md). Browser-safe.
+import { SLOW_CARD_READ_SECS } from './card-runs';
 export type HealthInput = {
   version?: string; freeHdd?: number; totalHdd?: number; freeMemory?: number; totalMemory?: number;
   ntp?: string; clockDate?: string; services?: string; socks?: string; proxy?: string; users?: number; scripts?: number; idle?: string; shared?: string;
+  /** Seconds the router's last complete card read took (from our own records, not the router report). */
+  cardsSecs?: number | null | undefined;
 };
 export type Issue = { id: string; severity: 'critical' | 'warn' | 'info'; ar: [string, string]; en: [string, string]; fix?: string };
 
@@ -37,6 +40,10 @@ export function checkHealth(h: HealthInput, now = Date.now()): Issue[] {
   if (h.idle === 'none') out.push({ id: 'idle', severity: 'warn', ar: ['مهلة الخمول مطفية في Hotspot', 'الجلسة تبقى شغالة بعد ما يبتعد الزبون، فيُحسب عليه الوقت. اجعلها 5 دقائق.'], en: ['Hotspot idle timeout is off', 'Sessions stay on after the customer leaves, so time keeps counting. Set 5 minutes.'], fix: '/ip hotspot set [find] idle-timeout=5m' });
   const shared = (h.shared ?? '').split(',').filter(Boolean);
   if (shared.some((s) => s === 'unlimited' || Number(s) > 1)) out.push({ id: 'shared', severity: 'info', ar: ['باقات تسمح بأكثر من جهاز للكرت', 'لو ما تقصد هذا، الكرت يُستهلك أسرع ويشتكي الزبون. اجعلها 1.'], en: ['Packages allow several devices per card', 'If unintended, cards run out faster and customers complain. Set it to 1.'], fix: '/ip hotspot user profile set [find] shared-users=1' });
+  if ((h.cardsSecs ?? 0) > SLOW_CARD_READ_SECS) {
+    const m = Math.round((h.cardsSecs ?? 0) / 60);
+    out.push({ id: 'cards_slow', severity: 'warn', ar: [`قراءة الكروت تأخذ ${m} دقائق`, 'المعالج يبقى مشغولاً طول القراءة. اضغط «إعادة الربط» مرة لتصل القراءة الخفيفة الجديدة، ولو بقيت بطيئة احذف الكروت المنتهية.'], en: [`Reading cards takes ${m} minutes`, 'The CPU stays busy the whole time. Tap Reconnect once to get the new light reader; if it stays slow, remove used-up cards.'] });
+  }
   return out;
 }
 

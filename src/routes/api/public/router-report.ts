@@ -57,7 +57,8 @@ export const Route = createFileRoute('/api/public/router-report')({
           const online = parseActiveList(act);
           await storeSessionsFor(supabaseAdmin, router.id, 'hotspot', online, since);
           const names = [...new Set(online.map((s) => s.username))];
-          if (names.length) await supabaseAdmin.from('router_cards').update({ last_online_at: new Date(now).toISOString() }).eq('router_id', router.id).eq('source', 'hotspot').in('name', names);
+          // User Manager cards log in through Hotspot too, so the online mark goes to the card whatever its kind.
+          if (names.length) await supabaseAdmin.from('router_cards').update({ last_online_at: new Date(now).toISOString() }).eq('router_id', router.id).in('name', names);
         }
         // Not behind NAT + IP Cloud + API on: connect directly on our own (8729 then 8728), no owner input. Push stays the backup.
         const host = normalizeCloudHost(status.cloudName);

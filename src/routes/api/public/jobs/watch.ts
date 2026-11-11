@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { authenticateCronRequest } from '@/integrations/supabase/cron-auth';
 import { evaluateRouter, cardsToClean, localClock, lowPackages, type WatchState } from '@/lib/watch-rules';
 import { checkHealth, healthScore } from '@/lib/router-health';
+import { cardReadSecs, type CardRuns } from '@/lib/card-runs';
 import { cardState, type CardRow } from '@/lib/card-status';
 
 // Runs every minute from the scheduler: router down/up, strain, restarts, low cards, daily report, nightly cleanup, health.
@@ -20,7 +21,7 @@ export const Route = createFileRoute('/api/public/jobs/watch')({
         await sb.from('router_jobs').update({ status: 'done', done_at: new Date(now).toISOString() }).eq('kind', 'reboot').eq('status', 'sent').lt('sent_at', new Date(now - 15 * 60_000).toISOString());
         await sb.from('router_jobs').update({ status: 'expired' }).eq('kind', 'reboot').eq('status', 'pending').lt('requested_at', new Date(now - 15 * 60_000).toISOString());
 
-        const { data: routers } = await sb.from('routers').select('id, owner_id, name, last_seen_at, last_status, watch_state, health, health_checked_at');
+        const { data: routers } = await sb.from('routers').select('id, owner_id, name, last_seen_at, last_status, watch_state, health, health_checked_at, card_runs');
         const owners = new Set<string>();
         for (const r of routers ?? []) {
           owners.add(r.owner_id);
@@ -34,10 +35,10 @@ export const Route = createFileRoute('/api/public/jobs/watch')({
           }
           // Health: re-check every 6 hours from the latest report; alert only new critical problems (once a week each).
           if (r.last_seen_at && (!r.health_checked_at || now - new Date(r.health_checked_at).getTime() > 6 * 3600_000)) {
-            const issues = checkHealth(st as never, now);
+            const issues = checkHealth({ ...(st as object), cardsSecs: cardReadSecs(r.card_runs as CardRuns | null) }, now);
             patch['health'] = { score: healthScore(issues), issues: issues.map((i) => i.id) };
             patch['health_checked_at'] = new Date(now).toISOString();
-            for (const i of issues.filter((x) => x.severity === 'critical')) await notify(sb, { owner: r.owner_id, router: r.id, kind: 'health', key: `${r.id}:health:${i.id}`, title: `${r.name}: ${i.ar[0]}`, body: i.ar[1], path: '/health', severity: 'critical', dedupHours: 24 * 7 });
+            for (const i of issues.filter((x) => x.severity === 'critical' || x.id === 'cards_slow')) await notify(sb, { owner: r.owner_id, router: r.id, kind: 'health', key: `${r.id}:health:${i.id}`, title: `${r.name}: ${i.ar[0]}`, body: i.ar[1], path: '/health', severity: i.severity === 'critical' ? 'critical' : 'warn', dedupHours: 24 * 7 });
           }
           await sb.from('routers').update(patch as never).eq('id', r.id);
         }

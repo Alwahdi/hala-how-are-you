@@ -6,7 +6,7 @@ import { parseRosDate, tzSeconds } from '@/lib/ros-date';
 import { nextRun, type CardRuns } from '@/lib/card-runs';
 
 const SOURCES = ['hotspot', 'usermanager', 'hotspot-profiles', 'usermanager-profiles', 'hotspot-sessions', 'usermanager-sessions', 'usermanager-links'] as const;
-const Body = z.object({ source: z.enum(SOURCES), page: z.number().int().min(0).max(2000), done: z.boolean(), rows: z.array(z.array(z.string().max(300)).max(12)).max(60) });
+const Body = z.object({ source: z.enum(SOURCES), page: z.number().int().min(0).max(2000), done: z.boolean(), rows: z.array(z.array(z.string().max(300)).max(12)).max(120) });
 
 // Card batches pushed by the router's mikro-cards / mikro-um scripts (routers behind NAT).
 export const Route = createFileRoute('/api/public/router-cards')({
@@ -36,7 +36,8 @@ export const Route = createFileRoute('/api/public/router-cards')({
           // The online list is a few quick batches, so rows untouched for 2 minutes at its end are gone.
           await storeSessionsFor(supabaseAdmin, router.id, src, sessions, done ? new Date(Date.now() - 120_000).toISOString() : undefined);
           const names = [...new Set(sessions.map((s) => s.username))];
-          if (names.length) await supabaseAdmin.from('router_cards').update({ last_online_at: new Date().toISOString() }).eq('router_id', router.id).eq('source', src).in('name', names);
+          // User Manager cards log in through Hotspot too, so the online mark goes to the card whatever its kind.
+          if (names.length) await supabaseAdmin.from('router_cards').update({ last_online_at: new Date().toISOString() }).eq('router_id', router.id).in('name', names);
           return new Response('ok');
         }
         if (kind === 'usermanager-links') {

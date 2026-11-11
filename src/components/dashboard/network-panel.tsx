@@ -174,7 +174,7 @@ export function NetworkPanel() {
                     <div role="alert" className="mt-3 space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm">
                       <p className="flex items-start gap-2 font-semibold"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />{t('الاتصال المباشر عبر IP Cloud ما اشتغل بعد', 'Direct IP Cloud link is not working yet')}</p>
                       <p className="text-xs text-muted-foreground">{cloudError(r.last_check_error, ar)}</p>
-                      <p className="text-xs text-muted-foreground">{t('نعيد المحاولة تلقائياً كل 3 دقائق. الإشارات شغالة كاحتياط.', 'We retry on our own every 3 minutes. Reports keep working as backup.')}</p>
+                      <p className="text-xs text-muted-foreground">{t('نعيد المحاولة تلقائياً كل 30 دقيقة حتى ما نشغل الراوتر. الإشارات شغالة كاحتياط.', 'We retry on our own every 30 minutes so the router is not kept busy. Reports keep working as backup.')}</p>
                       {(r.last_check_error === 'auth' || r.last_check_error === 'no_user')
                         ? <Button className="h-11 w-full" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط (مرة واحدة)', 'Reconnect (once)')}</Button>
                         : <Button variant="outline" className="h-11 w-full" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('جرّب الآن', 'Try now')}</Button>}
@@ -271,7 +271,7 @@ function cloudError(code: string, ar: boolean) {
     old_login: ['إصدار الراوتر قديم جداً (قبل 6.43). حدّث RouterOS للاتصال المباشر.', 'RouterOS is too old (before 6.43). Update it for direct access.'],
     auth: ['الراوتر رفض دخول مستخدم القراءة mikro-read — كلمة سره قديمة من أمر سابق. اضغط «إعادة الربط» والصق الأمر الجديد مرة واحدة.', 'The router rejected the read-only user mikro-read — its password is from an older command. Tap Reconnect and paste the new command once.'],
     no_user: ['مستخدم القراءة mikro-read غير موجود في الراوتر. اضغط «إعادة الربط» والصق الأمر الجديد مرة واحدة.', 'The read-only user mikro-read is not on the router. Tap Reconnect and paste the new command once.'],
-    timeout: ['الراوتر ما رد على منفذ API عبر IP Cloud. تأكد أن الجدار الناري ما يحجب 8728/8729 من الإنترنت. الإشارات شغالة كاحتياط.', 'No reply on the API port via IP Cloud. Check the firewall does not block 8728/8729. Reports keep working as backup.'],
+    timeout: ['منفذ API مفتوح، لكن الراوتر ما رد في الوقت. يحصل غالباً لما يكون المعالج مضغوطاً. لو تكرر بعد ما يهدأ، تأكد أن الجدار الناري يسمح بالمنفذ من الإنترنت.', 'The API port is open but the router did not answer in time. This usually happens when its CPU is busy. If it repeats once it calms down, check the firewall allows the port from the internet.'],
     unreachable: ['ما قدرنا نوصل لمنفذ API عبر IP Cloud. تأكد أن خدمة api شغالة وغير مقيدة بعناوين محددة. الإشارات شغالة كاحتياط.', 'Could not reach the API via IP Cloud. Check the api service is on and not limited to certain addresses. Reports keep working as backup.'],
   };
   const v = m[code] ?? m['unreachable']!;
