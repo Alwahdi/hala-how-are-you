@@ -44,7 +44,7 @@ export const refreshIpCloudRouters = createServerFn({ method: 'POST' })
     const { data } = await context.supabase.from('routers').select('id, cloud_host, direct_port, last_check_error, direct_checked_at, cards_synced_at, last_status');
     const now = Date.now();
     await Promise.all((data ?? []).map((r) => {
-      const s = (r.last_status ?? {}) as Record<string, string> & { apiUser?: number };
+      const s = (r.last_status ?? {}) as { cloudName?: string; behindNat?: string; apiDisabled?: string; apiSslDisabled?: string; apiUser?: number };
       const host = normalizeCloudHost(s.cloudName ?? '') ?? r.cloud_host;
       // "Try now" (id given) skips the wait after a failure, but never runs when the router reports the user is missing.
       const forced = input?.id === r.id && directAccessState(s) === 'ready' && s.apiUser !== 0;
