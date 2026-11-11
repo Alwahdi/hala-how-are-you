@@ -14,11 +14,11 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
   const f = e.facts;
   const none = t('بلا حد', 'No limit');
   const rows: { icon: React.ReactNode; label: string; value: string; muted?: boolean }[] = [
-    { icon: <Database />, label: t('البيانات', 'Data'), value: f.dataBytes ? `${humanData(f.dataBytes, ar)}${f.fromCards ? t(' (حسب الكروت)', ' (from cards)') : ''}` : none, muted: !f.dataBytes },
-    { icon: <Clock />, label: t('وقت الاستخدام', 'Usage time'), value: f.uptimeS ? formatDuration(f.uptimeS, ar) : none, muted: !f.uptimeS },
-    { icon: <CalendarClock />, label: t('الصلاحية', 'Validity'), value: f.validityS ? t(`${humanValidity(e.p?.validity, true)} من أول دخول`, `${humanValidity(e.p?.validity, false)} from first login`) : none, muted: !f.validityS },
-    { icon: <Gauge />, label: t('السرعة', 'Speed'), value: humanRate(f.rate, ar) ?? none, muted: !f.rate },
-    { icon: <Smartphone />, label: t('الأجهزة', 'Devices'), value: humanDevices(f.devices, ar) ?? t('جهاز واحد', '1 device') },
+    { icon: <Database />, label: t('بيانات', 'Data'), value: f.dataBytes ? `${humanData(f.dataBytes, ar)}${f.fromCards ? t(' (حسب الكروت)', ' (from cards)') : ''}` : none, muted: !f.dataBytes },
+    { icon: <Clock />, label: t('وقت', 'Time'), value: f.uptimeS ? formatDuration(f.uptimeS, ar) : none, muted: !f.uptimeS },
+    { icon: <CalendarClock />, label: t('صلاحية', 'Valid'), value: f.validityS ? humanValidity(e.p?.validity, ar) ?? none : none, muted: !f.validityS },
+    { icon: <Gauge />, label: t('سرعة', 'Speed'), value: humanRate(f.rate, ar) ?? none, muted: !f.rate },
+    { icon: <Smartphone />, label: t('أجهزة', 'Devices'), value: humanDevices(f.devices, ar) ?? t('جهاز واحد', '1 device') },
   ];
   const low = e.p && e.total > 0 && (e.ready === 0 || (e.total >= 30 && e.ready < LOW_READY));
   return (
@@ -28,11 +28,11 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
         {f.price ? <span className="text-primary">{f.price}</span> : <span className="text-sm font-normal text-muted-foreground">{t('بدون سعر', 'No price')}</span>}
         {f.sell ? <span className="ms-1 text-xs font-normal text-muted-foreground">{t(`(بيع ${f.sell})`, `(sells ${f.sell})`)}</span> : null}
       </span>
-      <dl className="mt-2 space-y-1 text-xs">
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
         {rows.map((r) => (
-          <div key={r.label} className="flex items-start gap-1.5">
-            <dt className="flex shrink-0 items-center gap-1 text-muted-foreground [&>svg]:size-3.5"><span className="sr-only">{r.label}</span>{r.icon}</dt>
-            <dd className={r.muted ? 'text-muted-foreground' : 'font-medium'} title={r.label}>{r.value}</dd>
+          <div key={r.label} className="contents">
+            <dt className="flex items-center gap-1 text-muted-foreground [&>svg]:size-3.5">{r.icon}{r.label}</dt>
+            <dd className={r.muted ? 'text-muted-foreground' : 'font-semibold'}>{r.value}</dd>
           </div>
         ))}
       </dl>
