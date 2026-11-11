@@ -4,7 +4,7 @@ import { demoCards, formatNumber } from '@/lib/specimen-data';
 
 export function InterfaceConcept({ ar }: { ar: boolean }) {
   const t = (a: string, b: string) => ar ? a : b;
-  return <div className="hero-preview">
+  return <div className="hero-preview mesh-surface">
     <div className="preview-caption"><span className="flex min-w-0 items-center gap-2"><span className="status-dot shrink-0"/>{t('تصور الواجهة · بيانات تجريبية فقط', 'Interface concept · Demonstration data only')}</span><span className="hidden sm:inline" dir="ltr">MIKRO / WORKSPACE</span></div>
     <div className="concept-workspace">
       <div className="concept-heading"><div><p className="text-secondary text-xs">{t('شبكة تجريبية', 'Demonstration network')}</p><h3>{t('حالة الكرت واستهلاكه', 'Card status and usage')}</h3></div><Ticket className="text-primary shrink-0" size={26}/></div>
