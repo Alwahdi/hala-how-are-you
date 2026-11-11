@@ -29,18 +29,43 @@ export function escapeRos(source: string): string {
   return source.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/\n/g, '\\r\\n');
 }
 
-export function buildPasteCommand(token: string, url = REPORT_URL): string {
+export const SETUP_URL = 'https://mikro.alwahdi.com/api/public/router-setup';
+
+/** Full setup steps, one RouterOS command each. */
+function setupCommands(token: string, url: string): string[] {
   return [
     `/system scheduler remove [find name=${SCRIPT_NAME}]`,
     `/system script remove [find name=${SCRIPT_NAME}]`,
     `/system script add name=${SCRIPT_NAME} policy=read,write,test source="${escapeRos(reportScriptSource(token, url))}"`,
     `/system scheduler add name=${SCRIPT_NAME} interval=30s start-time=startup on-event=${SCRIPT_NAME}`,
     `/system script run ${SCRIPT_NAME}`,
-  ].join('\n');
+  ];
+}
+
+/** The .rsc file the router downloads and imports. */
+export function buildSetupFile(token: string, url = REPORT_URL): string {
+  return setupCommands(token, url).join('\n') + '\n';
+}
+
+/** Short single-line command: survives terminals that drop newlines on paste. */
+export function buildPasteCommand(token: string, setupUrl = SETUP_URL): string {
+  return `/tool fetch url="${setupUrl}?t=${token}" dst-path=mikro.rsc; :delay 2s; /import file-name=mikro.rsc; /file remove [find name=mikro.rsc]`;
+}
+
+/** Fallback: the full setup in one line, separated by semicolons. */
+export function buildFallbackCommand(token: string, url = REPORT_URL): string {
+  return setupCommands(token, url).join('; ');
 }
 
 export function buildRemoveCommand(): string {
-  return `/system scheduler remove [find name=${SCRIPT_NAME}]\n/system script remove [find name=${SCRIPT_NAME}]`;
+  return `/system scheduler remove [find name=${SCRIPT_NAME}]; /system script remove [find name=${SCRIPT_NAME}]`;
+}
+
+/** Map a RouterOS version string like "7.15.3 (stable)" to our major label. */
+export function majorVersion(version: string | undefined | null): 'v6' | 'v7' | null {
+  const m = /^\s*(\d+)\./.exec(version ?? '');
+  if (!m) return null;
+  return m[1] === '6' ? 'v6' : 'v7';
 }
 
 export function isOnline(lastSeenAt: string | null, now = Date.now()): boolean {

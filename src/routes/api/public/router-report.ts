@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { hashToken } from '@/lib/router-script';
+import { hashToken, majorVersion } from '@/lib/router-script';
 
 const num = z.coerce.number().finite().nonnegative().max(1e15);
 const str = z.string().max(120);
@@ -34,7 +34,7 @@ export const Route = createFileRoute('/api/public/router-report')({
         if (router.last_seen_at && now - new Date(router.last_seen_at).getTime() < MIN_GAP_MS) return new Response('ok');
 
         const status = parsed.data;
-        await supabaseAdmin.from('routers').update({ last_seen_at: new Date(now).toISOString(), last_status: status }).eq('id', router.id);
+        await supabaseAdmin.from('routers').update({ last_seen_at: new Date(now).toISOString(), last_status: status, ...(majorVersion(status.version) ? { ros_version: majorVersion(status.version)! } : {}) }).eq('id', router.id);
         const { data: last } = await supabaseAdmin.from('router_status_log').select('created_at').eq('router_id', router.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
         if (!last || now - new Date(last.created_at).getTime() >= LOG_EVERY_MS) {
           await supabaseAdmin.from('router_status_log').insert({ router_id: router.id, status });
