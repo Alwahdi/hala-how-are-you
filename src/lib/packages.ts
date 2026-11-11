@@ -110,3 +110,19 @@ export function packageFacts(p: { source: string; price: string | null; sell_pri
     fromCards: !um && !!(fromCardsBytes || fromCardsTime),
   };
 }
+
+/** Our copy of a package right after the router confirmed it (same columns the card run writes). */
+export function packageProfileRow(p: PkgInput) {
+  const um = p.source === 'usermanager';
+  const rate = p.downKbps || p.upKbps ? `${rosRate(p.upKbps)}/${rosRate(p.downKbps)}` : null;
+  const extra: Record<string, string> = {};
+  if (um && p.uptimeS) extra['uptimeLimit'] = rosDuration(p.uptimeS);
+  if (um && p.dataMB) extra['transferLimit'] = String(p.dataMB * 1024 * 1024);
+  if (!um && p.validityS) extra['expiry'] = 'ntf';
+  return {
+    source: p.source, name: p.name, rate_limit: rate,
+    shared_users: p.devices ? String(p.devices) : um ? null : 'unlimited',
+    validity: p.validityS ? rosDuration(p.validityS) : null,
+    price: p.price ? String(p.price) : null, sell_price: p.sell ? String(p.sell) : null, extra,
+  };
+}
