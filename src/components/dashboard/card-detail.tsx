@@ -14,6 +14,7 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
   const t = (a: string, b: string) => (ar ? a : b);
   const st = cardState(card); const share = usedShare(card); const pct = share == null ? null : Math.min(100, Math.round(share * 100));
   const left = remaining(card);
+  const dec = isDecimalSize(card.limit_bytes);
   const msg = t(`كرت الإنترنت: ${card.name}`, `Internet card: ${card.name}`);
   return (
     <>
