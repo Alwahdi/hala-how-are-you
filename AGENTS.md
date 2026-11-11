@@ -73,4 +73,6 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
 - Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without storing the raw code or trusting the client.
 - IP Cloud routers are polled over HTTPS REST with a read-only RouterOS user and an AES-encrypted secret, only while the owner views their routers; push reports remain the default because they work behind CGNAT.
+- Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without trusting the client.
+- IP Cloud routers are polled over HTTPS REST with a read-only RouterOS user and an encrypted secret, only while the owner views their routers; push reports stay the default because they work behind CGNAT.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.
