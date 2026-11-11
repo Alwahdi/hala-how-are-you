@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, ChevronRight, Globe2, Home, LogOut, Menu, Plus, PlusCircle, Printer, Search, Settings, Ticket, Wifi } from 'lucide-react';
+import { Activity, Bell, ChevronRight, Globe2, HeartPulse, ListChecks, Home, LogOut, Menu, Plus, PlusCircle, Printer, Search, Settings, Ticket, Wifi } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { NetworkPanel, routerAlerts } from '@/components/dashboard/network-panel
 import { cardState, formatBytes, formatDuration, type CardRow, type CardState } from '@/lib/card-status';
 import { CardsTab } from '@/components/dashboard/cards-tab';
 import { HomeTab } from '@/components/dashboard/home-tab';
+import { EnableAlerts } from '@/components/alerts/enable-alerts';
 import type { ProfileRow, RouterRow, Session } from '@/components/dashboard/types';
 import type { LogPoint } from '@/lib/active-history';
 import { isOnline } from '@/lib/router-script';
@@ -91,6 +92,7 @@ function Dashboard() {
     queryFn: async () => { const { data, error } = await supabase.from('router_status_log').select('router_id, created_at, status').gte('created_at', new Date(Date.now() - 25 * 3600_000).toISOString()).order('created_at').limit(5000); if (error) throw error; return data as unknown as LogPoint[]; },
     refetchInterval: 300_000,
   });
+  const { data: unread = 0 } = useQuery({ queryKey: ['alerts-unread'], queryFn: async () => { const { count } = await supabase.from('alerts').select('id', { count: 'exact', head: true }).is('read_at', null); return count ?? 0; }, refetchInterval: 30_000 });
   const { data: styles = [] } = useQuery({ queryKey: ['card-style'], queryFn: async () => { const { data } = await supabase.from('network_settings').select('source, confirmed'); return data ?? []; } });
 
   useEffect(() => {
@@ -131,7 +133,12 @@ function Dashboard() {
             {profile?.city && <span>· {profile.city}</span>}
           </button>
         </div>
-        <Button variant="ghost" size="icon" className="size-11" aria-label={ar ? 'English' : 'العربية'} onClick={toggleLanguage}><Globe2 /></Button>
+        <div className="flex shrink-0 gap-1">
+          <Button variant="ghost" size="icon" className="relative size-11" aria-label={t(`التنبيهات${unread ? ` (${unread} جديد)` : ''}`, `Alerts${unread ? ` (${unread} new)` : ''}`)} asChild>
+            <Link to="/alerts"><Bell />{unread > 0 && <span className="absolute end-1.5 top-1.5 flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground" dir="ltr">{unread > 9 ? '9+' : unread}</span>}</Link>
+          </Button>
+          <Button variant="ghost" size="icon" className="size-11" aria-label={ar ? 'English' : 'العربية'} onClick={toggleLanguage}><Globe2 /></Button>
+        </div>
       </header>
 
       <nav aria-label={t('أقسام اللوحة', 'Dashboard sections')} className="dash-nav items-center">
@@ -140,6 +147,7 @@ function Dashboard() {
         {nav.slice(2).map(navButton)}
       </nav>
 
+      {tab === 'home' && <div className="mt-6"><EnableAlerts ar={ar} compact /></div>}
       {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => go(n, f)} />}
       {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={sessions} ar={ar} initialFilter={search.filter} />}
       {tab === 'active' && <ActiveTab sessions={sessions} reported={reportedActive} routers={routers} ar={ar} />}
@@ -147,6 +155,8 @@ function Dashboard() {
         <div className="mt-6 space-y-6">
           <section className="grid gap-2 sm:grid-cols-2">
             <Link to="/settings" className="app-panel tap-card flex items-center gap-3 p-4"><Settings className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('إعدادات الحساب', 'Account settings')}</b><span className="text-xs text-muted-foreground">{t('شكل الكروت، اسم الشبكة', 'Card style, network name')}</span></span><ChevronRight className="tap-chevron" /></Link>
+            <Link to="/alerts" className="app-panel tap-card flex items-center gap-3 p-4"><ListChecks className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('التنبيهات وسجل الإجراءات', 'Alerts and action log')}</b><span className="text-xs text-muted-foreground">{t('كل ما حصل في شبكتك، محفوظ', 'Everything that happened, saved')}</span></span><ChevronRight className="tap-chevron" /></Link>
+            <Link to="/health" className="app-panel tap-card flex items-center gap-3 p-4"><HeartPulse className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('صحة الراوتر', 'Router health')}</b><span className="text-xs text-muted-foreground">{t('فحص الأعطال الشائعة والأمان', 'Common faults and security check')}</span></span><ChevronRight className="tap-chevron" /></Link>
             <button type="button" onClick={() => supabase.auth.signOut().then(() => location.assign('/auth'))} className="app-panel tap-card flex items-center gap-3 p-4 text-start"><LogOut className="size-5 text-destructive" /><b className="flex-1">{t('تسجيل الخروج', 'Sign out')}</b></button>
           </section>
           <NetworkPanel />
