@@ -194,7 +194,16 @@ export function NetworkPanel() {
           {reconnect && (() => {
             const r = routers.find((x) => x.id === reconnect.id);
             const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;
-            return <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-3 text-sm">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</div>;
+            const rs = (r?.last_status ?? {}) as Status;
+            const linked = !!r?.direct_port && !r?.last_check_error;
+            return (
+              <div role="status" className="space-y-2 rounded-xl bg-muted p-3 text-sm">
+                <p className="flex items-center gap-3">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</p>
+                {on && directAccessState(rs) === 'ready' && (
+                  <p className="flex items-center gap-2 text-xs text-muted-foreground">{linked ? <><Cloud className="size-4 text-primary" />{t(`اتصال مباشر عبر IP Cloud شغال (${r?.direct_port}).`, `Direct IP Cloud link working (${r?.direct_port}).`)}</> : r?.last_check_error ? <><AlertTriangle className="size-4 text-destructive" />{cloudError(r.last_check_error, ar)}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('نتصل مباشرة عبر IP Cloud...', 'Connecting directly via IP Cloud...')}</>}</p>
+                )}
+              </div>
+            );
           })()}
         </DialogContent>
       </Dialog>
