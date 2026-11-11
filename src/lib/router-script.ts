@@ -26,12 +26,16 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set sp [:tostr [/ip service get www-ssl port]]} on-error={}',
     ':local sd ""',
     ':do {:set sd [:tostr [/ip service get www-ssl disabled]]} on-error={}',
+    ':local ap ""', ':local ad ""', ':local asp ""', ':local asd ""',
+    ':do {:set ap [:tostr [/ip service get api port]]; :set ad [:tostr [/ip service get api disabled]]; :set asp [:tostr [/ip service get api-ssl port]]; :set asd [:tostr [/ip service get api-ssl disabled]]} on-error={}',
+    ':local um 0',
+    ':do {:set um [:len [[:parse "/user-manager session find where active"]]]} on-error={}',
     ':local pa ""',
     ':do {:set pa [:tostr [/ip cloud get public-address]]} on-error={}',
     // Behind NAT unless the IP Cloud public address sits on one of the router's own interfaces.
     ':local nat "unknown"',
     ':if ([:len $pa] > 0) do={:set nat "yes"; :foreach a in=[/ip address find] do={:local ad [:tostr [/ip address get $a address]]; :if ([:pick $ad 0 [:find $ad "/"]] = $pa) do={:set nat "no"}}}',
-    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\"}")',
+    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $ad . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"umActive\\":" . $um . "}")',
     `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
   ].join('\n');
 }
@@ -74,10 +78,13 @@ export function majorVersion(version: string | undefined | null): 'v6' | 'v7' | 
 }
 
 /** Direct access is only useful when the router owns its public address and IP Cloud is on (v7 REST). */
-export function directAccessState(s: { version?: string; cloudName?: string; behindNat?: string; sslDisabled?: string } | null | undefined): 'unavailable' | 'needs_https' | 'ready' {
-  if (!s?.cloudName || !s.version?.startsWith('7') || s.behindNat !== 'no') return 'unavailable';
-  return s.sslDisabled === 'true' ? 'needs_https' : 'ready';
+/** Direct access needs IP Cloud, a public address on the router itself and the API (8728/8729) switched on. Works on v6 and v7. */
+export function directAccessState(s: { cloudName?: string; behindNat?: string; apiDisabled?: string; apiSslDisabled?: string } | null | undefined): 'unavailable' | 'needs_api' | 'ready' {
+  if (!s?.cloudName || s.behindNat !== 'no') return 'unavailable';
+  return s.apiDisabled === 'true' && s.apiSslDisabled === 'true' ? 'needs_api' : 'ready';
 }
+
+export const API_ENABLE_COMMAND = '/ip service set api disabled=no';
 
 export function isOnline(lastSeenAt: string | null, now = Date.now()): boolean {
   return !!lastSeenAt && now - new Date(lastSeenAt).getTime() < OFFLINE_AFTER_MS;

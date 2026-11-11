@@ -48,7 +48,8 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
   const { data: r } = await sb.from('routers').select('api_secret_encrypted, last_status, direct_port, direct_tls, cards_synced_at').eq('id', id).maybeSingle();
   if (!key || !r?.api_secret_encrypted) return { ok: false as const, error: 'no_user' as const };
   const password = await decrypt(key, r.api_secret_encrypted);
-  const list: Candidate[] = candidates ?? (r.direct_port ? [{ port: r.direct_port, tls: !!r.direct_tls }] : candidatePorts(r.last_status));
+  const known: Candidate[] = r.direct_port ? [{ port: r.direct_port, tls: !!r.direct_tls }] : [];
+  const list: Candidate[] = candidates ?? [...known, ...candidatePorts(r.last_status).filter((c) => !known.some((k) => k.port === c.port && k.tls === c.tls))];
   const withCards = !r.cards_synced_at || Date.now() - new Date(r.cards_synced_at).getTime() > CARDS_EVERY_MS;
   const commands = withCards ? [...BASE, ...CARDS] : BASE;
   let lastError: ProbeError = 'unreachable';
@@ -76,6 +77,6 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
     await sb.from('routers').update(patch).eq('id', id);
     return { ok: true as const, status, port: c.port, tls: c.tls };
   }
-  await sb.from('routers').update({ cloud_host: host, last_check_error: lastError, ...(candidates ? {} : {}) }).eq('id', id);
+  await sb.from('routers').update({ cloud_host: host, last_check_error: lastError }).eq('id', id);
   return { ok: false as const, error: lastError };
 }
