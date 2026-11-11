@@ -7,7 +7,7 @@ export function InterfaceConcept({ ar }: { ar: boolean }) {
   const t = (a: string, b: string) => ar ? a : b;
   const count = (s: CardState) => demoCards.filter(c => cardState(c) === s).length;
   const low = count('almostFinished');
-  const tiles: { s: CardState; label: string }[] = [{ s: 'unused', label: t('جاهز للبيع', 'Ready to sell') }, { s: 'inUse', label: stateLabel('inUse', ar) }, { s: 'almostFinished', label: stateLabel('almostFinished', ar) }];
+  const tiles: { s: CardState; label: string }[] = [{ s: 'unused', label: t('لم تُستخدم بعد', 'Not used yet') }, { s: 'inUse', label: stateLabel('inUse', ar) }, { s: 'almostFinished', label: stateLabel('almostFinished', ar) }];
   return <div className="hero-preview mesh-surface">
     <div className="preview-caption"><span className="flex min-w-0 items-center gap-2"><span className="status-dot shrink-0"/>{t('تصور الواجهة · بيانات تجريبية فقط', 'Interface concept · Demonstration data only')}</span><span className="hidden sm:inline" dir="ltr">MIKRO / WORKSPACE</span></div>
     <div className="concept-workspace">
