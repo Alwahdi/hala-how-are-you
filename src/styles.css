@@ -447,7 +447,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .state-bar-unused { background:var(--primary); }
 .state-bar-active { background:color-mix(in oklab,var(--primary) 55%,var(--muted)); }
 .state-bar-almost { background:var(--destructive); }
-.state-bar-finished, .state-bar-disabled { background:color-mix(in oklab,var(--muted-foreground) 40%,transparent); }
+.state-bar-finished, .state-bar-expired, .state-bar-disabled { background:color-mix(in oklab,var(--muted-foreground) 40%,transparent); }
 
 /* Tappable surfaces: lift on hover, press on tap, clear focus ring, direction-aware chevron. */
 .tap-card { cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; }

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Link } from '@tanstack/react-router';
 import { NetworkPanel, routerAlerts } from '@/components/dashboard/network-panel';
-import { cardState, formatBytes, formatDuration, type CardRow, type CardState } from '@/lib/card-status';
+import { CARD_STATES, cardState, formatBytes, formatDuration, withPackage, type CardRow, type CardState } from '@/lib/card-status';
 import { CardsTab } from '@/components/dashboard/cards-tab';
 import { HomeTab } from '@/components/dashboard/home-tab';
 import { EnableAlerts } from '@/components/alerts/enable-alerts';
@@ -19,7 +19,7 @@ import { isOnline } from '@/lib/router-script';
 
 type Tab = 'home' | 'cards' | 'active' | 'more';
 const TABS: Tab[] = ['home', 'cards', 'active', 'more'];
-const FILTERS: CardState[] = ['unused', 'active', 'almost', 'finished', 'disabled'];
+const FILTERS: CardState[] = CARD_STATES;
 type Search = { tab?: Tab; filter?: CardState };
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -103,7 +103,7 @@ function Dashboard() {
   const onlineCount = routers.filter((r) => isOnline(r.last_seen_at)).length;
   const reportedActive = routers.reduce((n, r) => { const s = (r.last_status ?? {}) as { hotspotActive?: number; umActive?: number }; return n + (s.hotspotActive ?? 0) + (s.umActive ?? 0); }, 0);
   const activeNow = sessions.length || reportedActive;
-  const counts = useMemo(() => { const c: Record<CardState, number> = { unused: 0, active: 0, almost: 0, finished: 0, disabled: 0 }; for (const card of cards) c[cardState(card)]++; return c; }, [cards]);
+  const counts = useMemo(() => { const c: Record<CardState, number> = { unused: 0, active: 0, almost: 0, finished: 0, expired: 0, disabled: 0 }; for (const card of cards) c[cardState(card)]++; return c; }, [cards]);
   const lowPackages = useMemo(() => {
     const m = new Map<string, { total: number; ready: number }>();
     for (const c of cards) { const k = c.profile || '-'; const e = m.get(k) ?? { total: 0, ready: 0 }; e.total++; if (cardState(c) === 'unused') e.ready++; m.set(k, e); }

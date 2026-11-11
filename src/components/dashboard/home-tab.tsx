@@ -1,6 +1,6 @@
 import { AlertTriangle, ChevronRight, CreditCard, Palette, Radio, Ticket, TrendingDown, TrendingUp, Wifi } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import type { CardState } from '@/lib/card-status';
+import { CARD_STATES, type CardState } from '@/lib/card-status';
 import { buckets, yesterdayAt, type LogPoint } from '@/lib/active-history';
 import { STATE_LABEL } from './cards-tab';
 
@@ -49,10 +49,10 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
         <section className="app-panel p-5">
           <h2 className="font-bold">{t(`كل الكروت (${total})`, `All cards (${total})`)}</h2>
           <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-muted" aria-hidden>
-            {(['unused', 'active', 'almost', 'finished', 'disabled'] as CardState[]).map((s) => counts[s] ? <span key={s} className={`state-bar-${s}`} style={{ width: `${(counts[s] / total) * 100}%` }} /> : null)}
+            {CARD_STATES.map((s) => counts[s] ? <span key={s} className={`state-bar-${s}`} style={{ width: `${(counts[s] / total) * 100}%` }} /> : null)}
           </div>
           <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {(['unused', 'active', 'almost', 'finished', 'disabled'] as CardState[]).map((s) => <li key={s}><button type="button" onClick={() => go('cards', s)} className="stat-tile tap-card w-full text-start"><span className="text-xs text-muted-foreground">{t(...STATE_LABEL[s])}</span><b className="block text-lg" dir="ltr">{counts[s]}</b></button></li>)}
+            {CARD_STATES.map((s) => <li key={s}><button type="button" onClick={() => go('cards', s)} className="stat-tile tap-card w-full text-start"><span className="text-xs text-muted-foreground">{t(...STATE_LABEL[s])}</span><b className="block text-lg" dir="ltr">{counts[s]}</b></button></li>)}
           </ul>
         </section>
       )}
