@@ -22,6 +22,15 @@ export const savePushSubscription = createServerFn({ method: 'POST' })
     return { ok: !error };
   });
 
+/** Phone check: is this device's subscription the one we push to? */
+export const checkPushSubscription = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ endpoint: z.string().url().max(800) }).parse(i))
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase.from('push_subscriptions').select('endpoint').eq('owner_id', context.userId);
+    return { known: (rows ?? []).some((r) => r.endpoint === data.endpoint), devices: rows?.length ?? 0 };
+  });
+
 export const sendTestAlert = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ ar: z.boolean() }).parse(i))
