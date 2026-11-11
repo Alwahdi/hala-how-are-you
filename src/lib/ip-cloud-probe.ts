@@ -1,7 +1,7 @@
 // Server-side direct access: RouterOS API over IP Cloud (8729 encrypted first, then 8728), REST as a last resort.
 import { API_USER, mapResource } from './ip-cloud';
 import { apiSession, type ApiError } from './routeros-api';
-import { mapHotspotActive, mapHotspotUser, mapUmSession, mapUmUser, storeCards, storeProfiles, storeSessions, type CardIn } from './router-sync';
+import { mapHotspotActive, mapHotspotProfile, mapHotspotUser, mapUmSession, mapUmUser, storeCards, storeProfilesFor, storeSessions, type CardIn, type ProfileIn } from './router-sync';
 
 async function aesKey(secret: string) {
   const raw = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
@@ -33,10 +33,10 @@ export function candidatePorts(s: { apiSslPort?: string; apiSslDisabled?: string
   return out;
 }
 
-const BASE = [['/system/resource/print'], ['/system/identity/print'], ['/ip/hotspot/active/print'], ['/user-manager/session/print', '?active=true']];
+const BASE = [['/system/resource/print'], ['/system/identity/print'], ['/ip/hotspot/active/print'], ['/user-manager/session/print', '?active=true'], ['/tool/user-manager/session/print', '?active=true']];
 const CARDS = [
   ['/ip/hotspot/user/print', '=.proplist=name,profile,uptime,bytes-in,bytes-out,limit-uptime,limit-bytes-total,disabled,comment'],
-  ['/ip/hotspot/user/profile/print', '=.proplist=name,rate-limit,shared-users'],
+  ['/ip/hotspot/user/profile/print', '=.proplist=name,rate-limit,shared-users,session-timeout,idle-timeout,keepalive-timeout,address-pool,on-login'],
   ['/user-manager/user/print', '=.proplist=name,group,disabled,comment'],
   ['/tool/user-manager/user/print', '=.proplist=username,actual-profile,uptime-used,download-used,upload-used,disabled,comment'],
 ];
@@ -59,14 +59,14 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
   for (const c of list) {
     const res = await apiSession({ host, port: c.port, tls: c.tls, user: API_USER, password, commands, timeoutMs: 9000 }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
     if (!res.ok) { console.error('api probe failed', host, c.port, c.tls, res.error); if (res.error === 'auth' || lastError === 'unreachable') lastError = res.error; continue; }
-    const [resource, identity, hsActive, umActive, hsUsers, hsProfiles, umUsers, umOld] = res.results;
+    const [resource, identity, hsActive, umActive, umActiveOld, hsUsers, hsProfiles, umUsers, umOld] = res.results;
     const status = mapResource(resource?.[0] ?? {}, identity?.[0]?.['name'], hsActive ? hsActive.length : undefined);
     const now = new Date().toISOString();
-    const sessions = [...(hsActive ?? []).map(mapHotspotActive), ...(umActive ?? []).map(mapUmSession)].filter((x) => !!x);
+    const sessions = [...(hsActive ?? []).map(mapHotspotActive), ...(umActive ?? []).map(mapUmSession), ...(umActiveOld ?? []).map((x) => mapUmSession({ ...x, 'user-address': x['user-ip'] ?? '' }))].filter((x) => !!x);
     await storeSessions(sb, id, sessions);
     const patch: Record<string, unknown> = {
       cloud_host: host, direct_port: c.port, direct_tls: c.tls, direct_checked_at: now, last_seen_at: now, last_check_error: null,
-      last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(status).filter(([, v]) => v !== undefined)), umActive: umActive ? umActive.length : undefined },
+      last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(status).filter(([, v]) => v !== undefined)), umActive: umActive ? umActive.length : umActiveOld ? umActiveOld.length : undefined },
       ros_version: status.version?.startsWith('6') ? 'v6' : 'v7',
     };
     if (withCards) {
@@ -74,7 +74,8 @@ export async function checkOne(sb: any, id: string, host: string, candidates?: C
       const um = [...(umUsers ?? []), ...(umOld ?? [])].map(mapUmUser).filter((x): x is CardIn => !!x);
       if (hsUsers) await storeCards(sb, id, 'hotspot', hs, now);
       if (umUsers || umOld) await storeCards(sb, id, 'usermanager', um, now);
-      if (hsProfiles) await storeProfiles(sb, id, hsProfiles.map((p) => ({ source: 'hotspot' as const, name: p['name'] ?? '', rate_limit: p['rate-limit'] ?? null, shared_users: p['shared-users'] ?? null })).filter((p) => p.name));
+      // Only Hotspot packages here: User Manager packages (with their limits) come from the router's own reader script.
+      if (hsProfiles) await storeProfilesFor(sb, id, 'hotspot', hsProfiles.map(mapHotspotProfile).filter((p): p is ProfileIn => !!p));
       patch['cards_synced_at'] = now;
     }
     await sb.from('routers').update(patch).eq('id', id);

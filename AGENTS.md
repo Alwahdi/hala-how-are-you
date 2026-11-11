@@ -75,6 +75,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Routers link via a ~130-char fetch+import of a one-hour setup code (payload sealed by the code); the full one-line paste is the fallback.
 - Direct access: RouterOS API over TCP (8729 TLS, then 8728) to IP Cloud, tried automatically (throttled retries) only when the router owns its public IP; no manual form, push stays the fallback.
 - Cards/sessions/profiles are owner-readable snapshots written only by server code; card passwords are never stored.
-- Router actions are fixed tasks returned in the report reply and run by the router script; no write credentials are stored. Alerts use Web Push with a seed-derived VAPID key.
+- Router and card actions are fixed tasks returned in the report reply and run by the router script, with server-validated safe values; no write credentials are stored. Alerts use Web Push with a seed-derived VAPID key.
+- User Manager is read by a per-version router script (v6 under /tool, v7 with user-profile); the report says whether it is installed/enabled so the UI never guesses from an empty card list.
 - Account type lives in user_roles, written only server-side; profile holds network name and city.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.

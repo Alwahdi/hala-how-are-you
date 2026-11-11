@@ -92,6 +92,13 @@
       "when": 1794377037812,
       "tag": "0012_router_setup_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794378075349,
+      "tag": "0013_card_actions_um_details",
+      "breakpoints": true
     }
   ]
 }

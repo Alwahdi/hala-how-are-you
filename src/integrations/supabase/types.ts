@@ -288,6 +288,7 @@ export type Database = {
           disabled: boolean
           finished_at: string | null
           first_seen_at: string
+          first_used_at: string | null
           limit_bytes: number | null
           limit_uptime_s: number | null
           name: string
@@ -296,6 +297,7 @@ export type Database = {
           router_id: string
           source: string
           synced_at: string
+          um_state: string | null
           uptime_s: number
         }
         Insert: {
@@ -304,6 +306,7 @@ export type Database = {
           disabled?: boolean
           finished_at?: string | null
           first_seen_at?: string
+          first_used_at?: string | null
           limit_bytes?: number | null
           limit_uptime_s?: number | null
           name: string
@@ -312,6 +315,7 @@ export type Database = {
           router_id: string
           source: string
           synced_at?: string
+          um_state?: string | null
           uptime_s?: number
         }
         Update: {
@@ -320,6 +324,7 @@ export type Database = {
           disabled?: boolean
           finished_at?: string | null
           first_seen_at?: string
+          first_used_at?: string | null
           limit_bytes?: number | null
           limit_uptime_s?: number | null
           name?: string
@@ -328,6 +333,7 @@ export type Database = {
           router_id?: string
           source?: string
           synced_at?: string
+          um_state?: string | null
           uptime_s?: number
         }
         Relationships: [
@@ -427,30 +433,36 @@ export type Database = {
       }
       router_profiles: {
         Row: {
+          extra: Json
           name: string
           price: string | null
           rate_limit: string | null
           router_id: string
+          sell_price: string | null
           shared_users: string | null
           source: string
           synced_at: string
           validity: string | null
         }
         Insert: {
+          extra?: Json
           name: string
           price?: string | null
           rate_limit?: string | null
           router_id: string
+          sell_price?: string | null
           shared_users?: string | null
           source: string
           synced_at?: string
           validity?: string | null
         }
         Update: {
+          extra?: Json
           name?: string
           price?: string | null
           rate_limit?: string | null
           router_id?: string
+          sell_price?: string | null
           shared_users?: string | null
           source?: string
           synced_at?: string
