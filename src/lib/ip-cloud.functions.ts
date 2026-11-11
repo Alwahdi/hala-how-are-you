@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
-import { API_USER, mapResource, newApiPassword, normalizeCloudHost } from './ip-cloud';
+import { API_USER, mapResource, newApiPassword, normalizeCloudAddress } from './ip-cloud';
 
 async function aesKey(secret: string) {
   const raw = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
@@ -49,7 +49,7 @@ export const createIpCloudRouter = createServerFn({ method: 'POST' })
     if (!key) return { ok: false as const };
     const password = newApiPassword();
     const { data: row, error } = await context.supabase.from('routers').insert({
-      owner_id: context.userId, name: data.name, ros_version: 'v7', connection_method: 'ip_cloud', api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
+      owner_id: context.userId, name: data.name, connection_method: 'ip_cloud', api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
     }).select('id').single();
     if (error || !row) return { ok: false as const };
     return { ok: true as const, id: row.id, password };
@@ -58,9 +58,9 @@ export const createIpCloudRouter = createServerFn({ method: 'POST' })
 /** Saves the host and tests the connection right away. */
 export const connectIpCloudRouter = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), host: z.string().max(253) }).parse(i))
+  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), host: z.string().max(260), port: z.union([z.number(), z.string().max(5)]).optional() }).parse(i))
   .handler(async ({ data, context }) => {
-    const host = normalizeCloudHost(data.host);
+    const host = normalizeCloudAddress(data.host, data.port);
     if (!host) return { ok: false as const, error: 'invalid_host' as const };
     return checkOne(context.supabase, data.id, host);
   });
