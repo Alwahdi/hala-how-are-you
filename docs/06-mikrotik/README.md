@@ -24,6 +24,7 @@ related: [../README.md, risks-register.md]
 | [hardware.md](hardware.md) | العتاد وحدوده |
 | [common-faults.md](common-faults.md) | أكثر الأعطال وحلولها |
 | [certification-coverage.md](certification-coverage.md) | تغطية مناهج MTCNA/MTCRE/MTCINE |
+| [arabic-community-signals.md](arabic-community-signals.md) | إشارات فيسبوك والمنافسين العرب |
 | [doc-index.md](doc-index.md) | أقسام غير مدروسة بعمق |
 | [risks-register.md](risks-register.md) | سجل المخاطر الموحد |
 
