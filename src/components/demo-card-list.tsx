@@ -7,12 +7,12 @@ import { CustomerReply } from '@/components/customer-reply';
 import { ComplaintForm, type Complaint } from '@/components/complaint-log';
 import { biggestSession, cardState, demoCards, formatDataSize, formatDuration, formatNumber, remainingMB, remainingRatio, sessionsOf, type DemoCard } from '@/lib/specimen-data';
 
-type Props = { ar: boolean; cards?: DemoCard[]; onComplaint?: (c: Complaint) => void };
+type Props = { ar: boolean; cards?: DemoCard[]; onComplaint?: ((c: Complaint) => void) | undefined };
 export function DemoCardList({ ar, cards = demoCards, onComplaint }: Props) {
   return <div className="demo-card-list">{cards.map(card => <DemoCardItem key={card.id} card={card} ar={ar} onComplaint={onComplaint}/>)}</div>;
 }
 
-function DemoCardItem({ card, ar, onComplaint }: { card: DemoCard; ar: boolean; onComplaint?: (c: Complaint) => void }) {
+function DemoCardItem({ card, ar, onComplaint }: { card: DemoCard; ar: boolean; onComplaint?: ((c: Complaint) => void) | undefined }) {
   const t = (a: string, b: string) => ar ? a : b;
   const Arrow = ar ? ChevronLeft : ChevronRight;
   const [step, setStep] = useState<'details' | 'reply' | 'complaint'>('details');
