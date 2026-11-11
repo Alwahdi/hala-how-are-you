@@ -4,7 +4,8 @@ import { directAccessState, hashToken, majorVersion, shouldTryDirect } from '@/l
 import { normalizeCloudHost } from '@/lib/ip-cloud';
 import { checkOne } from '@/lib/ip-cloud-probe';
 import { parseActiveList, storeSessionsFor } from '@/lib/router-sync';
-import { cardJobLine } from '@/lib/card-actions';
+import { bulkJobLine, cardJobLine } from '@/lib/card-actions';
+import { packageJobLine, type PkgInput } from '@/lib/packages';
 
 const num = z.coerce.number().finite().nonnegative().max(1e15);
 const str = z.string().max(120);
@@ -17,7 +18,7 @@ const Report = z.object({
   apiPort: z.string().max(5).optional().default(''), apiDisabled: z.string().max(5).optional().default(''), apiSslPort: z.string().max(5).optional().default(''), apiSslDisabled: z.string().max(5).optional().default(''), umActive: num.optional(), apiUser: num.optional(),
   ntp: z.string().max(8).optional(), clockDate: z.string().max(20).optional(), services: z.string().max(120).optional(), socks: z.string().max(8).optional(), proxy: z.string().max(8).optional(),
   users: num.optional(), idle: z.string().max(20).optional(), shared: z.string().max(200).optional(),
-  umi: z.string().max(20).optional(), umr: num.optional(), act: z.string().max(3000).optional(), actMore: z.string().max(4).optional(),
+  umi: z.string().max(20).optional(), umr: num.optional(), act: z.string().max(3000).optional(), actMore: z.string().max(4).optional(), tz: z.string().max(12).optional(),
 });
 
 const LOG_EVERY_MS = 5 * 60_000;
@@ -53,7 +54,10 @@ export const Route = createFileRoute('/api/public/router-report')({
         // Who is online (Hotspot). A full list replaces the old one; a capped list only adds, and the 5-minute card run cleans up.
         if (act !== undefined) {
           const since = new Date(now - (actMore === 'yes' ? 6 * 60_000 : 1000)).toISOString();
-          await storeSessionsFor(supabaseAdmin, router.id, 'hotspot', parseActiveList(act), since);
+          const online = parseActiveList(act);
+          await storeSessionsFor(supabaseAdmin, router.id, 'hotspot', online, since);
+          const names = [...new Set(online.map((s) => s.username))];
+          if (names.length) await supabaseAdmin.from('router_cards').update({ last_online_at: new Date(now).toISOString() }).eq('router_id', router.id).eq('source', 'hotspot').in('name', names);
         }
         // Not behind NAT + IP Cloud + API on: connect directly on our own (8729 then 8728), no owner input. Push stays the backup.
         const host = normalizeCloudHost(status.cloudName);
@@ -74,7 +78,7 @@ export const Route = createFileRoute('/api/public/router-report')({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function nextJob(sb: any, routerId: string): Promise<string | null> {
   // A card action the router did not pick up within 5 minutes is dropped, so it never runs much later by surprise.
-  await sb.from('router_jobs').update({ status: 'expired', done_at: new Date().toISOString(), payload: {} }).eq('router_id', routerId).eq('kind', 'card_action').eq('status', 'pending').lt('requested_at', new Date(Date.now() - 5 * 60_000).toISOString());
+  await sb.from('router_jobs').update({ status: 'expired', done_at: new Date().toISOString(), payload: {} }).eq('router_id', routerId).in('kind', ['card_action', 'card_bulk', 'package']).eq('status', 'pending').lt('requested_at', new Date(Date.now() - 5 * 60_000).toISOString());
   const { data: j } = await sb.from('router_jobs').select('id, kind, payload').eq('router_id', routerId).eq('status', 'pending').order('requested_at').limit(1).maybeSingle();
   if (!j) return null;
   const now = new Date().toISOString();
@@ -90,6 +94,17 @@ async function nextJob(sb: any, routerId: string): Promise<string | null> {
     const line = cardJobLine(j.id, { source: p.source ?? '', action: p.action ?? '', name: p.name ?? '', value: p.value ?? null });
     // A new password is handed over once and then wiped; a new name is kept so the card list can follow it.
     if (p.action === 'pw') await sb.from('router_jobs').update({ payload: { ...p, value: null } }).eq('id', j.id);
+    if (!line) await sb.from('router_jobs').update({ status: 'failed', result: 'invalid', done_at: now }).eq('id', j.id);
+    return line;
+  }
+  if (j.kind === 'card_bulk') {
+    const p = (j.payload ?? {}) as { source?: string; action?: string; names?: string[] };
+    const line = bulkJobLine(j.id, p.source ?? '', p.action ?? '', p.names ?? []);
+    if (!line) await sb.from('router_jobs').update({ status: 'failed', result: 'invalid', done_at: now }).eq('id', j.id);
+    return line;
+  }
+  if (j.kind === 'package') {
+    const line = packageJobLine(j.id, (j.payload ?? {}) as PkgInput);
     if (!line) await sb.from('router_jobs').update({ status: 'failed', result: 'invalid', done_at: now }).eq('id', j.id);
     return line;
   }

@@ -1,6 +1,6 @@
 // Browser-safe rules for card actions and package details. The router script only understands these fixed actions.
 
-export const CARD_ACTIONS = ['pw', 'name', 'off', 'on', 'kick', 'del'] as const;
+export const CARD_ACTIONS = ['pw', 'name', 'off', 'on', 'kick', 'del', 'renew'] as const;
 export type CardAction = (typeof CARD_ACTIONS)[number];
 export type CardSource = 'hotspot' | 'usermanager';
 
@@ -19,13 +19,28 @@ export function checkCardAction(i: { source: string; action: string; name: strin
     if (!i.value || !SAFE_VALUE.test(i.value)) return 'bad_value';
     if (i.action === 'name' && i.value === i.name) return 'same_name';
   }
+  // Renew carries the card's package (or "-" when we do not know it); the router prefers its own record.
+  if (i.action === 'renew' && i.value != null && i.value !== '-' && !SAFE_VALUE.test(i.value)) return 'bad_value';
   return null;
 }
 
 /** The single line the router script reads: card|job|source|action|name|value ("-" when the action has no value). */
 export function cardJobLine(id: string, p: { source: string; action: string; name: string; value?: string | null | undefined }): string | null {
   if (checkCardAction(p)) return null;
-  return ['card', id, p.source, p.action, p.name, needsValue(p.action as CardAction) ? p.value : '-'].join('|');
+  const v = needsValue(p.action as CardAction) || (p.action === 'renew' && p.value) ? p.value : '-';
+  return ['card', id, p.source, p.action, p.name, v].join('|');
+}
+
+/** Several cards at once: only turning off, turning on and removing. */
+export const BULK_ACTIONS = ['off', 'on', 'del'] as const;
+export type BulkAction = (typeof BULK_ACTIONS)[number];
+export const BULK_MAX = 40;
+
+/** bulk|job|source|action|name,name,... — names that are not safe are dropped, at most 40 per task. */
+export function bulkJobLine(id: string, source: string, action: string, names: string[]): string | null {
+  if ((source !== 'hotspot' && source !== 'usermanager') || !(BULK_ACTIONS as readonly string[]).includes(action)) return null;
+  const ok = names.filter((n) => SAFE_VALUE.test(n)).slice(0, BULK_MAX);
+  return ok.length ? ['bulk', id, source, action, ok.join(',')].join('|') : null;
 }
 
 export const ROUTER_RESULTS = ['ok', 'missing', 'exists', 'error'] as const;
