@@ -12,6 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { getInitialLanguage } from '@/lib/locale.functions';
 import { LanguageContext } from '@/components/language-provider';
 import { useLanguage } from '@/components/language-provider';
+import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard';
 import { EarlyAccessProvider } from '@/components/early-access-context';
 import { Button } from '@/components/ui/button';
 import type { Language } from '@/lib/locale';
@@ -102,6 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   const initialLanguage = Route.useLoaderData();
   const [language, updateLanguage] = useState<Language>(initialLanguage ?? 'ar');
+  useMobileKeyboard();
   const setLanguage = (value: Language) => {
     document.cookie = `mikro-language=${value}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
     updateLanguage(value);
