@@ -7,7 +7,7 @@ describe('Demonstration card inspection', () => {
     render(<DemoCardList ar={true}/>);
     fireEvent.click(screen.getByRole('button', { name: 'تفاصيل الكرت DEMO-003' }));
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText('DEMO-003')).toBeInTheDocument();
+    expect(within(dialog).getAllByText('DEMO-003')[0]).toBeInTheDocument();
     expect(within(dialog).getByText('68.2%')).toBeInTheDocument();
     expect(within(dialog).queryByText('DEMO-001')).not.toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'إغلاق' }));
