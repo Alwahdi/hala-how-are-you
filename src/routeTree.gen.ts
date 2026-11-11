@@ -17,7 +17,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
-import { Route as ApiPublicRouterSetupRouteImport } from './routes/api/public/router-setup'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,11 +57,6 @@ const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   path: '/api/public/router-report',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicRouterSetupRoute = ApiPublicRouterSetupRouteImport.update({
-  id: '/api/public/router-setup',
-  path: '/api/public/router-setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,7 +66,6 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
-  '/api/public/router-setup': typeof ApiPublicRouterSetupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
-  '/api/public/router-setup': typeof ApiPublicRouterSetupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
-  '/api/public/router-setup': typeof ApiPublicRouterSetupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,7 +97,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/api/public/router-report'
-    | '/api/public/router-setup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -116,7 +106,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/api/public/router-report'
-    | '/api/public/router-setup'
   id:
     | '__root__'
     | '/'
@@ -127,7 +116,6 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/api/public/router-report'
-    | '/api/public/router-setup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -137,7 +125,6 @@ export interface RootRouteChildren {
   DesignSpecimenRoute: typeof DesignSpecimenRoute
   PrivacyRoute: typeof PrivacyRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
-  ApiPublicRouterSetupRoute: typeof ApiPublicRouterSetupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -198,13 +185,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRouterReportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/router-setup': {
-      id: '/api/public/router-setup'
-      path: '/api/public/router-setup'
-      fullPath: '/api/public/router-setup'
-      preLoaderRoute: typeof ApiPublicRouterSetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -228,7 +208,6 @@ const rootRouteChildren: RootRouteChildren = {
   DesignSpecimenRoute: DesignSpecimenRoute,
   PrivacyRoute: PrivacyRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
-  ApiPublicRouterSetupRoute: ApiPublicRouterSetupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

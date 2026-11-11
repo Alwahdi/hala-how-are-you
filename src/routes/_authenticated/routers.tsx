@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
-import { refreshIpCloudRouters } from '@/lib/ip-cloud.functions';
+import { refreshIpCloudRouters, rotatePushRouter } from '@/lib/ip-cloud.functions';
+import { CloudConnectForm } from '@/components/cloud-connect-form';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
-import { buildFallbackCommand, buildPasteCommand, buildRemoveCommand, hashToken, isOnline, newToken } from '@/lib/router-script';
-import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2 } from 'lucide-react';
+import { buildPasteCommand, buildRemoveCommand, isOnline } from '@/lib/router-script';
+import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud } from 'lucide-react';
 
 export const Route = createFileRoute('/_authenticated/routers')({
   head: () => ({ meta: [
@@ -23,7 +24,7 @@ export const Route = createFileRoute('/_authenticated/routers')({
   component: RoutersPage,
 });
 
-type Status = { identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string };
+type Status = { identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string; cloudName?: string; sslPort?: string; sslDisabled?: string };
 
 const pct = (free?: number, total?: number) => (total ? Math.round(((total - (free ?? 0)) / total) * 100) : null);
 
@@ -41,7 +42,7 @@ function RoutersPage() {
   const { data: routers = [], isLoading } = useQuery({
     queryKey: ['routers'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('routers').select('id, name, ros_version, connection_method, last_seen_at, last_status, last_check_error, created_at').order('created_at');
+      const { data, error } = await supabase.from('routers').select('id, name, ros_version, connection_method, cloud_host, last_seen_at, last_status, last_check_error, created_at').order('created_at');
       if (error) throw error;
       return data;
     },
@@ -49,6 +50,7 @@ function RoutersPage() {
   });
   const navigate = useNavigate();
   const refreshCloud = useServerFn(refreshIpCloudRouters);
+  const rotate = useServerFn(rotatePushRouter);
   // First visit with no routers: open the guided setup (unless the owner chose "later").
   useEffect(() => {
     if (!isLoading && routers.length === 0 && !sessionStorage.getItem('mikro-onboarding-later')) navigate({ to: '/onboarding', replace: true });
@@ -58,7 +60,8 @@ function RoutersPage() {
     const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
-  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; fallback: string } | null>(null);
+  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string } | null>(null);
+  const [cloudFor, setCloudFor] = useState<{ id: string; name: string; status: Status } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -67,11 +70,11 @@ function RoutersPage() {
   // Issue a fresh token so the owner gets a new paste command; the old one stops working.
   async function startReconnect(id: string, routerName: string) {
     setBusyId(id); setError(null);
-    const token = newToken();
-    const { error } = await supabase.from('routers').update({ token_hash: await hashToken(token) }).eq('id', id);
+    const r = await rotate({ data: { id } }).catch(() => ({ ok: false as const }));
     setBusyId(null);
-    if (error) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
-    setReconnect({ id, name: routerName, main: buildPasteCommand(token), fallback: buildFallbackCommand(token) });
+    if (!r.ok) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
+    setCloudFor(null);
+    setReconnect({ id, name: routerName, main: buildPasteCommand(r.token, r.password) });
   }
 
   async function checkCloudNow(id: string) {
@@ -124,7 +127,13 @@ function RoutersPage() {
                   </div>
                   <StatusChip state={online ? 'online' : r.last_seen_at ? 'offline' : 'waiting'} ar={ar} />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{ago(r.last_seen_at, ar)}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">{ago(r.last_seen_at, ar)}{r.cloud_host && !r.last_check_error && <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary"><Cloud className="size-3" />{t('مباشر عبر IP Cloud', 'Direct via IP Cloud')}</span>}</p>
+                {!r.cloud_host && s.cloudName && s.version?.startsWith('7') && (
+                  <button type="button" onClick={() => setCloudFor({ id: r.id, name: r.name, status: s })} className="mt-3 flex w-full items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 p-3 text-start text-sm hover:bg-primary/10">
+                    <Cloud className="size-5 shrink-0 text-primary" />
+                    <span className="flex-1"><b className="block">{t('IP Cloud مفعّل في هذا الراوتر', 'IP Cloud is on for this router')}</b><span className="text-xs text-muted-foreground">{t('اضغط للاتصال المباشر وتحديث أسرع', 'Tap for direct, faster updates')}</span></span>
+                  </button>
+                )}
                 {r.last_status && (
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                     <Stat label={t('المعالج', 'CPU')} value={`${s.cpu ?? '-'}%`} />
@@ -144,9 +153,10 @@ function RoutersPage() {
                   </p>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {r.connection_method === 'ip_cloud' ? (
-                    <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحقق الآن', 'Check now')}</Button>
-                  ) : (
+                  {r.cloud_host && (
+                    <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <Cloud />}{t('تحقق الآن', 'Check now')}</Button>
+                  )}
+                  {r.connection_method === 'ip_cloud' ? null : (
                     <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
                   )}
                   <Button variant="ghost" className="h-11 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
@@ -165,12 +175,22 @@ function RoutersPage() {
             <DialogTitle>{t('إعادة ربط', 'Reconnect')} {reconnect?.name}</DialogTitle>
             <DialogDescription>{t('الصق هذا الأمر في Terminal. الأمر القديم توقف عن العمل، وهذا يستبدله.', 'Paste this into Terminal. The old command no longer works; this replaces it.')}</DialogDescription>
           </DialogHeader>
-          {reconnect && <PasteCommandPanel command={reconnect.main} fallback={reconnect.fallback} ar={ar} />}
+          {reconnect && <PasteCommandPanel command={reconnect.main} ar={ar} />}
           {reconnect && (() => {
             const r = routers.find((x) => x.id === reconnect.id);
             const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;
             return <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-3 text-sm">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</div>;
           })()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!cloudFor} onOpenChange={(o) => !o && setCloudFor(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('اتصال مباشر عبر IP Cloud', 'Direct IP Cloud connection')} · {cloudFor?.name}</DialogTitle>
+            <DialogDescription>{t('نستخدم مستخدم القراءة فقط اللي أنشأه أمر اللصق. الراوتر يظل متصل بأمر اللصق كاحتياط.', 'We use the read-only user created by the paste command. The paste command stays on as a backup.')}</DialogDescription>
+          </DialogHeader>
+          {cloudFor && <CloudConnectForm routerId={cloudFor.id} ar={ar} defaultHost={cloudFor.status.cloudName} defaultPort={cloudFor.status.sslPort} httpsOff={cloudFor.status.sslDisabled === 'true'} onConnected={() => { setCloudFor(null); qc.invalidateQueries({ queryKey: ['routers'] }); }} onReconnect={() => cloudFor && startReconnect(cloudFor.id, cloudFor.name)} />}
         </DialogContent>
       </Dialog>
 

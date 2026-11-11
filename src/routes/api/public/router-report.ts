@@ -8,6 +8,7 @@ const Report = z.object({
   identity: str, board: str, version: str, uptime: str,
   cpu: num, freeMemory: num, totalMemory: num, freeHdd: num, totalHdd: num,
   hotspotActive: num, temperature: str.optional().default(''),
+  cloudName: str.optional().default(''), sslPort: z.string().max(5).optional().default(''), sslDisabled: z.string().max(5).optional().default(''),
 });
 
 const LOG_EVERY_MS = 5 * 60_000;

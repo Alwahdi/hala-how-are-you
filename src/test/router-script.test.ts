@@ -1,24 +1,30 @@
 import { describe, it, expect } from 'vitest';
-import { buildFallbackCommand, buildSetupFile, majorVersion, buildPasteCommand, escapeRos, hashToken, isOnline, newToken } from '@/lib/router-script';
+import { buildPasteCommand, escapeRos, hashToken, isOnline, majorVersion, newToken, reportScriptSource } from '@/lib/router-script';
 
 describe('router status push', () => {
   it('reports every 30 seconds', () => {
-    expect(buildSetupFile('a'.repeat(48))).toContain('interval=30s');
+    expect(buildPasteCommand('a'.repeat(48))).toContain('interval=30s');
   });
-  it('paste and fallback commands are a single line (survive mobile terminals)', () => {
-    const tok = 'a'.repeat(48);
-    expect(buildPasteCommand(tok)).not.toMatch(/[\r\n]/);
-    expect(buildFallbackCommand(tok)).not.toMatch(/[\r\n]/);
-    expect(buildPasteCommand(tok)).toContain(`t=${tok}`);
-    expect(buildFallbackCommand(tok)).toContain('[find name=mikro-report]; /system script remove');
+  it('the paste command is one line with no download from our site', () => {
+    const cmd = buildPasteCommand('a'.repeat(48), 'Abc123');
+    expect(cmd).not.toMatch(/[\r\n]/);
+    expect(cmd).not.toContain('router-setup');
+    expect(cmd).toContain('[find name=mikro-report]; /system script remove');
   });
-  it('setup file carries the token and scheduler', () => {
-    const f = buildSetupFile('b'.repeat(48));
-    expect(f).toContain('b'.repeat(48));
-    expect(f).toContain('/system scheduler add name=mikro-report');
+  it('creates the read-only user only on v7, compiled at run time so v6 skips it', () => {
+    const cmd = buildPasteCommand('a'.repeat(48), 'Abc123');
+    expect(cmd).toContain(':if ([:pick [/system resource get version] 0 1] = "7")');
+    expect(cmd).toContain(':parse "/user group remove');
+    expect(cmd).toContain('password=Abc123');
+    expect(buildPasteCommand('a'.repeat(48))).not.toContain('/user add');
+  });
+  it('reports the IP Cloud name and HTTPS port', () => {
+    const src = reportScriptSource('a'.repeat(48));
+    expect(src).toContain('/ip cloud get dns-name');
+    expect(src).toContain('/ip service get www-ssl port');
   });
   it('keeps version-specific syntax out of the compiled script (works on v6 and v7)', () => {
-    const f = buildSetupFile('c'.repeat(48));
+    const f = buildPasteCommand('c'.repeat(48));
     expect(f).not.toContain('[/system health get [find');
     expect(f).toContain(':parse');
   });

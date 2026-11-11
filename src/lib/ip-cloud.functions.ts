@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { API_USER, mapResource, newApiPassword, normalizeCloudAddress } from './ip-cloud';
+import { hashToken, newToken } from './router-script';
 
 async function aesKey(secret: string) {
   const raw = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
@@ -40,19 +41,34 @@ async function probe(host: string, password: string): Promise<Probe> {
   }
 }
 
-/** Creates a pending IP Cloud router and returns the one-time password for the setup command. */
-export const createIpCloudRouter = createServerFn({ method: 'POST' })
+/** Creates a router for the paste command: report token plus an encrypted read-only API password (used later for direct IP Cloud access on v7). */
+export const createPushRouter = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ name: z.string().trim().min(1).max(60) }).parse(i))
   .handler(async ({ data, context }) => {
     const key = process.env['ROUTER_SECRET_KEY'];
     if (!key) return { ok: false as const };
-    const password = newApiPassword();
+    const token = newToken(); const password = newApiPassword();
     const { data: row, error } = await context.supabase.from('routers').insert({
-      owner_id: context.userId, name: data.name, connection_method: 'ip_cloud', api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
+      owner_id: context.userId, name: data.name, connection_method: 'push', token_hash: await hashToken(token), api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
     }).select('id').single();
     if (error || !row) return { ok: false as const };
-    return { ok: true as const, id: row.id, password };
+    return { ok: true as const, id: row.id, token, password };
+  });
+
+/** Issues a fresh token and API password for an existing router (Reconnect). RLS limits it to the owner. */
+export const rotatePushRouter = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    const key = process.env['ROUTER_SECRET_KEY'];
+    if (!key) return { ok: false as const };
+    const token = newToken(); const password = newApiPassword();
+    const { data: row, error } = await context.supabase.from('routers').update({
+      token_hash: await hashToken(token), api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
+    }).eq('id', data.id).select('id').maybeSingle();
+    if (error || !row) return { ok: false as const };
+    return { ok: true as const, token, password };
   });
 
 /** Saves the host and tests the connection right away. */
@@ -69,7 +85,7 @@ export const connectIpCloudRouter = createServerFn({ method: 'POST' })
 export const refreshIpCloudRouters = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.from('routers').select('id, cloud_host').eq('connection_method', 'ip_cloud').not('cloud_host', 'is', null);
+    const { data } = await context.supabase.from('routers').select('id, cloud_host').not('cloud_host', 'is', null);
     await Promise.all((data ?? []).map((r) => checkOne(context.supabase, r.id, r.cloud_host!)));
     return { ok: true };
   });
@@ -77,12 +93,12 @@ export const refreshIpCloudRouters = createServerFn({ method: 'POST' })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkOne(sb: any, id: string, host: string) {
   const key = process.env['ROUTER_SECRET_KEY'];
-  const { data: r } = await sb.from('routers').select('api_secret_encrypted').eq('id', id).maybeSingle();
-  if (!key || !r?.api_secret_encrypted) return { ok: false as const, error: 'unreachable' as const };
+  const { data: r } = await sb.from('routers').select('api_secret_encrypted, last_status').eq('id', id).maybeSingle();
+  if (!key || !r?.api_secret_encrypted) return { ok: false as const, error: 'no_user' as const };
   const result = await probe(host, await decrypt(key, r.api_secret_encrypted));
   const now = new Date().toISOString();
   await sb.from('routers').update(result.ok
-    ? { cloud_host: host, last_seen_at: now, last_status: result.status, last_check_error: null, ros_version: result.status.version?.startsWith('6') ? 'v6' : 'v7' }
+    ? { cloud_host: host, last_seen_at: now, last_status: { ...(r.last_status ?? {}), ...Object.fromEntries(Object.entries(result.status).filter(([, v]) => v !== undefined)) }, last_check_error: null, ros_version: result.status.version?.startsWith('6') ? 'v6' : 'v7' }
     : { cloud_host: host, last_check_error: result.error }).eq('id', id);
   return result.ok ? { ok: true as const, status: result.status } : { ok: false as const, error: result.error };
 }

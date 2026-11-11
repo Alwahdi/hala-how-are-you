@@ -72,5 +72,5 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Company knowledge is plain Markdown in `docs/`, never only in chat or tool memory — keeps it portable across workspaces and tools.
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
 - Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without storing the raw code or trusting the client.
-- IP Cloud routers are polled over HTTPS REST with a read-only RouterOS user and an AES-encrypted secret, only while the owner views their routers; push reports remain the default because they work behind CGNAT.
+- Every router links with one self-contained single-line paste command (push reports work behind CGNAT and on v6/v7; v7-only steps run via :parse); on v7 it also creates an encrypted read-only REST user so an owner can opt into direct IP Cloud polling, which runs only while they view their routers.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.

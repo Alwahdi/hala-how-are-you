@@ -20,7 +20,13 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     // v6 and v7 read temperature differently; :parse compiles at run time so the other version's syntax cannot break the script.
     ':do {:set temp [:tostr [[:parse "/system health get temperature"]]]} on-error={}',
     ':if ($temp = "") do={:do {:set temp [:tostr [[:parse "/system health get [find name=temperature] value"]]]} on-error={}}',
-    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\"}")',
+    ':local cn ""',
+    ':do {:set cn [:tostr [/ip cloud get dns-name]]} on-error={}',
+    ':local sp ""',
+    ':do {:set sp [:tostr [/ip service get www-ssl port]]} on-error={}',
+    ':local sd ""',
+    ':do {:set sd [:tostr [/ip service get www-ssl disabled]]} on-error={}',
+    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\"}")',
     `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
   ].join('\n');
 }
@@ -30,32 +36,25 @@ export function escapeRos(source: string): string {
   return source.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/\n/g, '\\r\\n');
 }
 
-export const SETUP_URL = 'https://mikro.alwahdi.com/api/public/router-setup';
+import { readOnlyUserCommands } from './ip-cloud';
 
-/** Full setup steps, one RouterOS command each. */
-function setupCommands(token: string, url: string): string[] {
-  return [
+/**
+ * The one paste command for every RouterOS version: a single line (mobile terminals drop newlines),
+ * no download from our site, and v7-only steps compiled at run time so v6 skips them without errors.
+ * When an API password is given, v7 routers also get the read-only user used for direct IP Cloud access.
+ */
+export function buildPasteCommand(token: string, apiPassword?: string, url = REPORT_URL): string {
+  const parts = [
     `/system scheduler remove [find name=${SCRIPT_NAME}]`,
     `/system script remove [find name=${SCRIPT_NAME}]`,
     `/system script add name=${SCRIPT_NAME} policy=read,write,test source="${escapeRos(reportScriptSource(token, url))}"`,
     `/system scheduler add name=${SCRIPT_NAME} interval=30s start-time=startup on-event=${SCRIPT_NAME}`,
-    `/system script run ${SCRIPT_NAME}`,
   ];
-}
-
-/** The .rsc file the router downloads and imports. */
-export function buildSetupFile(token: string, url = REPORT_URL): string {
-  return setupCommands(token, url).join('\n') + '\n';
-}
-
-/** Short single-line command: survives terminals that drop newlines on paste. */
-export function buildPasteCommand(token: string, setupUrl = SETUP_URL): string {
-  return `/tool fetch url="${setupUrl}?t=${token}" dst-path=mikro.rsc; :delay 2s; /import file-name=mikro.rsc; /file remove [find name=mikro.rsc]`;
-}
-
-/** Fallback: the full setup in one line, separated by semicolons. */
-export function buildFallbackCommand(token: string, url = REPORT_URL): string {
-  return setupCommands(token, url).join('; ');
+  if (apiPassword) {
+    parts.push(`:if ([:pick [/system resource get version] 0 1] = "7") do={:do {:local f [:parse "${readOnlyUserCommands(apiPassword)}"]; $f} on-error={}}`);
+  }
+  parts.push(`/system script run ${SCRIPT_NAME}`);
+  return parts.join('; ');
 }
 
 export function buildRemoveCommand(): string {

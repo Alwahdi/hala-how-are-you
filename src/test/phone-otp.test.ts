@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { hashOtp, newOtp, normalizePhone, signProof, verifyProof, OTP_MAX_ATTEMPTS, OTP_TTL_MS, PROOF_TTL_MS } from '@/lib/phone-otp';
-import { buildReadOnlyUserCommand, normalizeCloudAddress, normalizeCloudHost } from '@/lib/ip-cloud';
+import { readOnlyUserCommands, normalizeCloudAddress, normalizeCloudHost } from '@/lib/ip-cloud';
 
 describe('phone verification', () => {
   it('normalises Yemeni, Egyptian and Syrian mobiles', () => {
@@ -43,7 +43,7 @@ describe('IP Cloud connection', () => {
     expect(normalizeCloudAddress('192.168.88.1:8443')).toBeNull();
   });
   it('setup user can read but never write, in one line', () => {
-    const cmd = buildReadOnlyUserCommand('pw');
+    const cmd = readOnlyUserCommands('pw');
     expect(cmd).not.toMatch(/[\r\n]/);
     expect(cmd).toContain('policy=read,api,rest-api,!write');
     expect(cmd).not.toMatch(/policy=[^\n]*(?<!!)write,/);
