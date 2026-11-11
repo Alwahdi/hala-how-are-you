@@ -42,3 +42,4 @@ related: [../templates/decision.md]
 - [D-028](D-028-router-push-status.md) — الراوتر يرسل حالته كل 30 ثانية (approved)
 - [D-029](D-029-external-ux-review-fixes.md) — تطبيق ملاحظات مراجعة UX خارجية (approved)
 - [D-030](D-030-phone-first-signin-and-router-onboarding.md) — الدخول برقم الجوال ومعالج أول راوتر (approved)
+- [D-031](D-031-auto-direct-access-dashboard-account-type.md) — اتصال مباشر تلقائي، لوحة الراوترات، نوع الحساب والمدينة
