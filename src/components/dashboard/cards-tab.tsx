@@ -86,7 +86,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
       {explained && (
         <p className="app-panel p-4 text-sm leading-relaxed">
           <b>Hotspot</b>: {t('الكروت محفوظة في الراوتر نفسه، وكل باقة لها سرعة وعدد أجهزة.', 'Cards live on the router itself; each package sets speed and devices.')}<br />
-          <b>User Manager</b>: {t('نظام كروت مركزي داخل الراوتر (v7): مدة صلاحية، سعر، وحدود بيانات لكل باقة، ويخدم أكثر من راوتر.', 'A central card system on the router (v7): validity, price and data limits per package, serving more than one router.')}
+          <b>User Manager</b>: {t('نظام كروت مركزي داخل الراوتر (v6 وv7): مدة صلاحية، سعر، وحدود بيانات لكل باقة، ويخدم أكثر من راوتر.', 'A central card system on the router (v6 and v7): validity, price and data limits per package, serving more than one router.')}
         </p>
       )}
 
