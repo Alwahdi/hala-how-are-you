@@ -3,7 +3,7 @@ type: decision
 status: approved
 owner: founder
 updated: 2026-11-11
-related: [D-019-mobile-interface-concept-and-voucher-inspection.md, D-022-mesh-texture-and-color-roles.md]
+related: [D-019-readable-demo-card-preview.md, D-022-mesh-texture-and-color-roles.md]
 ---
 # D-023 تصور الكروت بلغة صاحب الشبكة وقواعد الأسطح
 
