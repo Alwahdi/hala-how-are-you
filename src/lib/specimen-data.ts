@@ -43,7 +43,7 @@ export type Tone = 'short' | 'detailed';
 export const iso = (v: string | number) => `\u2066${v}\u2069`;
 export function buildCustomerMessage(card: DemoCard, lang: Language, tone: Tone) {
   const ar = lang === 'ar'; const s = sessionsOf(card); const big = biggestSession(s); const used = card.downloadMB + card.uploadMB;
-  const L = (v: string | number) => ar ? iso(v) : String(v); const D = (mb: number) => L(formatDataSize(mb));
+  const L = (v: string | number) => ar ? iso(String(v).replace(/ /g, "\u00A0")) : String(v); const D = (mb: number) => L(formatDataSize(mb));
   const left = D(remainingMB(card)), total = D(card.limitMB), usedS = D(used), time = formatDuration(card.usedMinutes, ar), id = L(card.id);
   const downHeavy = used > 0 && card.downloadMB / used > 0.7;
   if (used === 0) return ar ? `مرحباً، الكرت ${id} لم يُستخدم بعد، والباقة كاملة ${total}.` : `Hello, card ${id} has not been used yet. The full ${total} is available.`;
