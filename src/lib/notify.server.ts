@@ -22,7 +22,7 @@ export async function notify(sb: any, a: { owner: string; router?: string | null
   const { data: subs } = await sb.from('push_subscriptions').select('endpoint, p256dh, auth').eq('owner_id', a.owner);
   let sent = 0;
   for (const s of subs ?? []) {
-    const r = await sendPush(s, { title: a.title, body: a.body, path: a.path ?? '/alerts', tag: a.kind }, seed, a.severity === 'critical' ? 'high' : 'normal');
+    const r = await sendPush(s, { title: a.title, body: a.body, path: a.path ?? '/alerts', tag: a.kind }, seed, a.kind === 'daily_report' ? 'normal' : 'high');
     if (r === 'gone') await sb.from('push_subscriptions').delete().eq('endpoint', s.endpoint);
     if (r === 'ok') sent++;
   }
