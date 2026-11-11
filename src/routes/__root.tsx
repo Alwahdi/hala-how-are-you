@@ -73,7 +73,16 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: () => getInitialLanguage(),
+  // Language is decided once on the server; a re-run (HMR, retry) during a network blip keeps the current page language instead of blanking the app.
+  loader: async () => {
+    try {
+      return await getInitialLanguage();
+    } catch {
+      if (typeof document !== 'undefined') return document.documentElement.lang === 'en' ? 'en' : 'ar';
+      throw new Error('language unavailable');
+    }
+  },
+  staleTime: Infinity,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
