@@ -11,21 +11,32 @@ export function normalizeCloudHost(input: string): string | null {
   return h;
 }
 
-/** v7 command: enable IP Cloud, get a trusted certificate, read-only user, HTTPS REST only. */
-export function buildIpCloudSetup(password: string): string {
+/** Accepts "host", "host:port" or a URL plus an optional separate port; returns "host" or "host:port" (443 omitted). */
+export function normalizeCloudAddress(input: string, port?: number | string | null): string | null {
+  const raw = input.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const m = /^(.*?)(?::(\d{1,5}))?$/.exec(raw);
+  const host = normalizeCloudHost(m?.[1] ?? '');
+  if (!host) return null;
+  const p = Number(m?.[2] ?? (port === '' || port == null ? 443 : port));
+  if (!Number.isInteger(p) || p < 1 || p > 65535) return null;
+  return p === 443 ? host : `${host}:${p}`;
+}
+
+/** One-line command (mobile terminals drop newlines): read-only group and user for Mikro. */
+export function buildReadOnlyUserCommand(password: string): string {
   return [
-    '/ip cloud set ddns-enabled=yes',
-    ':delay 5s',
     `/user group remove [find name=${API_GROUP}]`,
     `/user group add name=${API_GROUP} policy=read,api,rest-api,!write,!policy,!sensitive,!ftp,!ssh,!telnet,!winbox,!web,!reboot,!test,!sniff,!romon`,
     `/user remove [find name=${API_USER}]`,
     `/user add name=${API_USER} group=${API_GROUP} password="${password}"`,
-    '/certificate enable-ssl-certificate dns-name=[/ip cloud get dns-name]',
-    ':delay 20s',
-    '/ip service set www-ssl disabled=no certificate=[/certificate find where common-name=[/ip cloud get dns-name]]',
-    ':put ("Mikro host: " . [/ip cloud get dns-name])',
-  ].join('\n');
+  ].join('; ');
 }
+
+/** One line: show the IP Cloud name (enables IP Cloud if it was off). */
+export const CLOUD_NAME_COMMAND = '/ip cloud set ddns-enabled=yes; :delay 5s; :put [/ip cloud get dns-name]';
+
+/** One line: trusted certificate for the IP Cloud name and HTTPS service on. Keeps the owner's port. */
+export const HTTPS_SETUP_COMMAND = '/certificate enable-ssl-certificate dns-name=[/ip cloud get dns-name]; :delay 20s; /ip service set www-ssl disabled=no certificate=[/certificate find where common-name=[/ip cloud get dns-name]]';
 
 export function newApiPassword(): string {
   const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';

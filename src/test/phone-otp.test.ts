@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { hashOtp, newOtp, normalizePhone, signProof, verifyProof, OTP_MAX_ATTEMPTS, OTP_TTL_MS, PROOF_TTL_MS } from '@/lib/phone-otp';
-import { buildIpCloudSetup, normalizeCloudHost } from '@/lib/ip-cloud';
+import { buildReadOnlyUserCommand, normalizeCloudAddress, normalizeCloudHost } from '@/lib/ip-cloud';
 
 describe('phone verification', () => {
   it('normalises Yemeni, Egyptian and Syrian mobiles', () => {
@@ -34,8 +34,17 @@ describe('IP Cloud connection', () => {
     expect(normalizeCloudHost('100.64.1.1')).toBeNull();
     expect(normalizeCloudHost('localhost')).toBeNull();
   });
-  it('setup user can read but never write', () => {
-    const cmd = buildIpCloudSetup('pw');
+  it('accepts a custom HTTPS port, separately or after the name', () => {
+    expect(normalizeCloudAddress('abcd1234.sn.mynetname.net', 8443)).toBe('abcd1234.sn.mynetname.net:8443');
+    expect(normalizeCloudAddress('abcd1234.sn.mynetname.net:9443')).toBe('abcd1234.sn.mynetname.net:9443');
+    expect(normalizeCloudAddress('abcd1234.sn.mynetname.net', 443)).toBe('abcd1234.sn.mynetname.net');
+    expect(normalizeCloudAddress('abcd1234.sn.mynetname.net', '')).toBe('abcd1234.sn.mynetname.net');
+    expect(normalizeCloudAddress('abcd1234.sn.mynetname.net', 70000)).toBeNull();
+    expect(normalizeCloudAddress('192.168.88.1:8443')).toBeNull();
+  });
+  it('setup user can read but never write, in one line', () => {
+    const cmd = buildReadOnlyUserCommand('pw');
+    expect(cmd).not.toMatch(/[\r\n]/);
     expect(cmd).toContain('policy=read,api,rest-api,!write');
     expect(cmd).not.toMatch(/policy=[^\n]*(?<!!)write,/);
   });
