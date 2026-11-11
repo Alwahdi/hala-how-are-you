@@ -90,6 +90,7 @@ function Dashboard() {
   const { data: pkgs = [] } = useQuery({ queryKey: ['profiles-pkg'], queryFn: async () => { const { data, error } = await supabase.from('router_profiles').select('*'); if (error) throw error; return data as ProfileRow[]; }, refetchInterval: 120_000 });
   const rawCards = loadedCards ?? partial?.cards ?? [];
   const cards = useMemo(() => withPackage(rawCards, pkgs), [rawCards, pkgs]);
+  if (typeof window !== 'undefined') console.log('DBG cards', loadedCards?.length, partial?.cards.length, rawCards.length, cards.length);
   const cardsLoad = loadedCards ? null : { loaded: partial?.cards.length ?? 0, total: partial?.total ?? null, fetching: cardsFetching };
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions'],
