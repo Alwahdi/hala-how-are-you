@@ -1,8 +1,8 @@
-import { AlertTriangle, CircleDashed, Wifi } from 'lucide-react';
+import { AlertTriangle, Ban, CircleDashed, Wifi } from 'lucide-react';
 import type { CardState } from '@/lib/specimen-data';
 
-export const stateLabel = (s: CardState, ar: boolean) => ({ unused: ar ? 'لم يُستخدم بعد' : 'Not used yet', inUse: ar ? 'قيد الاستخدام' : 'In use', almostFinished: ar ? 'قارب على الانتهاء' : 'Almost finished' })[s];
-export const StateIcon = ({ state, size = 14 }: { state: CardState; size?: number }) => state === 'almostFinished' ? <AlertTriangle size={size} aria-hidden="true"/> : state === 'inUse' ? <Wifi size={size} aria-hidden="true"/> : <CircleDashed size={size} aria-hidden="true"/>;
+export const stateLabel = (s: CardState, ar: boolean) => ({ unused: ar ? 'لم يُستخدم بعد' : 'Not used yet', inUse: ar ? 'قيد الاستخدام' : 'In use', almostFinished: ar ? 'قارب على الانتهاء' : 'Almost finished', disabled: ar ? 'معطّل' : 'Disabled' })[s];
+export const StateIcon = ({ state, size = 14 }: { state: CardState; size?: number }) => state === 'disabled' ? <Ban size={size} aria-hidden="true"/> : state === 'almostFinished' ? <AlertTriangle size={size} aria-hidden="true"/> : state === 'inUse' ? <Wifi size={size} aria-hidden="true"/> : <CircleDashed size={size} aria-hidden="true"/>;
 export function CardStateChip({ state, ar }: { state: CardState; ar: boolean }) {
   return <span className={`status-chip status-chip--${state}`}><StateIcon state={state}/>{stateLabel(state, ar)}</span>;
 }
