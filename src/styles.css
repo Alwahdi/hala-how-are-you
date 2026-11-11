@@ -163,7 +163,7 @@
   --secondary: oklch(.76 .11 295);
   --secondary-foreground: oklch(.16 .025 295);
   --muted: oklch(.22 .013 165);
-  --muted-foreground: oklch(.73 .016 165);
+  --muted-foreground: oklch(.81 .014 165);
   --accent: oklch(.25 .028 165);
   --accent-foreground: var(--foreground);
   --border: oklch(.65 .015 165 / .22);
@@ -401,3 +401,22 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
   .reply-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .demo-card-dialog input, .demo-card-dialog textarea { font-size:16px; }
 }
+
+/* D-029: compact filters, two-layer cards, unified actions */
+.concept-heading-row { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.concept-toolbar .card-search { margin-bottom:2px; }
+.filter-chips button { gap:6px; }
+.chip-count { min-width:22px; padding:0 6px; border-radius:999px; font-size:12px; font-weight:700; background:color-mix(in oklab,currentColor 14%,transparent); }
+.chip-attention:not([aria-pressed=true]) { color:var(--warning); border-color:color-mix(in oklab,var(--warning) 50%,transparent); }
+.demo-card-item { border:1px solid var(--border); border-radius:14px; background:color-mix(in oklab,var(--card) 70%,var(--background)); transition:border-color .15s; }
+.demo-card-item:has(.demo-card-row--almostFinished) { border-color:color-mix(in oklab,var(--warning) 45%,transparent); }
+.demo-card-item:hover { border-color:color-mix(in oklab,var(--primary) 50%,transparent); }
+.demo-card-row, .demo-card-row:hover { border:0; background:transparent; padding:20px 20px 12px; border-radius:14px; gap:14px; }
+.demo-card-item .demo-card-top { padding-inline-end:44px; }
+.demo-card-actions { display:flex; padding:0 20px 16px; }
+.demo-card-more { position:absolute; top:10px; inset-inline-end:8px; width:44px; height:44px; border-radius:12px; color:var(--muted-foreground); }
+.demo-card-quick { min-height:40px; border-radius:999px; gap:6px; }
+.demo-card-item svg, .filter-chips svg { stroke-width:2; }
+.demo-card-identity svg { width:18px; height:18px; }
+.status-chip svg { width:14px; height:14px; }
+@media(max-width:760px){ .demo-card-row, .demo-card-row:hover { padding:18px 16px 10px; } .demo-card-actions { padding:0 16px 14px; } .concept-heading-row { align-items:center; } }
