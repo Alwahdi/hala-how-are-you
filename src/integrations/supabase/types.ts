@@ -507,6 +507,41 @@ export type Database = {
           },
         ]
       }
+      router_setups: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          fetch_count: number
+          router_id: string
+          sealed: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          fetch_count?: number
+          router_id: string
+          sealed: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          fetch_count?: number
+          router_id?: string
+          sealed?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_setups_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       router_status_log: {
         Row: {
           created_at: string
