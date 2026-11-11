@@ -16,5 +16,5 @@ const stateOrder: Record<CardState, number> = { almostFinished: 0, inUse: 1, unu
 export const byAttention = (cards: DemoCard[]) => [...cards].sort((a, b) => stateOrder[cardState(a)] - stateOrder[cardState(b)]);
 /** MB under 1,000 stays MB; otherwise GB with at most one decimal. Latin digits. */
 export const formatDataSize = (mb: number) => mb >= 1000 ? `${formatNumber(Math.round(mb / 100) / 10)} GB` : `${formatNumber(mb)} MB`;
-export const formatDuration = (minutes: number, ar: boolean) => { const h = Math.floor(minutes / 60), m = minutes % 60; const hs = ar ? 'ساعة' : 'h', ms = ar ? 'دقيقة' : 'm'; return h ? `${h} ${hs} ${m} ${ms}` : `${m} ${ms}`; };
+export const formatDuration = (minutes: number, ar: boolean) => { const h = Math.floor(minutes / 60), m = minutes % 60; const hs = ar ? 'ساعة' : 'h', ms = ar ? 'دقيقة' : 'm'; return h ? (m ? `${h} ${hs} ${m} ${ms}` : `${h} ${hs}`) : `${m} ${ms}`; };
 export const searchCards = (query: string) => demoCards.filter(card => card.id.toLowerCase().includes(query.trim().toLowerCase()));
