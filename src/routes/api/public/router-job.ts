@@ -29,8 +29,9 @@ export const Route = createFileRoute('/api/public/router-job')({
             const p = (job.payload ?? {}) as { source?: string; action?: string; name?: string; value?: string | null };
             await supabaseAdmin.from('router_events').insert({ router_id: router.id, owner_id: router.owner_id, kind: 'card_action', detail: { action: p.action, source: p.source, name: p.name, result: parsed.data.result } });
             if (ok && p.source && p.name) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const where = (q: any) => q.eq('router_id', router.id).eq('source', p.source!).eq('name', p.name!);
               const card = supabaseAdmin.from('router_cards');
-              const where = <T extends { eq: (c: string, v: string) => T }>(q: T) => q.eq('router_id', router.id).eq('source', p.source!).eq('name', p.name!);
               // Keep our copy in step right away; the next card run confirms it.
               if (p.action === 'off') await where(card.update({ disabled: true }));
               if (p.action === 'on') await where(card.update({ disabled: false }));
