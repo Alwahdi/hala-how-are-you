@@ -5,7 +5,8 @@ import { AlertTriangle, ArrowLeft, Check, Copy, Info, OctagonAlert, ShieldCheck 
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
-import { checkHealth, healthScore, type Issue } from '@/lib/router-health';
+import { checkHealth, healthScore, readTime, type HealthInput, type Issue } from '@/lib/router-health';
+import { cardReadSecs, type CardRuns } from '@/lib/card-runs';
 
 export const Route = createFileRoute('/_authenticated/health')({
   head: () => ({ meta: [
@@ -24,7 +25,7 @@ const SEV = { critical: { icon: <OctagonAlert className="size-5 text-destructive
 function HealthPage() {
   const { ar } = useLanguage();
   const t = (a: string, b: string) => (ar ? a : b);
-  const { data: routers = [], isLoading } = useQuery({ queryKey: ['routers-health'], queryFn: async () => { const { data } = await supabase.from('routers').select('id, name, last_status, last_seen_at').order('created_at'); return data ?? []; } });
+  const { data: routers = [], isLoading } = useQuery({ queryKey: ['routers-health'], queryFn: async () => { const { data } = await supabase.from('routers').select('id, name, last_status, last_seen_at, card_runs').order('created_at'); return data ?? []; } });
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
       <div aria-hidden className="landing-pattern" />
@@ -34,7 +35,8 @@ function HealthPage() {
       {isLoading ? null : routers.map((r) => {
         const st = (r.last_status ?? {}) as Record<string, never>;
         const fields = 'ntp' in st;
-        const issues = checkHealth(st);
+        const secs = cardReadSecs(r.card_runs as CardRuns | null);
+        const issues = checkHealth({ ...(st as HealthInput), cardsSecs: secs });
         const score = healthScore(issues);
         return (
           <section key={r.id} className="app-panel mt-6 p-5">
@@ -42,6 +44,7 @@ function HealthPage() {
               <div className="gauge" data-tone={score < 70 ? 'warn' : undefined} style={{ ['--v' as string]: score }} role="img" aria-label={t(`النتيجة ${score} من 100`, `Score ${score} of 100`)}><span dir="ltr">{score}</span></div>
               <div><h2 className="text-lg font-bold">{r.name}</h2><p className="text-sm text-muted-foreground">{issues.length === 0 ? t('ما لقينا مشاكل.', 'No problems found.') : t(`${issues.length} نقطة تحتاج انتباه`, `${issues.length} things need attention`)}</p></div>
             </div>
+            {secs != null && <p className="mt-3 text-sm text-muted-foreground">{t(`آخر قراءة كاملة للكروت أخذت ${readTime(secs, true)}.`, `The last full card read took ${readTime(secs, false)}.`)}</p>}
             {!fields && <p className="mt-4 rounded-xl bg-muted p-3 text-sm">{t('الفحص الكامل (الوقت، الخدمات، علامات الاختراق، إعدادات Hotspot) يبدأ بعد «إعادة الربط» مرة واحدة. الآن نفحص المساحة والذاكرة والإصدار فقط.', 'The full check (time, services, break-in signs, Hotspot settings) starts after one Reconnect. For now we check storage, memory and version only.')}</p>}
             {issues.length === 0 ? <p className="mt-4 flex items-center gap-2 text-sm text-primary"><ShieldCheck className="size-5" />{t('راوترك بحالة ممتازة.', 'Your router is in great shape.')}</p> : (
               <ul className="mt-4 space-y-3">{issues.map((i) => <IssueRow key={i.id} i={i} ar={ar} />)}</ul>
@@ -68,3 +71,4 @@ function IssueRow({ i, ar }: { i: Issue; ar: boolean }) {
     </li>
   );
 }
+

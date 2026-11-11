@@ -77,7 +77,8 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Cards/sessions/profiles are owner-readable snapshots written only by server code; card passwords are never stored.
 - Router and card actions are fixed tasks returned in the report reply and run by the router script, with server-validated safe values; no write credentials are stored. Alerts use Web Push with a seed-derived VAPID key.
 - User Manager is read by a per-version router script (v6 under /tool, v7 with user-profile); the report says whether it is installed/enabled so the UI never guesses from an empty card list.
-- Card snapshots are removed only when a complete card run (every batch confirmed) misses them; fixed time windows deleted healthy cards on slow routers.
+- Card snapshots are removed only when a complete card run (every batch confirmed, tracked atomically by a database function) misses them; fixed windows and concurrent uploads deleted healthy cards.
+- Router scripts stay light on weak routers: no overlapping runs, one print as-value per list, full card reads paced by list size, never scan User Manager session history; the direct API only runs a light check.
 - Packages are written by fixed router tasks with server-validated values; Hotspot packages keep Mikhmon's on-login format with a per-card expiry scheduler so Mikhmon users see the same data.
 - Account type lives in user_roles, written only server-side; profile holds network name and city.
 - Product (app) architecture is designed only after discovery and MVP definition are approved — avoids redesign.

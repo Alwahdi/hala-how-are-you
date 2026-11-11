@@ -693,6 +693,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      card_run_step: {
+        Args: {
+          _done: boolean
+          _page: number
+          _router: string
+          _source: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

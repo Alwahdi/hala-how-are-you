@@ -1,7 +1,10 @@
 // Read-only router health check built from the documented common faults (docs/06-mikrotik/common-faults.md). Browser-safe.
+import { SLOW_CARD_READ_SECS } from './card-runs';
 export type HealthInput = {
   version?: string; freeHdd?: number; totalHdd?: number; freeMemory?: number; totalMemory?: number;
   ntp?: string; clockDate?: string; services?: string; socks?: string; proxy?: string; users?: number; scripts?: number; idle?: string; shared?: string;
+  /** Seconds the router's last complete card read took (from our own records, not the router report). */
+  cardsSecs?: number | null | undefined;
 };
 export type Issue = { id: string; severity: 'critical' | 'warn' | 'info'; ar: [string, string]; en: [string, string]; fix?: string };
 
@@ -14,6 +17,15 @@ export function parseRouterDate(s?: string): number | null {
   let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if (m) return Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!);
   m = /^([a-z]{3})\/(\d{2})\/(\d{4})$/i.exec(s); if (m) { const mo = MONTHS.indexOf(m[1]!.toLowerCase()); return mo < 0 ? null : Date.UTC(+m[3]!, mo, +m[2]!); }
   return null;
+}
+
+/** How long something took, in plain Arabic or English ("40 ثانية", "3 دقائق", "دقيقتين"). */
+export function readTime(secs: number, ar: boolean): string {
+  if (secs < 2) return ar ? 'أقل من ثانيتين' : 'under 2 seconds';
+  const [n, one, two, few, many] = secs < 90 ? [secs, 'ثانية', 'ثانيتين', 'ثوانٍ', 'ثانية'] : [Math.round(secs / 60), 'دقيقة', 'دقيقتين', 'دقائق', 'دقيقة'];
+  if (!ar) return `${n} ${secs < 90 ? 'seconds' : 'minutes'}`;
+  if (n === 1) return one; if (n === 2) return two;
+  return `${n} ${n <= 10 ? few : many}`;
 }
 
 export function checkHealth(h: HealthInput, now = Date.now()): Issue[] {
@@ -37,6 +49,10 @@ export function checkHealth(h: HealthInput, now = Date.now()): Issue[] {
   if (h.idle === 'none') out.push({ id: 'idle', severity: 'warn', ar: ['مهلة الخمول مطفية في Hotspot', 'الجلسة تبقى شغالة بعد ما يبتعد الزبون، فيُحسب عليه الوقت. اجعلها 5 دقائق.'], en: ['Hotspot idle timeout is off', 'Sessions stay on after the customer leaves, so time keeps counting. Set 5 minutes.'], fix: '/ip hotspot set [find] idle-timeout=5m' });
   const shared = (h.shared ?? '').split(',').filter(Boolean);
   if (shared.some((s) => s === 'unlimited' || Number(s) > 1)) out.push({ id: 'shared', severity: 'info', ar: ['باقات تسمح بأكثر من جهاز للكرت', 'لو ما تقصد هذا، الكرت يُستهلك أسرع ويشتكي الزبون. اجعلها 1.'], en: ['Packages allow several devices per card', 'If unintended, cards run out faster and customers complain. Set it to 1.'], fix: '/ip hotspot user profile set [find] shared-users=1' });
+  if ((h.cardsSecs ?? 0) > SLOW_CARD_READ_SECS) {
+    const secs = h.cardsSecs ?? 0;
+    out.push({ id: 'cards_slow', severity: 'warn', ar: [`قراءة الكروت تأخذ ${readTime(secs, true)}`, 'المعالج يبقى مشغولاً طول القراءة. اضغط «إعادة الربط» مرة لتصل القراءة الخفيفة الجديدة، ولو بقيت بطيئة احذف الكروت المنتهية.'], en: [`Reading cards takes ${readTime(secs, false)}`, 'The CPU stays busy the whole time. Tap Reconnect once to get the new light reader; if it stays slow, remove used-up cards.'] });
+  }
   return out;
 }
 

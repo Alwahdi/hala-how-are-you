@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { nextRun } from '@/lib/card-runs';
 import { checkPackage, hotspotOnLogin, packageFacts, packageJobLine, rosDuration } from '@/lib/packages';
 import { rosExpr, reportScriptSource, cardsScriptSource } from '@/lib/router-script';
 import { parseRosDate, tzSeconds } from '@/lib/ros-date';
@@ -9,22 +8,8 @@ import { cardFromRow } from '@/lib/router-sync';
 
 const card = (o: Partial<CardRow> = {}): CardRow => ({ router_id: 'r', source: 'usermanager', name: 'c1', profile: 'p1', uptime_s: 0, bytes: 0, limit_uptime_s: null, limit_bytes: null, disabled: false, comment: null, first_seen_at: '2026-11-01T00:00:00Z', synced_at: '2026-11-11T00:00:00Z', ...o });
 
-describe('card runs: vanished cards are removed only after a complete run', () => {
-  it('a run where every batch arrived removes what was not refreshed since its start', () => {
-    let runs = nextRun({}, 'usermanager', 0, false, 'T0').runs;
-    runs = nextRun(runs, 'usermanager', 1, false, 'T1').runs;
-    expect(nextRun(runs, 'usermanager', 2, true, 'T2').complete).toBe('T0');
-  });
-  it('a missing batch means nothing is removed', () => {
-    const runs = nextRun({}, 'usermanager', 0, false, 'T0').runs;
-    expect(nextRun(runs, 'usermanager', 2, true, 'T2').complete).toBeNull();
-  });
-  it('a slow run never uses a fixed two-minute window (the old bug)', () => {
-    let runs = nextRun({}, 'hotspot', 0, false, '2026-11-11T06:52:00Z').runs;
-    for (let p = 1; p < 47; p++) runs = nextRun(runs, 'hotspot', p, false, `x${p}`).runs;
-    expect(nextRun(runs, 'hotspot', 47, true, '2026-11-11T06:56:30Z').complete).toBe('2026-11-11T06:52:00Z');
-  });
-});
+// Run tracking (vanished cards removed only after a complete run) now lives in the database function card_run_step,
+// so concurrent Hotspot and User Manager uploads cannot overwrite each other; it is checked against a live router.
 
 describe('packages', () => {
   it('refuses a validity shorter than the usage time', () => {
@@ -72,8 +57,10 @@ describe('router script pieces', () => {
   });
   it('card reading sends packages first and protects every batch', () => {
     const s = cardsScriptSource('a'.repeat(48), 'um6');
-    expect(s.indexOf('usermanager-profiles')).toBeLessThan(s.indexOf('usermanager-sessions'));
-    expect(s.indexOf('usermanager-sessions')).toBeLessThan(s.lastIndexOf('\\"source\\":\\"usermanager\\"'));
+    expect(s.indexOf('usermanager-profiles')).toBeLessThan(s.lastIndexOf('\\"source\\":\\"usermanager\\"'));
+    const h = cardsScriptSource('a'.repeat(48), 'hotspot');
+    expect(h.indexOf('hotspot-profiles')).toBeLessThan(h.indexOf('hotspot-sessions'));
+    expect(h.indexOf('hotspot-sessions')).toBeLessThan(h.lastIndexOf('\\"source\\":\\"hotspot\\"'));
     expect(s.match(/:do \{\/tool fetch/g)!.length).toBe(s.match(/\/tool fetch/g)!.length);
   });
 });

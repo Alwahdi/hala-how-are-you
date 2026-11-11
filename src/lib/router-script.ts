@@ -29,10 +29,9 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set sd [:tostr [/ip service get www-ssl disabled]]} on-error={}',
     ':local ap ""', ':local apd ""', ':local asp ""', ':local asd ""',
     ':do {:set ap [:tostr [/ip service get api port]]; :set apd [:tostr [/ip service get api disabled]]; :set asp [:tostr [/ip service get api-ssl port]]; :set asd [:tostr [/ip service get api-ssl disabled]]} on-error={}',
+    // Online User Manager cards log in through Hotspot, so they are already in the Hotspot count. Scanning User Manager's
+    // session history every 30 seconds kept weak v6 routers at 100% CPU, so it is no longer read here.
     ':local um 0',
-    ':do {:set um [:len [[:parse "/user-manager session find where active"]]]} on-error={}',
-    // User Manager v6 lives under /tool; the other version's path is compiled at run time so it never breaks the script.
-    ':if ($um = 0) do={:do {:set um [:len [[:parse "/tool user-manager session find where active"]]]} on-error={}}',
     // umi: "pkg" when the User Manager package is installed, then ",true|false" (v7 enabled flag). umr: our reader script is installed.
     ':local umi ""',
     ':do {:if ([:len [/system package find where name="user-manager" and disabled=no]] > 0) do={:set umi "pkg"}} on-error={}',
@@ -129,22 +128,35 @@ const fld = (f: string) => q(`[:tostr ($r->"${f}")]`);
 // Comments may hold quotes or backslashes that would break the JSON, so those are sent empty.
 const SAFE_COMMENT = String.raw`:local cm [:tostr ($r->"comment")]; :if (([:typeof [:find $cm "\""]] != "nil") || ([:typeof [:find $cm "\\"]] != "nil")) do={:set cm ""}`;
 
+/** Above this many cards the full card list is read only every FULL_EVERY_RUNS runs (6 x 5 minutes = 30 minutes). */
+export const FULL_EVERY_CARDS = 1000;
+export const FULL_EVERY_RUNS = 6;
+/** Rows per upload: fewer uploads means fewer encrypted connections, which cost a weak router the most CPU. */
+export const CARD_BATCH = 100;
+
 /**
- * Sends the packages first, then who is online, then every card in batches of 40 (behind NAT this is how we read cards).
- * Each send is protected: one failed batch never stops the rest, so packages and online users always arrive.
- * Fields are read from the item array, so missing ones stay empty. The password itself never leaves the router:
- * only "same as name" / "none" / "other". Each kind uses its own menus: Hotspot, User Manager v6 (/tool) or v7.
+ * Packages first, then (Hotspot only) who is online, then every card in batches.
+ * Load rules, learned on a 600 MHz RB2011 with 3,000+ User Manager cards that sat at 100% CPU:
+ * - a run never starts while the previous one is still going (the scheduler would otherwise stack them);
+ * - the whole list comes from one native "print as-value" instead of one "get" per card (about 3x faster);
+ * - big lists (over FULL_EVERY_CARDS) are read in full only every FULL_EVERY_RUNS runs; packages every run;
+ * - a short pause after each upload so the router keeps serving customers;
+ * - User Manager's session history is never scanned for "online now": those cards log in through Hotspot,
+ *   and the Hotspot script already sends the active list.
+ * One failed upload never stops the rest. The password itself never leaves the router: only "same as name" / "none" / "other".
  */
 export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager', url = CARDS_URL): string {
   const k: CardsKind = kind === 'usermanager' ? 'um7' : kind;
   const src = k === 'hotspot' ? 'hotspot' : 'usermanager';
+  const job = k === 'hotspot' ? CARDS_SCRIPT : UM_SCRIPT;
+  const tick = k === 'hotspot' ? 'mikroHsTick' : 'mikroUmTick';
   const send = (done: string, what: string) => `:do {/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"source\\":\\"${what}\\",\\"page\\":" . $p . ",\\"done\\":${done},\\"rows\\":[" . $b . "]}") output=none} on-error={}`;
-  const add = (row: string, what: string, max = 40) => `:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = ${max}) do={${send('false', what)}; :set b ""; :set n 0; :set p ($p + 1)}`;
+  const add = (row: string, what: string, max = CARD_BATCH) => `:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = ${max}) do={${send('false', what)}; :set b ""; :set n 0; :set p ($p + 1); :delay 1s}`;
   const reset = ':set b ""; :set n 0; :set p 0';
   const T = {
-    hotspot: { menu: '/ip hotspot user', name: 'name', pmenu: '/ip hotspot user profile', smenu: '/ip hotspot active', s: ['user', 'mac-address', 'uptime'], sb: ['bytes-in', 'bytes-out'], sa: 'address' },
-    um6: { menu: '/tool user-manager user', name: 'username', pmenu: '/tool user-manager profile', smenu: '/tool user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-ip' },
-    um7: { menu: '/user-manager user', name: 'name', pmenu: '/user-manager profile', smenu: '/user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-address' },
+    hotspot: { menu: '/ip hotspot user', name: 'name', pmenu: '/ip hotspot user profile' },
+    um6: { menu: '/tool user-manager user', name: 'username', pmenu: '/tool user-manager profile' },
+    um7: { menu: '/user-manager user', name: 'name', pmenu: '/user-manager profile' },
   }[k];
   const empty = '"\\"\\""';
   // Hotspot rows: name,profile,uptime,in,out,limit-uptime,limit-bytes,disabled,comment,pw.
@@ -156,8 +168,10 @@ export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager'
   };
   const row = rows[k].join(' . "," . ');
   const lines = [':local p 0', ':local b ""', ':local n 0'];
+  lines.push(`:global ${tick}`, `:if ([:typeof $${tick}] != "num") do={:set ${tick} 0}`);
+  lines.push(`:local full (([:len [${T.menu} find]] <= ${FULL_EVERY_CARDS}) || (($${tick} % ${FULL_EVERY_RUNS}) = 0))`, `:set ${tick} ($${tick} + 1)`);
 
-  // 1) Packages.
+  // 1) Packages (every run: there are few).
   if (k === 'hotspot') {
     // name,rate,devices,session-timeout,idle,keepalive,pool,mikhmon (price/validity that Mikhmon keeps in on-login).
     const prow = [fld('name'), fld('rate-limit'), fld('shared-users'), fld('session-timeout'), fld('idle-timeout'), fld('keepalive-timeout'), fld('address-pool'), q('$mk')].join(' . "," . ');
@@ -171,27 +185,34 @@ export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager'
   }
   lines.push(send('true', `${src}-profiles`), reset);
 
-  // 2) Who is online: user,mac,uptime,bytes,address (all of them, in batches).
-  const srow = [...T.s.map(fld), q(`[:tostr (($r->"${T.sb[0]}") + ($r->"${T.sb[1]}"))]`), fld(T.sa)].join(' . "," . ');
-  const where = k === 'hotspot' ? '' : ' where active';
-  lines.push(`:foreach u in=[${T.smenu} find${where}] do={:do {:local r [${T.smenu} get $u]; :local cm [:tostr ($r->"user")]; :if (([:typeof [:find $cm "\\""]] = "nil") && ([:typeof [:find $cm "\\\\"]] = "nil")) do={${add(srow, `${src}-sessions`)}}} on-error={}}`, send('true', `${src}-sessions`), reset);
+  // 2) Who is online (Hotspot active list: cheap, and it includes User Manager cards logged in through Hotspot).
+  if (k === 'hotspot') {
+    const srow = [fld('user'), fld('mac-address'), fld('uptime'), q(`[:tostr (($r->"bytes-in") + ($r->"bytes-out"))]`), fld('address')].join(' . "," . ');
+    lines.push(`:foreach u in=[/ip hotspot active find] do={:do {:local r [/ip hotspot active get $u]; :local cm [:tostr ($r->"user")]; :if (([:typeof [:find $cm "\\""]] = "nil") && ([:typeof [:find $cm "\\\\"]] = "nil")) do={${add(srow, 'hotspot-sessions', 40)}}} on-error={}}`, send('true', 'hotspot-sessions'), reset);
+  }
 
-  // 3) Cards. v7 keeps used time and data per session, so they are summed first (skipped on huge session logs).
+  // 3) Cards, only on full runs. v7 keeps used time and data per session, so they are summed first (skipped on huge session logs).
+  const body: string[] = [];
   let pre = '';
   if (k === 'um7') {
-    lines.push(String.raw`:local agb ({}); :local agt ({}); :local sc 0; :do {:set sc [:len [/user-manager session find]]} on-error={}; :if ($sc < 20000) do={:foreach s in=[/user-manager session find] do={:do {:local r [/user-manager session get $s]; :local u [:tostr ($r->"user")]; :local ob [:tonum ($agb->$u)]; :if ([:typeof $ob] != "num") do={:set ob 0}; :local ot ($agt->$u); :if ([:typeof $ot] != "time") do={:set ot 0s}; :set ($agb->$u) ($ob + [:tonum ($r->"download")] + [:tonum ($r->"upload")]); :set ($agt->$u) ($ot + [:totime ($r->"uptime")])} on-error={}}}`);
+    body.push(String.raw`:local agb ({}); :local agt ({}); :local sc 0; :do {:set sc [:len [/user-manager session find]]} on-error={}; :if ($sc < 20000) do={:foreach s in=[/user-manager session find] do={:do {:local r [/user-manager session get $s]; :local u [:tostr ($r->"user")]; :local ob [:tonum ($agb->$u)]; :if ([:typeof $ob] != "num") do={:set ob 0}; :local ot ($agt->$u); :if ([:typeof $ot] != "time") do={:set ot 0s}; :set ($agb->$u) ($ob + [:tonum ($r->"download")] + [:tonum ($r->"upload")]); :set ($agt->$u) ($ot + [:totime ($r->"uptime")])} on-error={}}}`);
     pre = String.raw`:local nm [:tostr ($r->"name")]; :local ut [:tostr ($agt->$nm)]; :local ub [:tostr ($agb->$nm)]; `;
   }
-  lines.push(
-    `:foreach u in=[${T.menu} find] do={:do {:local r [${T.menu} get $u]; ${pre}:local pw [:tostr ($r->"password")]; :local pm "other"; :if ($pw = "") do={:set pm "none"}; :if ($pw = [:tostr ($r->"${T.name}")]) do={:set pm "same"}; ${SAFE_COMMENT}; ${add(row, src)}} on-error={}}`,
+  // v6 User Manager may leave usage out of the list for some cards; those few are read one by one (only if they were ever used).
+  const fix = k === 'um6' ? String.raw`:if (([:len [:tostr ($r->"uptime-used")]] = 0) && ([:tostr ($r->"last-seen")] != "never")) do={:do {:set r [/tool user-manager user get ($r->".id")]} on-error={}}; ` : '';
+  body.push(
+    `:local all ({}); :do {:set all [${T.menu} print as-value]} on-error={}`,
+    `:foreach r in=$all do={:do {${fix}${pre}:local pw [:tostr ($r->"password")]; :local pm "other"; :if ($pw = "") do={:set pm "none"}; :if ($pw = [:tostr ($r->"${T.name}")]) do={:set pm "same"}; ${SAFE_COMMENT}; ${add(row, src)}} on-error={}}`,
+    ':set all ({})',
     send('true', src),
   );
-
   // 4) v7: which package each card has and its state (waiting / running / used) live outside the user.
   if (k === 'um7') {
-    lines.push(reset, `:foreach u in=[/user-manager user-profile find] do={:do {:local r [/user-manager user-profile get $u]; ${add([fld('user'), fld('profile'), fld('state'), fld('end-time')].join(' . "," . '), 'usermanager-links')}} on-error={}}`, send('true', 'usermanager-links'));
+    body.push(reset, `:foreach r in=[/user-manager user-profile print as-value] do={:do {${add([fld('user'), fld('profile'), fld('state'), fld('end-time')].join(' . "," . '), 'usermanager-links')}} on-error={}}`, send('true', 'usermanager-links'));
   }
-  return lines.filter(Boolean).join('\n');
+  lines.push(`:if ($full) do={`, ...body, '}');
+  // Never two at once: if the previous run is still going, this one does nothing.
+  return [`:if ([:len [/system script job find where script="${job}"]] < 2) do={`, ...lines.filter(Boolean), '}'].join('\n');
 }
 
 /** Escape a script so it can live inside a RouterOS double-quoted string. */
@@ -253,12 +274,13 @@ export function directAccessState(s: { cloudName?: string; behindNat?: string; a
   return s.apiDisabled === 'true' && s.apiSslDisabled === 'true' ? 'needs_api' : 'ready';
 }
 
-const RETRY_FAILED_MS = 3 * 60_000;
+export const RETRY_FAILED_MS = 30 * 60_000;
 const REFRESH_CARDS_MS = 5 * 60_000;
 
 /**
  * Decides when the server tries the direct API link on its own: right away for a new or reconnected router,
- * every 5 minutes when it works (cards), and at most every 3 minutes after a failure so we never hammer the router's login.
+ * every 5 minutes when it works, and only every 30 minutes after a failure: a busy router is not woken again and again,
+ * and "Try now" or Reconnect still checks at once.
  */
 export function shouldTryDirect(
   r: { cloud_host: string | null; direct_port: number | null; last_check_error: string | null; direct_checked_at: string | null; cards_synced_at: string | null },

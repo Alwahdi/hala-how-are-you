@@ -54,19 +54,22 @@ export { durationToSeconds } from './duration';
 
 export type ApiError = 'unreachable' | 'timeout' | 'tls' | 'auth' | 'old_login';
 
-/** One API session: login, run read commands one by one, close. Commands that fail (missing package) return null. */
+/** One API session: login, run read commands one by one, close. Commands that fail (missing package) return null.
+ * timeoutMs is per step (login, then each command), so one slow reply cannot use up the time of the others. */
 export async function apiSession(opts: { host: string; port: number; tls: boolean; user: string; password: string; commands: string[][]; timeoutMs?: number }): Promise<{ ok: true; results: (Record<string, string>[] | null)[] } | { ok: false; error: ApiError }> {
   const net = await import('node:net');
   const tlsMod = opts.tls ? await import('node:tls') : null;
   return new Promise((resolve) => {
     let buf = new Uint8Array(0); let done = false; let step = -1; let rows: Record<string, string>[] = []; let trapped = false;
     const results: (Record<string, string>[] | null)[] = [];
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const finish = (v: Parameters<typeof resolve>[0]) => { if (done) return; done = true; clearTimeout(timer); try { sock.destroy(); } catch { /* closed */ } resolve(v); };
-    const timer = setTimeout(() => finish({ ok: false, error: 'timeout' }), opts.timeoutMs ?? 10000);
+    const arm = () => { clearTimeout(timer); timer = setTimeout(() => finish({ ok: false, error: 'timeout' }), opts.timeoutMs ?? 10000); };
+    arm();
     const sock = tlsMod
       ? tlsMod.connect({ host: opts.host, port: opts.port, rejectUnauthorized: false, servername: opts.host })
       : net.connect({ host: opts.host, port: opts.port });
-    const send = (words: string[]) => sock.write(encodeSentence(words));
+    const send = (words: string[]) => { arm(); sock.write(encodeSentence(words)); };
     sock.on(tlsMod ? 'secureConnect' : 'connect', () => send(['/login', `=name=${opts.user}`, `=password=${opts.password}`]));
     sock.on('error', (e: Error) => finish({ ok: false, error: /certificate|ssl|tls|handshake|alert/i.test(String(e)) ? 'tls' : 'unreachable' }));
     sock.on('close', () => finish({ ok: false, error: 'unreachable' }));
