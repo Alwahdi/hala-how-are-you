@@ -83,7 +83,7 @@ export function buildPasteCommand(token: string, apiPassword?: string, url = REP
   parts.push(`/system script add name=${CARDS_SCRIPT} policy=read,write,test source="${escapeRos(cardsScriptSource(token, 'hotspot', url.replace('router-report', 'router-cards')))}"`);
   parts.push(`/system scheduler add name=${CARDS_SCRIPT} interval=5m start-time=startup on-event=${CARDS_SCRIPT}`);
   // User Manager (v7 package) only where it is installed; its menu does not exist elsewhere.
-  parts.push(`:if ([:len [/system package find name=user-manager]] > 0 && [:pick [/system resource get version] 0 1] = "7") do={/system script add name=${UM_SCRIPT} policy=read,write,test source="${escapeRos(escapeRos(cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
+  parts.push(`:if (([:len [/system package find name=user-manager]] > 0) && ([:pick [/system resource get version] 0 1] = "7")) do={/system script add name=${UM_SCRIPT} policy=read,write,test source="${escapeRos((cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
   parts.push(`/system script run ${SCRIPT_NAME}`, `:do {/system script run ${CARDS_SCRIPT}} on-error={}`);
   return parts.join('; ');
 }
