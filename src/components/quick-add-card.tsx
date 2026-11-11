@@ -48,7 +48,7 @@ export function QuickAddCard({ ar, existing, onAdd }: { ar: boolean; existing: D
           <button type="button" className="kind-option" onClick={() => { setKind('batch'); }}><Layers aria-hidden="true"/><strong>{t('عدة كروت', 'Several cards')}</strong><span>{t('للبيع أو للتوزيع؛ الأرقام تُولَّد تلقائياً', 'For selling or distributing; numbers are generated')}</span></button>
         </div>
       </> : <>
-        <Button variant="ghost" className="justify-self-start w-fit" onClick={() => setKind(null)}><Back/>{t('تغيير النوع', 'Change type')}</Button>
+        <div className="flex"><Button variant="ghost" onClick={() => setKind(null)}><Back/>{t('تغيير النوع', 'Change type')}</Button></div>
         {kind === 'single' ? <fieldset className="choice-group"><legend>{t('رقم الكرت', 'Card number')}</legend>
           <div className="choice-grid choice-grid--2"><Button type="button" variant={!manual ? 'default' : 'outline'} aria-pressed={!manual} onClick={() => setManual(false)}>{t('تلقائي', 'Automatic')}</Button><Button type="button" variant={manual ? 'default' : 'outline'} aria-pressed={manual} onClick={() => setManual(true)}>{t('أكتبه بنفسي', 'I’ll type it')}</Button></div>
           {manual && <div className="field-block"><Input id="manual-card-id" autoFocus dir="ltr" inputMode="text" autoCapitalize="characters" autoComplete="off" enterKeyHint="done" maxLength={16} placeholder="SHOP-101" value={typed} aria-invalid={touched && !!idError} aria-describedby="manual-id-msg" onChange={e => setTyped(e.target.value)} onBlur={() => setTouched(true)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); create(); } }}/>

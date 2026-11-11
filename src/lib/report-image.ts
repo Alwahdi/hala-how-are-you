@@ -35,7 +35,7 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   t(`${ar ? 'استخدمت' : 'Used'} ${L(formatDataSize(used))} · ${formatDuration(card.usedMinutes, ar)}`, P + 44, 515, 28, muted);
   // stats row
   const sw = (W - 2 * P - 32) / 3; const stats: [string, string][] = [[ar ? 'تحميل' : 'Download', formatDataSize(card.downloadMB)], [ar ? 'رفع' : 'Upload', formatDataSize(card.uploadMB)], [ar ? 'الجلسات' : 'Sessions', String(s.length)]];
-  stats.forEach(([k, val], i) => { const bx = P + i * (sw + 16); box(bx, 575, sw, 130, card_, border, 24); x.font = `600 26px ${font}`; x.fillStyle = muted; x.textAlign = 'center'; x.fillText(k, (ar ? W - bx - sw / 2 : bx + sw / 2), 625); x.font = `800 40px Manrope, sans-serif`; x.fillStyle = fg; x.fillText(L(val), (ar ? W - bx - sw / 2 : bx + sw / 2), 680); });
+  stats.forEach(([k, val], i) => { const bx = P + i * (sw + 16); box(bx, 575, sw, 130, card_, border, 24); x.font = `600 26px ${font}`; x.fillStyle = muted; x.textAlign = 'center'; x.fillText(k, (ar ? W - bx - sw / 2 : bx + sw / 2), 625); x.font = `800 40px Manrope, sans-serif`; x.fillStyle = fg; x.direction = 'ltr'; x.fillText(val, (ar ? W - bx - sw / 2 : bx + sw / 2), 680); x.direction = ar ? 'rtl' : 'ltr'; });
   // sessions
   t(ar ? 'الجلسات' : 'Sessions', P, 775, 34, fg, 800);
   let y = 805; const maxS = Math.max(1, ...s.map(z => z.downloadMB + z.uploadMB));
