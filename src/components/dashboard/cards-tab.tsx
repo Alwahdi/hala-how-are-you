@@ -6,6 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { cardState, formatBytes, formatDuration, usedShare, type CardRow, type CardState } from '@/lib/card-status';
 import type { ProfileRow, RouterRow, Session, Source } from './types';
 import { UserManagerSetup } from './user-manager-setup';
+import { useServerFn } from '@tanstack/react-start';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { requestRemoveFinished } from '@/lib/alerts.functions';
+import { Trash2, Loader2 } from 'lucide-react';
 
 export const STATE_LABEL: Record<CardState, [string, string]> = { unused: ['جديد', 'Unused'], active: ['قيد الاستخدام', 'In use'], almost: ['قارب على الانتهاء', 'Almost used'], finished: ['منتهي', 'Finished'], disabled: ['معطّل', 'Disabled'] };
 export const STATE_TONE: Record<CardState, string> = { unused: 'bg-primary/15 text-primary', active: 'bg-secondary/20 text-foreground', almost: 'bg-destructive/10 text-destructive', finished: 'bg-muted text-muted-foreground', disabled: 'bg-muted text-muted-foreground' };
@@ -24,6 +29,19 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [limit, setLimit] = useState(100);
   const [open, setOpen] = useState<CardRow | null>(null);
   const [explained, setExplained] = useState(false);
+  const [confirmClean, setConfirmClean] = useState(false);
+  const [cleanMsg, setCleanMsg] = useState<string | null>(null);
+  const removeFinished = useServerFn(requestRemoveFinished);
+  const qc = useQueryClient();
+  const { data: pendingClean = 0 } = useQuery({ queryKey: ['clean-jobs'], queryFn: async () => { const { count } = await supabase.from('router_jobs').select('id', { count: 'exact', head: true }).eq('kind', 'remove_cards').in('status', ['pending', 'sent']); return count ?? 0; }, refetchInterval: 10_000 });
+  const finishedHs = useMemo(() => cards.filter((c) => c.source === 'hotspot' && cardState(c) === 'finished'), [cards]);
+  async function cleanAll() {
+    setConfirmClean(false);
+    let n = 0;
+    for (const r of routers) { const x = await removeFinished({ data: { id: r.id } }).catch(() => ({ queued: 0 })); n += x.queued ?? 0; }
+    setCleanMsg(n ? t(`أرسلنا ${n} كرت للحذف. الراوتر يتأكد من كل كرت ويحذفه خلال دقيقة أو اثنتين.`, `Sent ${n} cards for removal. The router re-checks each one and removes it within a minute or two.`) : t('ما في كروت منتهية مؤكدة بعد. حاول بعد دقيقة.', 'No confirmed used-up cards yet. Try again in a minute.'));
+    qc.invalidateQueries({ queryKey: ['clean-jobs'] });
+  }
 
   const mine = useMemo(() => cards.filter((c) => c.source === source), [cards, source]);
   const packages = useMemo(() => {
@@ -77,6 +95,13 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             {(['all', 'unused', 'active', 'almost', 'finished', 'disabled'] as const).map((f) => <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)} className="chip">{f === 'all' ? t('الكل', 'All') : t(...STATE_LABEL[f])}</button>)}
           </div>
           <p className="text-xs text-muted-foreground">{t(`${list.length} كرت`, `${list.length} cards`)}{pkg ? ` · ${pkg}` : ''}</p>
+          {source === 'hotspot' && filter === 'finished' && finishedHs.length > 0 && (
+            <div className="app-panel flex flex-wrap items-center gap-3 p-4">
+              <span className="flex-1 text-sm">{pendingClean ? <span className="flex items-center gap-2"><Loader2 className="size-4 animate-spin text-primary" />{t('جاري الحذف على الراوتر...', 'Removing on the router...')}</span> : t('الكروت المنتهية تأخذ مساحة وتبطئ البحث في الراوتر.', 'Used-up cards take space and slow searches on the router.')}</span>
+              <Button variant="destructive" className="h-11" disabled={pendingClean > 0} onClick={() => setConfirmClean(true)}><Trash2 />{t(`احذف الكل (${finishedHs.length})`, `Remove all (${finishedHs.length})`)}</Button>
+            </div>
+          )}
+          {cleanMsg && <p role="status" className="rounded-xl bg-primary/10 p-3 text-sm">{cleanMsg}</p>}
           {mine.length === 0 ? <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما وصلت قائمة الكروت بعد.', 'No card list yet.')}</p> : (
             <ul className="space-y-2">
               {list.slice(0, limit).map((c) => {
@@ -101,6 +126,19 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
           {list.length > limit && <Button variant="outline" className="h-11 w-full" onClick={() => setLimit(limit + 200)}>{t('عرض المزيد', 'Show more')}</Button>}
         </>
       )}
+
+      <Dialog open={confirmClean} onOpenChange={setConfirmClean}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle>{t(`حذف ${finishedHs.length} كرت منتهي؟`, `Remove ${finishedHs.length} used-up cards?`)}</DialogTitle>
+            <DialogDescription>{t('تنحذف من الراوتر نهائياً. الراوتر يتأكد بنفسه أن كل كرت خلص فعلاً قبل حذفه، والكرت اللي فيه رصيد ما ينحذف.', 'They are removed from the router for good. The router checks each card is really used up first; a card with balance left is never removed.')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="h-11" onClick={() => setConfirmClean(false)}>{t('إلغاء', 'Cancel')}</Button>
+            <Button variant="destructive" className="h-11" onClick={cleanAll}><Trash2 />{t('احذف', 'Remove')}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">

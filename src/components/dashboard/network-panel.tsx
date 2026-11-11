@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { refreshIpCloudRouters, rotatePushRouter, setRouterRole } from '@/lib/ip-cloud.functions';
+import { requestReboot } from '@/lib/alerts.functions';
+import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
@@ -9,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
 import { API_ENABLE_COMMAND, buildPasteCommand, buildRemoveCommand, directAccessState, isOnline } from '@/lib/router-script';
-import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle } from 'lucide-react';
+import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle, Power, HeartPulse } from 'lucide-react';
 
 type Status = { apiUser?: number; identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string; cloudName?: string; sslPort?: string; sslDisabled?: string; behindNat?: string; publicAddress?: string; apiPort?: string; apiDisabled?: string; apiSslPort?: string; apiSslDisabled?: string };
 export type { Status as RouterStatus };
@@ -38,6 +40,13 @@ export function NetworkPanel() {
     refetchInterval: 15_000,
   });
   const navigate = useNavigate();
+  const reboot = useServerFn(requestReboot);
+  const [confirmReboot, setConfirmReboot] = useState<{ id: string; name: string } | null>(null);
+  const { data: reboots = [] } = useQuery({
+    queryKey: ['reboot-jobs'],
+    queryFn: async () => { const { data } = await supabase.from('router_jobs').select('router_id, status, requested_at, sent_at, done_at').eq('kind', 'reboot').gte('requested_at', new Date(Date.now() - 20 * 60_000).toISOString()).order('requested_at', { ascending: false }); return data ?? []; },
+    refetchInterval: 5_000,
+  });
   const saveRole = useServerFn(setRouterRole);
   const refreshCloud = useServerFn(refreshIpCloudRouters);
   const rotate = useServerFn(rotatePushRouter);
@@ -133,6 +142,12 @@ export function NetworkPanel() {
                     </label>
                   </div>
 
+                  {(() => {
+                    const j = reboots.find((x) => x.router_id === r.id);
+                    if (!j) return null;
+                    const secs = j.done_at && j.sent_at ? Math.round((new Date(j.done_at).getTime() - new Date(j.sent_at).getTime()) / 1000) : null;
+                    return <p role="status" className="mt-3 flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-sm">{j.status === 'pending' ? <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر الراوتر يستلم أمر إعادة التشغيل (خلال 30 ثانية)...', 'Waiting for the router to pick up the restart (within 30 seconds)...')}</> : j.status === 'sent' ? <><Loader2 className="size-4 animate-spin text-primary" />{t('الراوتر يعيد التشغيل... يرجع عادة خلال دقيقة.', 'Restarting... usually back within a minute.')}</> : j.status === 'done' ? <><Power className="size-4 text-primary" />{secs != null ? t(`رجع يشتغل بعد ${secs} ثانية ✓`, `Back up after ${secs} seconds ✓`) : t('تمت إعادة التشغيل ✓', 'Restarted ✓')}</> : <><AlertTriangle className="size-4 text-destructive" />{t('ما استلم الراوتر الأمر (غير متصل).', 'The router did not pick it up (offline).')}</>}</p>;
+                  })()}
                   {!!r.last_status && (
                     <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
                       <Stat label={t('المعالج', 'CPU')} value={s.cpu == null ? '-' : `${s.cpu}%`} meter={s.cpu} />
@@ -172,6 +187,8 @@ export function NetworkPanel() {
                   )}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {direct && <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحديث الآن', 'Refresh now')}</Button>}
+                    <Button variant="outline" className="h-11" disabled={!online} onClick={() => setConfirmReboot({ id: r.id, name: r.name })}><Power />{t('إعادة تشغيل', 'Restart')}</Button>
+                    <Button variant="ghost" className="h-11" asChild><Link to="/health"><HeartPulse />{t('الصحة', 'Health')}</Link></Button>
                     <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
                     <Button variant="ghost" className="h-11 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
                   </div>
@@ -205,6 +222,19 @@ export function NetworkPanel() {
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!confirmReboot} onOpenChange={(o) => !o && setConfirmReboot(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle>{t('إعادة تشغيل', 'Restart')} {confirmReboot?.name}؟</DialogTitle>
+            <DialogDescription>{t('كل المتصلين ينقطعون حوالي دقيقة ثم يرجعون تلقائياً. يصلك تنبيه لما يرجع الراوتر.', 'Everyone is disconnected for about a minute, then reconnects. You get an alert when the router is back.')}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="h-11" onClick={() => setConfirmReboot(null)}>{t('إلغاء', 'Cancel')}</Button>
+            <Button variant="destructive" className="h-11" onClick={async () => { const id = confirmReboot!.id; setConfirmReboot(null); await reboot({ data: { id } }).catch(() => null); qc.invalidateQueries({ queryKey: ['reboot-jobs'] }); }}><Power />{t('أعد التشغيل', 'Restart now')}</Button>
+          </div>
         </DialogContent>
       </Dialog>
 
