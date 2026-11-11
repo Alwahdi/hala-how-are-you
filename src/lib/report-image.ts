@@ -2,7 +2,7 @@ import { iso, biggestSession, cardState, formatDataSize, formatDuration, remaini
 
 /** Draws a 1080x1350 customer report in the browser. Demonstration data only; nothing is uploaded. */
 export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Blob> {
-  await document.fonts?.ready;
+  await Promise.all([document.fonts?.load(`700 30px Cairo`), document.fonts?.load(`800 40px Manrope`)].map(p => p?.catch(() => undefined))); await document.fonts?.ready;
   const W = 1080, H = 1350, P = 72, c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d')!; const css = getComputedStyle(document.documentElement);
   const v = (n: string, f: string) => css.getPropertyValue(n).trim() || f;
@@ -23,7 +23,7 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   const tint = (bx: number, by: number, bw: number, bh: number, color: string, a: number, stroke?: string, r = 22) => { box(bx, by, bw, bh, card_, undefined, r); x.globalAlpha = a; box(bx, by, bw, bh, color, undefined, r); x.globalAlpha = 1; if (stroke) box(bx, by, bw, bh, 'transparent', stroke, r); };
   const bar = (by: number, ratio: number, color: string, h = 20, bx = P, bw = W - 2 * P) => { box(bx, by, bw, h, border, undefined, h / 2); box(bx, by, Math.max(h, bw * Math.max(0, Math.min(1, ratio))), h, color, undefined, h / 2); };
   // header
-  x.font = `800 46px Manrope, sans-serif`; x.fillStyle = fg; x.textAlign = ar ? 'right' : 'left'; x.fillText('Mikro', S(P), 118); const mw = x.measureText('Mikro').width; x.fillStyle = primary; x.fillText('.', ar ? S(P) - mw : S(P) + mw, 118);
+  x.direction = 'ltr'; x.font = `800 46px Manrope, sans-serif`; x.textAlign = 'left'; const mw = x.measureText('Mikro').width; const lx = ar ? W - P - mw - 14 : P; x.fillStyle = fg; x.fillText('Mikro', lx, 118); x.fillStyle = primary; x.fillText('.', lx + mw, 118); x.direction = ar ? 'rtl' : 'ltr';
   t(ar ? 'تقرير استهلاك الكرت' : 'Card usage report', P, 118, 30, muted, 600, 'end');
   // hero card
   box(P, 165, W - 2 * P, 380, card_, border, 36);
@@ -35,12 +35,12 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   t(`${ar ? 'استخدمت' : 'Used'} ${L(formatDataSize(used))} · ${formatDuration(card.usedMinutes, ar)}`, P + 44, 515, 28, muted);
   // stats row
   const sw = (W - 2 * P - 32) / 3; const stats: [string, string][] = [[ar ? 'تحميل' : 'Download', formatDataSize(card.downloadMB)], [ar ? 'رفع' : 'Upload', formatDataSize(card.uploadMB)], [ar ? 'الجلسات' : 'Sessions', String(s.length)]];
-  stats.forEach(([k, val], i) => { const bx = P + i * (sw + 16); box(bx, 575, sw, 130, card_, border, 24); x.font = `600 26px ${font}`; x.fillStyle = muted; x.textAlign = 'center'; x.fillText(k, (ar ? W - bx - sw / 2 : bx + sw / 2), 625); x.font = `800 40px Manrope, sans-serif`; x.fillStyle = fg; x.fillText(val, (ar ? W - bx - sw / 2 : bx + sw / 2), 680); });
+  stats.forEach(([k, val], i) => { const bx = P + i * (sw + 16); box(bx, 575, sw, 130, card_, border, 24); x.font = `600 26px ${font}`; x.fillStyle = muted; x.textAlign = 'center'; x.fillText(k, (ar ? W - bx - sw / 2 : bx + sw / 2), 625); x.font = `800 40px Manrope, sans-serif`; x.fillStyle = fg; x.fillText(L(val), (ar ? W - bx - sw / 2 : bx + sw / 2), 680); });
   // sessions
   t(ar ? 'الجلسات' : 'Sessions', P, 775, 34, fg, 800);
   let y = 805; const maxS = Math.max(1, ...s.map(z => z.downloadMB + z.uploadMB));
   if (!s.length) t(ar ? 'لا توجد جلسات بعد' : 'No sessions yet', P, y + 50, 28, muted);
-  for (const z of s.slice(0, 4)) {
+  for (const z of s.slice(0, 3)) {
     const isBig = z === big && s.length > 1; const mb = z.downloadMB + z.uploadMB;
     isBig ? tint(P, y, W - 2 * P, 104, violet, 0.16, violet) : box(P, y, W - 2 * P, 104, card_, border, 22);
     t(`${L(z.device)}${isBig ? (ar ? '  · الأكبر' : '  · Biggest') : ''}`, P + 28, y + 44, 28, fg, 700);
