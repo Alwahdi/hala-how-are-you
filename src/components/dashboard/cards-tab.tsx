@@ -98,10 +98,10 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {packages.map((e) => (
                   <button key={e.name} type="button" aria-pressed={pkg === e.name} onClick={() => { setPkg(pkg === e.name ? null : e.name); setLimit(100); }} className={`app-panel tap-card p-4 text-start ${pkg === e.name ? 'border-primary' : ''}`}>
-                    <span className="flex items-center justify-between gap-1"><b className="truncate" dir="auto">{e.name}</b><ChevronRight className="tap-chevron" /></span>
+                    <span className="flex items-center justify-between gap-1"><b className="truncate" dir="auto">{e.name === '-' ? t('بدون باقة', 'No package') : e.name}</b><ChevronRight className="tap-chevron" /></span>
                     {e.p?.price ? <span className="mt-1 block text-lg font-bold text-primary" dir="auto">{e.p.price}{e.p.sell_price && e.p.sell_price !== e.p.price ? <span className="ms-1 text-xs font-normal text-muted-foreground">{t(`(بيع ${e.p.sell_price})`, `(sells ${e.p.sell_price})`)}</span> : null}</span> : null}
                     <span className="mt-1 block space-y-0.5 text-xs text-muted-foreground">
-                      {[humanValidity(e.p?.validity, ar), humanRate(e.p?.rate_limit, ar), humanDevices(e.p?.shared_users, ar)].filter(Boolean).map((x) => <span key={x} className="block truncate">{x}</span>)}
+                      {[humanValidity(e.p?.validity, ar), humanRate(e.p?.rate_limit, ar), humanDevices(e.p?.shared_users, ar)].filter(Boolean).map((x) => <span key={x} className="block">{x}</span>)}
                       {!e.p?.price && !e.p?.validity && !e.p?.rate_limit && !e.p?.shared_users ? <span className="block">{t('بدون حدود مسجلة', 'No limits set')}</span> : null}
                     </span>
                     <span className="mt-3 flex items-end justify-between gap-2">
@@ -112,7 +112,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
                         <span className="block" dir="ltr">/ {e.total}</span>
                       </span>
                     </span>
-                    {e.total > 0 && e.ready < LOW_READY && <span className="mt-2 flex items-center gap-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive"><AlertTriangle className="size-3.5" />{e.ready === 0 ? t('خلص الجاهز', 'None left') : t('الجاهز قليل', 'Running low')}</span>}
+                    {e.p && e.total > 0 && (e.ready === 0 || (e.total >= 30 && e.ready < LOW_READY)) && <span className="mt-2 flex items-center gap-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive"><AlertTriangle className="size-3.5" />{e.ready === 0 ? t('خلص الجاهز', 'None left') : t('الجاهز قليل', 'Running low')}</span>}
                   </button>
                 ))}
               </div>
