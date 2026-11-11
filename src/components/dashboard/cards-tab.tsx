@@ -32,7 +32,9 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [filter, setFilter] = useState<CardState | 'all' | 'online'>(initialFilter ?? 'all');
   const [pkg, setPkg] = useState<string | null>(null);
   const [limit, setLimit] = useState(100);
-  const [open, setOpen] = useState<CardRow | null>(null);
+  const [openRaw, setOpen] = useState<CardRow | null>(null);
+  // Follow the latest copy of the open card, so an action's result (off/on, rename) shows without reopening.
+  const open = openRaw ? (cards.find((c) => c.router_id === openRaw.router_id && c.source === openRaw.source && c.name === openRaw.name) ?? openRaw) : null;
   const [explained, setExplained] = useState(false);
   const [confirmClean, setConfirmClean] = useState(false);
   const [cleanMsg, setCleanMsg] = useState<string | null>(null);
