@@ -362,7 +362,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
   .summary-tiles { gap:8px; } .summary-tile { min-height:96px; }
   .demo-card-list { gap:12px; }
   /* Bottom sheet */
-  .demo-card-dialog { top:auto!important; bottom:0!important; left:0!important; right:0!important; transform:none!important; width:100%!important; max-width:none!important; max-height:92dvh; border-radius:22px 22px 0 0!important; padding:28px 18px calc(18px + env(safe-area-inset-bottom)); border-bottom:0; }
+  .demo-card-dialog { top:auto!important; bottom:0!important; left:0!important; right:0!important; transform:none!important; translate:none!important; width:100%!important; max-width:none!important; max-height:92dvh; border-radius:22px 22px 0 0!important; padding:28px 18px calc(18px + env(safe-area-inset-bottom)); border-bottom:0; }
   .demo-card-dialog::before { content:""; position:absolute; top:10px; left:50%; width:44px; height:5px; margin-left:-22px; border-radius:999px; background:var(--border); }
   .demo-card-dialog .sheet-actions, .demo-card-dialog>.demo-close-sticky { position:sticky; bottom:calc(-18px - env(safe-area-inset-bottom)); margin-inline:-18px; padding:12px 18px calc(12px + env(safe-area-inset-bottom)); background:var(--card); border-top:1px solid var(--border); }
 }
