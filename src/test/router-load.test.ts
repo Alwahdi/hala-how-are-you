@@ -38,3 +38,15 @@ describe('router load', () => {
     expect(checkHealth({ cardsSecs: 40 }).some((i) => i.id === 'cards_slow')).toBe(false);
   });
 });
+
+describe('read time wording', () => {
+  it('says read times in natural Arabic', async () => {
+    const { readTime } = await import('@/lib/router-health');
+    expect(readTime(0, true)).toBe('أقل من ثانيتين');
+    expect(readTime(5, true)).toBe('5 ثوانٍ');
+    expect(readTime(40, true)).toBe('40 ثانية');
+    expect(readTime(120, true)).toBe('دقيقتين');
+    expect(readTime(570, true)).toBe('10 دقائق');
+    expect(readTime(40, false)).toBe('40 seconds');
+  });
+});

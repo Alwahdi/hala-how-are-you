@@ -5,7 +5,7 @@ import { AlertTriangle, ArrowLeft, Check, Copy, Info, OctagonAlert, ShieldCheck 
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
-import { checkHealth, healthScore, type HealthInput, type Issue } from '@/lib/router-health';
+import { checkHealth, healthScore, readTime, type HealthInput, type Issue } from '@/lib/router-health';
 import { cardReadSecs, type CardRuns } from '@/lib/card-runs';
 
 export const Route = createFileRoute('/_authenticated/health')({
@@ -72,8 +72,3 @@ function IssueRow({ i, ar }: { i: Issue; ar: boolean }) {
   );
 }
 
-function readTime(secs: number, ar: boolean) {
-  if (secs < 90) return ar ? `${secs} ثانية` : `${secs} seconds`;
-  const m = Math.round(secs / 60);
-  return ar ? `${m} دقائق` : `${m} minutes`;
-}

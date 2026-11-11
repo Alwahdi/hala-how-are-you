@@ -19,6 +19,15 @@ export function parseRouterDate(s?: string): number | null {
   return null;
 }
 
+/** How long something took, in plain Arabic or English ("40 ثانية", "3 دقائق", "دقيقتين"). */
+export function readTime(secs: number, ar: boolean): string {
+  if (secs < 2) return ar ? 'أقل من ثانيتين' : 'under 2 seconds';
+  const [n, one, two, few, many] = secs < 90 ? [secs, 'ثانية', 'ثانيتين', 'ثوانٍ', 'ثانية'] : [Math.round(secs / 60), 'دقيقة', 'دقيقتين', 'دقائق', 'دقيقة'];
+  if (!ar) return `${n} ${secs < 90 ? 'seconds' : 'minutes'}`;
+  if (n === 1) return one; if (n === 2) return two;
+  return `${n} ${n <= 10 ? few : many}`;
+}
+
 export function checkHealth(h: HealthInput, now = Date.now()): Issue[] {
   const out: Issue[] = [];
   const hdd = h.totalHdd ? (h.freeHdd ?? 0) / h.totalHdd : null;
@@ -41,8 +50,8 @@ export function checkHealth(h: HealthInput, now = Date.now()): Issue[] {
   const shared = (h.shared ?? '').split(',').filter(Boolean);
   if (shared.some((s) => s === 'unlimited' || Number(s) > 1)) out.push({ id: 'shared', severity: 'info', ar: ['باقات تسمح بأكثر من جهاز للكرت', 'لو ما تقصد هذا، الكرت يُستهلك أسرع ويشتكي الزبون. اجعلها 1.'], en: ['Packages allow several devices per card', 'If unintended, cards run out faster and customers complain. Set it to 1.'], fix: '/ip hotspot user profile set [find] shared-users=1' });
   if ((h.cardsSecs ?? 0) > SLOW_CARD_READ_SECS) {
-    const m = Math.round((h.cardsSecs ?? 0) / 60);
-    out.push({ id: 'cards_slow', severity: 'warn', ar: [`قراءة الكروت تأخذ ${m} دقائق`, 'المعالج يبقى مشغولاً طول القراءة. اضغط «إعادة الربط» مرة لتصل القراءة الخفيفة الجديدة، ولو بقيت بطيئة احذف الكروت المنتهية.'], en: [`Reading cards takes ${m} minutes`, 'The CPU stays busy the whole time. Tap Reconnect once to get the new light reader; if it stays slow, remove used-up cards.'] });
+    const secs = h.cardsSecs ?? 0;
+    out.push({ id: 'cards_slow', severity: 'warn', ar: [`قراءة الكروت تأخذ ${readTime(secs, true)}`, 'المعالج يبقى مشغولاً طول القراءة. اضغط «إعادة الربط» مرة لتصل القراءة الخفيفة الجديدة، ولو بقيت بطيئة احذف الكروت المنتهية.'], en: [`Reading cards takes ${readTime(secs, false)}`, 'The CPU stays busy the whole time. Tap Reconnect once to get the new light reader; if it stays slow, remove used-up cards.'] });
   }
   return out;
 }
