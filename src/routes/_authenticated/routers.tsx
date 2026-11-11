@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { buildPasteCommand, buildRemoveCommand, hashToken, isOnline, newToken } from '@/lib/router-script';
+import { PasteCommandPanel } from '@/components/paste-command-panel';
+import { buildFallbackCommand, buildPasteCommand, buildRemoveCommand, hashToken, isOnline, newToken } from '@/lib/router-script';
 import { Globe2, Plus, Copy, Trash2, LogOut } from 'lucide-react';
 
 export const Route = createFileRoute('/_authenticated/routers')({
@@ -61,8 +62,7 @@ function RoutersPage() {
   }, [refreshCloud, qc]);
   const [addOpen, setAddOpen] = useState(false);
   const [name, setName] = useState('');
-  const [version, setVersion] = useState<'v7' | 'v6'>('v7');
-  const [command, setCommand] = useState<string | null>(null);
+  const [command, setCommand] = useState<{ main: string; fallback: string } | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,9 +72,9 @@ function RoutersPage() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     const token = newToken();
-    const { error } = await supabase.from('routers').insert({ owner_id: u.user.id, name: name.trim(), ros_version: version, token_hash: await hashToken(token) });
+    const { error } = await supabase.from('routers').insert({ owner_id: u.user.id, name: name.trim(), token_hash: await hashToken(token) });
     if (error) return setError(error.message);
-    setCommand(buildPasteCommand(token));
+    setCommand({ main: buildPasteCommand(token), fallback: buildFallbackCommand(token) });
     qc.invalidateQueries({ queryKey: ['routers'] });
   }
 
@@ -150,18 +150,13 @@ function RoutersPage() {
           </DialogHeader>
           {command ? (
             <div className="space-y-3">
-              <pre dir="ltr" className="max-h-56 overflow-auto rounded-lg bg-muted p-3 text-xs whitespace-pre-wrap break-all">{command}</pre>
-              <Button className="w-full" onClick={() => copy(command)}><Copy />{copied ? t('تم النسخ', 'Copied') : t('نسخ الأمر', 'Copy command')}</Button>
+              <PasteCommandPanel command={command.main} fallback={command.fallback} ar={ar} />
               <p className="text-xs text-muted-foreground">{t('بعد اللصق تظهر حالة الراوتر هنا خلال دقيقة تقريباً.', 'The router should appear online here within about a minute.')}</p>
             </div>
           ) : (
             <form className="space-y-4" onSubmit={addRouter}>
               <div className="space-y-2"><Label htmlFor="rname">{t('اسم الراوتر', 'Router name')}</Label><Input id="rname" required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder={t('مثلاً: برج الحي', 'e.g. Main tower')} /></div>
-              <div className="space-y-2">
-                <Label>{t('إصدار RouterOS', 'RouterOS version')}</Label>
-                <div className="flex gap-2">{(['v7', 'v6'] as const).map((v) => <Button key={v} type="button" variant={version === v ? 'default' : 'outline'} onClick={() => setVersion(v)}>{v}</Button>)}</div>
-                {version === 'v6' && <p className="text-xs text-muted-foreground">{t('يحتاج v6.43 أو أحدث.', 'Requires v6.43 or newer.')}</p>}
-              </div>
+              <p className="text-xs text-muted-foreground">{t('نعرف إصدار RouterOS تلقائياً من الراوتر. يحتاج v6.43 أو أحدث.', 'We detect the RouterOS version automatically. Requires v6.43 or newer.')}</p>
               {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full">{t('أنشئ أمر الربط', 'Create connect command')}</Button>
             </form>

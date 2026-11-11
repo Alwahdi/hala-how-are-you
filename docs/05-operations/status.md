@@ -35,6 +35,9 @@ related: [roadmap.md]
 - القرارات المعتمدة: [decisions](../04-decisions/README.md)؛ أحدث اعتماد في [D-004](../04-decisions/D-004-self-serve-product-led-growth.md). [confirmed]
 - مسودة رحلة صاحب الشبكة وحالاتها: [دورة الكرت](../01-discovery/voucher-lifecycle.md)؛ التوصيات غير معتمدة للبناء. [confirmed]
 
+- [confirmed] 2026-11-11: أمر ربط الراوتر صار سطراً واحداً (يحل خطأ expected end of command في تطبيق الجوال)، والإصدار يُعرف تلقائياً، وأضيفت طريقة بديلة ونصائح انتظار. انظر [D-030](../04-decisions/D-030-phone-first-signin-and-router-onboarding.md).
+- ينتظر: تجربة الأمر الجديد على راوتر v6 وv7 من الجوال.
+
 ## الخطوة الجاية
 [confirmed] نفذت صفحة التسويق بعد اعتماد خطتها؛ التالي مراجعة المؤسس واستكمال بيانات الخصوصية قبل النشر، وفق [سجل الصفحة](../00-company/conversion-landing-page.md). لا ربط شبكات أو نشر منفذ.
 [assumption] في نطاق تقييم الفرصة: عرض خطة مقارنة المهام المرشحة والتحقق عن بعد لاعتماد مستقل؛ مرجع الفجوات والتوصية في [التقييم](../01-discovery/product-opportunity-assessment.md). لم نختر المهمة أو السوق أو الأسعار بعد.

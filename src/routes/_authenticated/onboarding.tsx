@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Cloud, Copy, Globe2, Loader2, Router, Terminal, TriangleAlert } from 'lucide-react';
-import { buildPasteCommand, hashToken, newToken } from '@/lib/router-script';
+import { buildFallbackCommand, buildPasteCommand, hashToken, newToken } from '@/lib/router-script';
+import { PasteCommandPanel } from '@/components/paste-command-panel';
 import { buildIpCloudSetup } from '@/lib/ip-cloud';
 import { connectIpCloudRouter, createIpCloudRouter } from '@/lib/ip-cloud.functions';
 
@@ -35,7 +36,8 @@ function Onboarding() {
   const connectCloud = useServerFn(connectIpCloudRouter);
   const [step, setStep] = useState<Step>('basics');
   const [name, setName] = useState('');
-  const [version, setVersion] = useState<'v7' | 'v6'>('v7');
+  const [fallback, setFallback] = useState('');
+  const [waited, setWaited] = useState(0);
   const [routerId, setRouterId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
   const [copied, setCopied] = useState(false);
@@ -50,6 +52,7 @@ function Onboarding() {
     if (step !== 'push' || !routerId) return;
     const id = setInterval(async () => {
       const { data } = await supabase.from('routers').select('last_seen_at, last_status').eq('id', routerId).maybeSingle();
+      setWaited((w) => w + 5);
       if (data?.last_seen_at) { setStatus(data.last_status as Status); setStep('done'); }
     }, 5000);
     return () => clearInterval(id);
@@ -59,10 +62,10 @@ function Onboarding() {
     setBusy(true); setError(null);
     const { data: u } = await supabase.auth.getUser();
     const token = newToken();
-    const { data, error: e } = await supabase.from('routers').insert({ owner_id: u.user!.id, name: name.trim(), ros_version: version, token_hash: await hashToken(token) }).select('id').single();
+    const { data, error: e } = await supabase.from('routers').insert({ owner_id: u.user!.id, name: name.trim(), token_hash: await hashToken(token) }).select('id').single();
     setBusy(false);
     if (e || !data) return setError(t('ما قدرنا نحفظ الراوتر. حاول مرة ثانية.', 'Could not save the router. Try again.'));
-    setRouterId(data.id); setCommand(buildPasteCommand(token)); setStep('push');
+    setRouterId(data.id); setCommand(buildPasteCommand(token)); setFallback(buildFallbackCommand(token)); setWaited(0); setStep('push');
   }
 
   async function chooseCloud() {
@@ -83,15 +86,15 @@ function Onboarding() {
       invalid_host: t('اكتب اسم IP Cloud كما يظهر في الراوتر، مثل xxxx.sn.mynetname.net', 'Enter the IP Cloud name as shown on the router, e.g. xxxx.sn.mynetname.net'),
       auth: t('الراوتر رفض الدخول. الصق الأمر مرة ثانية ثم أعد المحاولة.', 'The router rejected the login. Paste the command again, then retry.'),
       tls: t('الشهادة لم تجهز بعد. انتظر دقيقة ثم أعد المحاولة.', 'The certificate is not ready yet. Wait a minute and retry.'),
-      timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
-      unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
+      timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
+      unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
     };
     setError(msgs[r.error]);
   }
 
   async function switchToPush() {
     if (routerId) await supabase.from('routers').delete().eq('id', routerId);
-    setRouterId(null); setError(null); setVersion('v7'); await choosePush();
+    setRouterId(null); setError(null); await choosePush();
   }
 
   async function copy() { await navigator.clipboard.writeText(command); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -124,18 +127,7 @@ function Onboarding() {
             <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); if (name.trim()) setStep('method'); }}>
               <Head icon={<Router />} title={t('أهلاً بك! لنضف راوترك الأول', "Welcome! Let's add your first router")} sub={t('دقيقتان تقريباً. لا نطلب كلمة مرور المدير أبداً.', 'About two minutes. We never ask for the admin password.')} />
               <div className="space-y-2"><Label htmlFor="rname">{t('اسم تعرفه به', 'A name you recognise')}</Label><Input id="rname" autoFocus required maxLength={60} className="h-12" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('مثلاً: برج الحي', 'e.g. Main tower')} /></div>
-              <fieldset className="space-y-2">
-                <legend className="text-sm font-medium">{t('إصدار RouterOS', 'RouterOS version')}</legend>
-                <div className="grid grid-cols-2 gap-3">
-                  {(['v7', 'v6'] as const).map((v) => (
-                    <button key={v} type="button" aria-pressed={version === v} onClick={() => setVersion(v)} className={`rounded-xl border p-4 text-start ${version === v ? 'border-primary bg-primary/10 ring-2 ring-primary/30' : 'border-input'}`}>
-                      <span className="block text-2xl font-extrabold" dir="ltr">{v}</span>
-                      <span className="text-xs text-muted-foreground">{v === 'v7' ? t('الأحدث (7.x)', 'Newest (7.x)') : t('الأقدم (6.x)', 'Older (6.x)')}</span>
-                    </button>
-                  ))}
-                </div>
-                <details className="text-xs text-muted-foreground"><summary className="cursor-pointer text-primary">{t('كيف أعرف إصداري؟', 'How do I know my version?')}</summary><p className="mt-1">{t('في Winbox يظهر الإصدار أعلى النافذة، أو اكتب في Terminal:', 'Winbox shows it in the title bar, or run in Terminal:')} <code dir="ltr">/system resource print</code></p></details>
-              </fieldset>
+              <p className="flex gap-2 text-xs text-muted-foreground"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('ما تحتاج تعرف الإصدار (v6 أو v7). نعرفه تلقائياً من الراوتر.', 'No need to know your version (v6 or v7). We detect it from the router.')}</p>
               <Button type="submit" className="h-12 w-full text-base" disabled={!name.trim()}>{t('التالي', 'Next')}</Button>
             </form>
           )}
@@ -144,7 +136,7 @@ function Onboarding() {
             <div className="space-y-4">
               <div className="flex items-start gap-2"><BackBtn Back={Back} label={t('رجوع', 'Back')} onClick={() => setStep('basics')} /><Head icon={<Globe2 />} title={t('كيف نتصل بالراوتر؟', 'How should we connect?')} sub={t('اختر واحدة، وتقدر تغيرها لاحقاً.', 'Pick one; you can change it later.')} /></div>
               <MethodCard icon={<Terminal />} badge={t('موصى به', 'Recommended')} title={t('أمر لصق', 'Paste command')} body={t('يعمل حتى لو الإنترنت خلف CGNAT. الراوتر يرسل حالته كل 30 ثانية.', 'Works even behind CGNAT. The router sends its status every 30 seconds.')} onClick={choosePush} disabled={busy} />
-              <MethodCard icon={<Cloud />} title="IP Cloud / DDNS" body={version === 'v6' ? t('متاح حالياً لـ v7 فقط. استخدم أمر اللصق لـ v6.', 'Currently v7 only. Use the paste command for v6.') : t('نتصل نحن بالراوتر عبر اسم IP Cloud. يحتاج عنواناً مفتوحاً (ليس CGNAT).', 'We connect to the router through its IP Cloud name. Needs a reachable address (not CGNAT).')} onClick={chooseCloud} disabled={busy || version === 'v6'} />
+              <MethodCard icon={<Cloud />} title="IP Cloud / DDNS" body={t('نتصل بالراوتر عبر اسم IP Cloud ونعرف إصداره تلقائياً. يحتاج RouterOS v7 وعنواناً مفتوحاً (ليس CGNAT).', 'We connect through its IP Cloud name and detect the version. Needs RouterOS v7 and a reachable address (not CGNAT).')} onClick={chooseCloud} disabled={busy} />
               {busy && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{t('نجهز...', 'Preparing...')}</p>}
               <Err e={error} />
             </div>
@@ -152,10 +144,20 @@ function Onboarding() {
 
           {step === 'push' && (
             <div className="space-y-4">
-              <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('Winbox ← New Terminal ← الصق ← Enter', 'Winbox → New Terminal → paste → Enter')} />
-              <Cmd command={command} />
-              <Button className="h-12 w-full text-base" onClick={copy}><Copy />{copied ? t('تم النسخ ✓', 'Copied ✓') : t('نسخ الأمر', 'Copy command')}</Button>
-              <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" />{t('ننتظر أول رسالة من راوترك... عادة أقل من دقيقة.', 'Waiting for the first message from your router... usually under a minute.')}</div>
+              <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('أمر قصير في سطر واحد: انسخ ← الصق في Terminal ← Enter', 'One short line: copy → paste in Terminal → Enter')} />
+              <PasteCommandPanel command={command} fallback={fallback} ar={ar} />
+              <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" /><span className="flex-1">{t('ننتظر أول إشارة من راوترك... عادة أقل من دقيقة.', 'Waiting for the first signal from your router... usually under a minute.')}</span><bdi dir="ltr" className="tabular-nums text-muted-foreground">{waited}s</bdi></div>
+              {waited >= 60 && (
+                <div className="space-y-2 rounded-xl border border-border p-4 text-sm">
+                  <p className="font-semibold">{t('ما وصلت إشارة بعد؟ تأكد من هذه:', 'No signal yet? Check these:')}</p>
+                  <ul className="list-disc space-y-1 ps-5 text-muted-foreground">
+                    <li>{t('الراوتر متصل بالإنترنت: جرّب', 'The router has internet: try')} <code dir="ltr">/ping 8.8.8.8</code></li>
+                    <li>{t('DNS شغال: جرّب', 'DNS works: try')} <code dir="ltr">/ping mikro.alwahdi.com</code></li>
+                    <li>{t('ساعة الراوتر صحيحة (الساعة الخاطئة تفشل اتصال HTTPS):', 'Router clock is correct (a wrong clock breaks HTTPS):')} <code dir="ltr">/system clock print</code></li>
+                    <li>{t('لو ظهر خطأ في Terminal استخدم الطريقة البديلة فوق.', 'If Terminal showed an error, use the alternative command above.')}</li>
+                  </ul>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">{t('لن يظهر هذا الأمر مرة ثانية. لا تشاركه مع أحد.', 'This command will not be shown again. Do not share it.')}</p>
             </div>
           )}
