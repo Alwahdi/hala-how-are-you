@@ -3,8 +3,23 @@ export const API_USER = 'mikro-read';
 export const API_GROUP = 'mikro-read';
 
 /** Accepts MikroTik IP Cloud names or any public hostname; rejects IPs in private ranges. */
+/** Cleans what people paste: Arabic/Persian digits, spaces, scheme, www., paths, trailing dots. */
+export function cleanAddressInput(input: string): string {
+  return input
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06f0-\u06f9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[\s\u200e\u200f]+/g, '')
+    .replace(/\uff1a/g, ':')
+    .toLowerCase()
+    .replace(/^[a-z]+:\/\//, '')
+    .replace(/^[^@/]*@/, '')
+    .replace(/^www\./, '')
+    .replace(/[/?#].*$/, '')
+    .replace(/\.+(?=:|$)/, '');
+}
+
 export function normalizeCloudHost(input: string): string | null {
-  const h = input.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const h = cleanAddressInput(input);
   if (!/^[a-z0-9.-]{4,253}$/.test(h) || !h.includes('.')) return null;
   if (/^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(h)) return null;
   if (h === 'localhost' || h.endsWith('.local') || h.endsWith('.internal')) return null;
@@ -13,11 +28,12 @@ export function normalizeCloudHost(input: string): string | null {
 
 /** Accepts "host", "host:port" or a URL plus an optional separate port; returns "host" or "host:port" (443 omitted). */
 export function normalizeCloudAddress(input: string, port?: number | string | null): string | null {
-  const raw = input.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  const raw = cleanAddressInput(input);
   const m = /^(.*?)(?::(\d{1,5}))?$/.exec(raw);
   const host = normalizeCloudHost(m?.[1] ?? '');
   if (!host) return null;
-  const p = Number(m?.[2] ?? (port === '' || port == null ? 443 : port));
+  const cp = typeof port === 'string' ? cleanAddressInput(port) : port;
+  const p = Number(m?.[2] ?? (cp === '' || cp == null ? 443 : cp));
   if (!Number.isInteger(p) || p < 1 || p > 65535) return null;
   return p === 443 ? host : `${host}:${p}`;
 }
