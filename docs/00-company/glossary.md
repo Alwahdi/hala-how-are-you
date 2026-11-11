@@ -82,3 +82,7 @@ related: [vision.md]
 | زمن الوصول للقيمة | Time to Value | [assumption] المدة إلى أول نتيجة ذات قيمة، لا مجرد إكمال التسجيل؛ تعريف قياس مقترح. |
 | جلسة | Session | [confirmed] فترة اتصال واحدة لكرت من جهاز، لها بداية ومدة وتحميل ورفع. |
 | رد الزبون | Customer reply | [confirmed] رسالة أو صورة يجهزها صاحب الشبكة من بيانات الكرت ويرسلها بنفسه. |
+- **CGNAT (Carrier-Grade NAT):** عنوان عام مشترك من المزود يمنع الوصول المباشر للراوتر من الإنترنت. مرجع: [remote-access](../06-mikrotik/remote-access.md).
+- **Telemetry (تقرير الحالة):** إرسال الراوتر حالته دورياً إلى Mikro. مرجع: [D-028](../04-decisions/D-028-router-push-status.md).
+- **RADIUS:** بروتوكول مصادقة ومحاسبة مركزي يستخدمه User Manager. مرجع: [user-manager-radius](../06-mikrotik/user-manager-radius.md).
+- **FastTrack:** تسريع في RouterOS يتجاوز حدود السرعة. مرجع: [queues](../06-mikrotik/queues.md).
