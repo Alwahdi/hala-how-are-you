@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DesignSpecimenRouteImport } from './routes/design-specimen'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
@@ -43,6 +44,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design-specimen': typeof DesignSpecimenRoute
   '/privacy': typeof PrivacyRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/dashboard'
     | '/onboarding'
     | '/routers'
     | '/welcome'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/dashboard'
     | '/onboarding'
     | '/routers'
     | '/welcome'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-specimen'
     | '/privacy'
+    | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/_authenticated/welcome'
@@ -189,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -228,12 +247,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,

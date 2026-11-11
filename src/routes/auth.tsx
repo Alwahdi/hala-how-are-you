@@ -60,7 +60,7 @@ function AuthPage() {
       const proof = sessionStorage.getItem(PROOF_KEY);
       if (proof) { await link({ data: { proof, language: ar ? 'ar' : 'en' } }).catch(() => null); sessionStorage.removeItem(PROOF_KEY); }
       const { data: prof } = await supabase.from('profiles').select('account_type').eq('id', data.user.id).maybeSingle();
-      navigate({ to: prof?.account_type ? '/routers' : '/welcome', replace: true });
+      if (prof?.account_type) navigate({ to: '/dashboard', replace: true }); else navigate({ to: '/onboarding', replace: true });
     }
     finish();
     const { data: sub } = supabase.auth.onAuthStateChange((e) => { if (e === 'SIGNED_IN') finish(); });
