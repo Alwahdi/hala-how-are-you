@@ -35,3 +35,4 @@ related: [../templates/decision.md]
 | [D-021](D-021-professional-landing-background-pattern.md) | خلفية صفحة Mikro بنمط شبكي متدرج يغطي الصفحة | draft | 2026-11-11 |
 - [D-022](D-022-mesh-texture-and-color-roles.md) — mesh texture and color roles (approved)
 - [D-023](D-023-owner-first-card-concept-and-surfaces.md) — owner-first card concept and surface rules (approved)
+- [D-024](D-024-customer-reply-assistant-demo.md) — customer reply assistant and card search, demo only (approved)
