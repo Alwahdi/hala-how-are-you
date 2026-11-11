@@ -31,10 +31,16 @@ export function cardState(c: Pick<CardRow, 'uptime_s' | 'bytes' | 'limit_uptime_
   return 'active';
 }
 
-export function formatBytes(b: number): string {
-  if (b < 1024) return `${b} B`;
-  const u = ['KB', 'MB', 'GB', 'TB']; let v = b / 1024; let i = 0;
-  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+/** A limit typed as "10G" in a 1000-based menu is a round decimal number; show its card's numbers in the same base. */
+export function isDecimalSize(limit: number | null | undefined): boolean {
+  return !!limit && limit % 1048576 !== 0 && limit % 1_000_000 === 0;
+}
+
+export function formatBytes(b: number, decimal = false): string {
+  const k = decimal ? 1000 : 1024;
+  if (b < k) return `${b} B`;
+  const u = ['KB', 'MB', 'GB', 'TB']; let v = b / k; let i = 0;
+  while (v >= k && i < u.length - 1) { v /= k; i++; }
   return `${v.toFixed(v < 10 ? 1 : 0)} ${u[i]}`;
 }
 

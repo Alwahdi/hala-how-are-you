@@ -1,7 +1,7 @@
 import { CalendarClock, Copy, Layers, MessageCircle, Server, StickyNote, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { cardState, formatBytes, formatDuration, remaining, shortLeft, usedShare, type CardRow } from '@/lib/card-status';
+import { cardState, formatBytes, isDecimalSize, formatDuration, remaining, shortLeft, usedShare, type CardRow } from '@/lib/card-status';
 import { CardControls } from './card-controls';
 import { STATE_LABEL, STATE_TONE } from './card-row';
 import type { ProfileRow, RouterRow, Session } from './types';
@@ -19,12 +19,12 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
     <>
       <DialogHeader>
         <DialogTitle dir="ltr" className="font-mono text-2xl">{card.name}</DialogTitle>
-        <DialogDescription><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATE_TONE[st]}`}>{t(...STATE_LABEL[st])}</span> {card.source === 'usermanager' ? 'User Manager' : 'Hotspot'}</DialogDescription>
+        <DialogDescription><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATE_TONE[st]}`}>{t(...STATE_LABEL[st])}</span><span className="ms-2">{card.source === 'usermanager' ? 'User Manager' : 'Hotspot'}</span></DialogDescription>
       </DialogHeader>
       <div className="flex items-center gap-4">
         <div className="gauge shrink-0" data-tone={pct != null && pct >= 80 ? 'warn' : undefined} style={{ ['--v' as string]: pct ?? 0 }} role="img" aria-label={pct == null ? t('بدون حد', 'No limit') : t(`مستخدم ${pct}%`, `${pct}% used`)}><span dir="ltr">{pct == null ? '∞' : `${pct}%`}</span></div>
         <dl className="min-w-0 space-y-2 text-sm">
-          <div><dt className="text-xs text-muted-foreground">{t('البيانات', 'Data')}</dt><dd><b dir="ltr">{formatBytes(card.bytes)}</b> {card.limit_bytes ? <span className="text-muted-foreground">{t(`من ${formatBytes(card.limit_bytes)} · باقي `, `of ${formatBytes(card.limit_bytes)} · left `)}<b className="text-foreground" dir="ltr">{formatBytes(left.bytes ?? 0)}</b></span> : <span className="text-muted-foreground">{t('· بلا حد', '· no limit')}</span>}</dd></div>
+          <div><dt className="text-xs text-muted-foreground">{t('البيانات', 'Data')}</dt><dd><b dir="ltr">{formatBytes(card.bytes, dec)}</b> {card.limit_bytes ? <span className="text-muted-foreground">{t(`من ${formatBytes(card.limit_bytes, dec)} · باقي `, `of ${formatBytes(card.limit_bytes, dec)} · left `)}<b className="text-foreground" dir="ltr">{formatBytes(left.bytes ?? 0, dec)}</b></span> : <span className="text-muted-foreground">{t('· بلا حد', '· no limit')}</span>}</dd></div>
           <div><dt className="text-xs text-muted-foreground">{t('وقت الاستخدام', 'Usage time')}</dt><dd><b>{formatDuration(card.uptime_s, ar)}</b> {card.limit_uptime_s ? <span className="text-muted-foreground">{t(`من ${formatDuration(card.limit_uptime_s, true)} · باقي `, `of ${formatDuration(card.limit_uptime_s, false)} · left `)}<b className="text-foreground">{formatDuration(left.seconds ?? 0, ar)}</b></span> : <span className="text-muted-foreground">{t('· بلا حد', '· no limit')}</span>}</dd></div>
         </dl>
       </div>
