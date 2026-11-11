@@ -320,3 +320,23 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .split-block { display:flex; flex-direction:column; gap:8px; }
 .split-bar { height:10px; border-radius:999px; background:var(--secondary); overflow:hidden; } .split-bar>span { display:block; height:100%; background:var(--primary); }
 .split-legend { display:flex; justify-content:space-between; font-size:13px; } .split-legend span { display:inline-flex; align-items:center; gap:6px; } .split-legend span:first-child svg { color:var(--primary); } .split-legend span:last-child svg { color:var(--secondary); }.dialog-hero .status-chip { align-self:flex-start; }
+
+/* D-024 search, sessions, customer reply */
+.summary-tile { cursor:pointer; text-align:start; transition:border-color .15s; } .summary-tile:hover { border-color:color-mix(in oklab,var(--primary) 45%,transparent); } .summary-tile[aria-pressed=true] { outline:2px solid var(--ring); outline-offset:2px; } .summary-tile:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+.card-search { position:relative; display:flex; align-items:center; gap:8px; } .card-search>svg { position:absolute; inset-inline-start:14px; color:var(--muted-foreground); pointer-events:none; } .card-search input { height:48px; padding-inline-start:42px; font-size:15px; text-align:start; } .card-search>button { position:absolute; inset-inline-end:4px; }
+.filter-chips { display:flex; flex-wrap:wrap; gap:8px; margin-block:12px 4px; } .filter-chips button { min-height:36px; border-radius:999px; }
+.empty-results { display:flex; flex-direction:column; align-items:center; gap:10px; padding:32px 16px; border:1px dashed var(--border); border-radius:12px; color:var(--muted-foreground); }
+.reply-cta { display:flex; flex-wrap:wrap; gap:8px; } .reply-cta button { flex:1 1 160px; min-height:44px; }
+.sessions-block { display:flex; flex-direction:column; gap:10px; }
+.session-list { display:flex; flex-direction:column; gap:8px; } .session-list li { padding:10px 12px; border-radius:10px; border:1px solid var(--border); display:flex; flex-direction:column; gap:6px; } .session-list li.session--big { border-color:color-mix(in oklab,var(--warning) 50%,transparent); }
+.session-head,.session-meta { display:flex; justify-content:space-between; gap:8px; font-size:13px; } .session-meta { font-size:12px; color:var(--muted-foreground); }
+.session-tag { font-size:11px; padding:1px 8px; border-radius:999px; color:var(--warning); border:1px solid currentColor; margin-inline-start:6px; }
+.session-bar { height:6px; border-radius:999px; background:color-mix(in oklab,var(--foreground) 8%,transparent); } .session-bar>span { display:block; height:100%; border-radius:inherit; background:var(--primary); } .session--big .session-bar>span { background:var(--warning); }
+.reply-step { display:flex; flex-direction:column; gap:12px; }
+.reply-options { display:flex; flex-wrap:wrap; gap:10px; } .reply-options>div { display:inline-flex; gap:4px; } .reply-options button { min-height:36px; }
+.reply-preview { white-space:pre-wrap; font-family:inherit; font-size:14px; line-height:1.8; padding:14px; border-radius:12px; border:1px solid var(--border); background:color-mix(in oklab,var(--background) 60%,var(--card)); max-height:260px; overflow:auto; text-align:start; }
+.reply-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .reply-actions>* { min-height:44px; }
+.reply-status { min-height:20px; display:flex; align-items:center; gap:6px; font-size:13px; color:var(--primary); }
+.reason-option { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; cursor:pointer; } .reason-option:has(input:checked) { border-color:var(--primary); } .reason-option input { accent-color:var(--primary); }
+.complaint-list { margin-top:16px; padding:14px; border-radius:12px; border:1px solid color-mix(in oklab,var(--warning) 40%,transparent); display:flex; flex-direction:column; gap:8px; } .complaint-list li { display:flex; align-items:center; gap:6px; font-size:13px; } .complaint-list svg { color:var(--warning); }
+@media(max-width:760px){ .reply-actions { grid-template-columns:1fr; } }
