@@ -12,7 +12,7 @@ export function needsValue(a: CardAction): boolean {
 }
 
 /** Validates an action request; returns an error code or null when it can be sent to the router. */
-export function checkCardAction(i: { source: string; action: string; name: string; value?: string | null }): 'bad_action' | 'bad_name' | 'bad_value' | 'same_name' | null {
+export function checkCardAction(i: { source: string; action: string; name: string; value?: string | null | undefined }): 'bad_action' | 'bad_name' | 'bad_value' | 'same_name' | null {
   if (!(CARD_ACTIONS as readonly string[]).includes(i.action) || (i.source !== 'hotspot' && i.source !== 'usermanager')) return 'bad_action';
   if (!SAFE_VALUE.test(i.name)) return 'bad_name';
   if (needsValue(i.action as CardAction)) {
@@ -23,7 +23,7 @@ export function checkCardAction(i: { source: string; action: string; name: strin
 }
 
 /** The single line the router script reads: card|job|source|action|name|value ("-" when the action has no value). */
-export function cardJobLine(id: string, p: { source: string; action: string; name: string; value?: string | null }): string | null {
+export function cardJobLine(id: string, p: { source: string; action: string; name: string; value?: string | null | undefined }): string | null {
   if (checkCardAction(p)) return null;
   return ['card', id, p.source, p.action, p.name, needsValue(p.action as CardAction) ? p.value : '-'].join('|');
 }
