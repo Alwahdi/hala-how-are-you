@@ -80,7 +80,7 @@ export function humanValidity(v: string | null | undefined, ar: boolean): string
   if (!s) return v;
   const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
   const parts = ar
-    ? [d && (d === 1 ? 'يوم' : d === 2 ? 'يومين' : `${d} أيام`), h && (h === 1 ? 'ساعة' : `${h} ساعات`), m && `${m} دقيقة`]
+    ? [d && (d === 1 ? 'يوم' : d === 2 ? 'يومين' : d <= 10 ? `${d} أيام` : `${d} يوم`), h && (h === 1 ? 'ساعة' : h === 2 ? 'ساعتين' : h <= 10 ? `${h} ساعات` : `${h} ساعة`), m && `${m} دقيقة`]
     : [d && `${d} day${d > 1 ? 's' : ''}`, h && `${h} h`, m && `${m} min`];
   return parts.filter(Boolean).join(ar ? ' و' : ' ');
 }

@@ -116,7 +116,9 @@ export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager'
   } else {
     // Packages: name,name-for-users,validity,price,devices,rate(rx/tx),uptime-limit,transfer-limit (from the first linked limitation).
     const lim = k === 'um6' ? { pl: '/tool user-manager profile profile-limitation', l: '/tool user-manager profile limitation', shared: 'override-shared-users' } : { pl: '/user-manager profile-limitation', l: '/user-manager limitation', shared: '-' };
-    const prow = [fld('name'), fld('name-for-users'), fld('validity'), fld('price'), lim.shared === '-' ? '"\\"\\""' : fld(lim.shared), q('$rl'), q('$ul'), q('$tl')].join(' . "," . ');
+    // v6 keeps the price in hundredths (3000 is stored as 300000).
+    const price = k === 'um6' ? q('[:tostr (($r->"price") / 100)]') : fld('price');
+    const prow = [fld('name'), fld('name-for-users'), fld('validity'), price, lim.shared === '-' ? '"\\"\\""' : fld(lim.shared), q('$rl'), q('$ul'), q('$tl')].join(' . "," . ');
     lines.push(`:foreach u in=[${T.pmenu} find] do={:local r [${T.pmenu} get $u]; :local rl ""; :local ul ""; :local tl ""; :do {:foreach x in=[${lim.pl} find where profile=($r->"name")] do={:local ln [${lim.pl} get $x limitation]; :local l [${lim.l} find where name=$ln]; :if (([:len $l] > 0) && ($rl = "")) do={:local lr [${lim.l} get [:pick $l 0]]; :set rl ([:tostr ($lr->"rate-limit-rx")] . "/" . [:tostr ($lr->"rate-limit-tx")]); :set ul [:tostr ($lr->"uptime-limit")]; :set tl [:tostr ($lr->"transfer-limit")]}}} on-error={}; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${prow} . "]"); :set n ($n + 1)}}`);
   }
   lines.push(send('true', `${src}-profiles`), reset);

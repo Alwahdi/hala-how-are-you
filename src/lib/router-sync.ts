@@ -60,7 +60,12 @@ export async function storeSessionsFor(sb: any, routerId: string, source: Sessio
   if (removeBefore) await sb.from('router_sessions').delete().eq('router_id', routerId).eq('source', source).lt('synced_at', removeBefore);
 }
 
-const nz = (v?: string | null) => (v && v !== 'none' && v !== '0s' && v !== '0' && v !== '0/0' && v !== '/' ? v : null);
+// Empty, "off", "none" and zero durations or rates ("0s", "00:00:00", "0/0") mean "no limit".
+const nz = (v?: string | null) => {
+  if (!v || ['none', 'off', '0', '/', 'unlimited'].includes(v)) return null;
+  if (/^[0:/smhdw\s]+$/.test(v) && !/[1-9]/.test(v)) return null;
+  return v;
+};
 const drop = (o: Record<string, string | null | undefined>) => Object.fromEntries(Object.entries(o).filter(([, v]) => !!v)) as Record<string, string>;
 
 /** Hotspot package from the push row (name,rate,devices,session-timeout,idle,keepalive,pool,mikhmon) or an API row. Mikhmon wins for price/validity. */
