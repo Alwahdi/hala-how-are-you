@@ -65,6 +65,63 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          phone: string | null
+          phone_verified_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          language?: string
+          phone?: string | null
+          phone_verified_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          phone?: string | null
+          phone_verified_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       router_status_log: {
         Row: {
           created_at: string
@@ -96,34 +153,49 @@ export type Database = {
       }
       routers: {
         Row: {
+          api_secret_encrypted: string | null
+          api_user: string | null
+          cloud_host: string | null
+          connection_method: string
           created_at: string
           id: string
+          last_check_error: string | null
           last_seen_at: string | null
           last_status: Json | null
           name: string
           owner_id: string
           ros_version: string
-          token_hash: string
+          token_hash: string | null
         }
         Insert: {
+          api_secret_encrypted?: string | null
+          api_user?: string | null
+          cloud_host?: string | null
+          connection_method?: string
           created_at?: string
           id?: string
+          last_check_error?: string | null
           last_seen_at?: string | null
           last_status?: Json | null
           name: string
           owner_id: string
           ros_version?: string
-          token_hash: string
+          token_hash?: string | null
         }
         Update: {
+          api_secret_encrypted?: string | null
+          api_user?: string | null
+          cloud_host?: string | null
+          connection_method?: string
           created_at?: string
           id?: string
+          last_check_error?: string | null
           last_seen_at?: string | null
           last_status?: Json | null
           name?: string
           owner_id?: string
           ros_version?: string
-          token_hash?: string
+          token_hash?: string | null
         }
         Relationships: []
       }
