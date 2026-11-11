@@ -18,7 +18,7 @@ describe('background watcher rules', () => {
     for (let i = 0; i < 2; i++) { const r = evaluateRouter('R', ago(5000), { cpu: 95 }, s, now); expect(r.alerts).toHaveLength(0); s = r.state; }
     const third = evaluateRouter('R', ago(5000), { cpu: 95 }, s, now);
     expect(third.alerts.map((x) => x.kind)).toEqual(['router_strain']);
-    expect(evaluateRouter('R', ago(5000), { cpu: 95 }, third.state, now + 10 * 60_000).alerts).toHaveLength(0);
+    expect(evaluateRouter('R', new Date(now + 10 * 60_000 - 5000).toISOString(), { cpu: 95 }, third.state, now + 10 * 60_000).alerts).toHaveLength(0);
   });
   it('detects an unexpected restart when uptime goes back', () => {
     const r = evaluateRouter('R', ago(5000), { uptime: '45s' }, { lastUptime: 86400 }, now);
