@@ -361,7 +361,6 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
   .filter-chips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:-8px; padding-inline:8px; } .filter-chips::-webkit-scrollbar { display:none; } .filter-chips button { flex-shrink:0; min-height:40px; }
   .summary-tiles { gap:8px; } .summary-tile { min-height:96px; }
   .demo-card-list { gap:12px; }
-  .quick-add-trigger span { display:none; } .quick-add-trigger { width:48px; padding:0; }
   /* Bottom sheet */
   .demo-card-dialog { top:auto!important; bottom:0!important; left:0!important; right:0!important; transform:none!important; width:100%!important; max-width:none!important; max-height:92dvh; border-radius:22px 22px 0 0!important; padding:28px 18px calc(18px + env(safe-area-inset-bottom)); border-bottom:0; }
   .demo-card-dialog::before { content:""; position:absolute; top:10px; left:50%; width:44px; height:5px; margin-left:-22px; border-radius:999px; background:var(--border); }
