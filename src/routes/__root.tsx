@@ -85,6 +85,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Mikro network operations by Alwahdi" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#0b1210" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Mikro" },
     ],
     links: [
       {
@@ -92,6 +95,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icon-180.png" },
     ],
   }),
   shellComponent: RootShell,
