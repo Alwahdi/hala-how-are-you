@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { hashToken, majorVersion } from '@/lib/router-script';
+import { directAccessState, hashToken, majorVersion } from '@/lib/router-script';
+import { normalizeCloudAddress } from '@/lib/ip-cloud';
+import { checkOne } from '@/lib/ip-cloud-probe';
 
 const num = z.coerce.number().finite().nonnegative().max(1e15);
 const str = z.string().max(120);
@@ -9,6 +11,7 @@ const Report = z.object({
   cpu: num, freeMemory: num, totalMemory: num, freeHdd: num, totalHdd: num,
   hotspotActive: num, temperature: str.optional().default(''),
   cloudName: str.optional().default(''), sslPort: z.string().max(5).optional().default(''), sslDisabled: z.string().max(5).optional().default(''),
+  publicAddress: z.string().max(45).optional().default(''), behindNat: z.string().max(8).optional().default(''),
 });
 
 const LOG_EVERY_MS = 5 * 60_000;
@@ -28,7 +31,7 @@ export const Route = createFileRoute('/api/public/router-report')({
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
         const hash = await hashToken(token);
-        const { data: router } = await supabaseAdmin.from('routers').select('id, last_seen_at').eq('token_hash', hash).maybeSingle();
+        const { data: router } = await supabaseAdmin.from('routers').select('id, last_seen_at, cloud_host').eq('token_hash', hash).maybeSingle();
         if (!router) return new Response('unauthorized', { status: 401 });
 
         const now = Date.now();
@@ -39,6 +42,11 @@ export const Route = createFileRoute('/api/public/router-report')({
         const { data: last } = await supabaseAdmin.from('router_status_log').select('created_at').eq('router_id', router.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
         if (!last || now - new Date(last.created_at).getTime() >= LOG_EVERY_MS) {
           await supabaseAdmin.from('router_status_log').insert({ router_id: router.id, status });
+        }
+        // Not behind NAT + IP Cloud + HTTPS on: connect directly on our own, once. Push reports stay as the backup.
+        if (!router.cloud_host && directAccessState(status) === 'ready') {
+          const host = normalizeCloudAddress(status.cloudName, status.sslPort || 443);
+          if (host) await checkOne(supabaseAdmin, router.id, host).catch(() => null);
         }
         return new Response('ok');
       },
