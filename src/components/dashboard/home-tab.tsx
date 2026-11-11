@@ -5,12 +5,12 @@ import { buckets, yesterdayAt, type LogPoint } from '@/lib/active-history';
 import { STATE_LABEL } from './cards-tab';
 
 type Props = {
-  ar: boolean; activeNow: number; log: LogPoint[]; counts: Record<CardState, number>; total: number; usedToday: number;
+  ar: boolean; activeNow: number; log: LogPoint[]; counts: Record<CardState, number>; total: number; inUse: number;
   lowPackages: { name: string; ready: number }[]; onlineCount: number; routerCount: number; alerts: string[]; styleConfirmed: boolean;
   go: (tab: 'cards' | 'active' | 'more', filter?: CardState) => void;
 };
 
-export function HomeTab({ ar, activeNow, log, counts, total, usedToday, lowPackages, onlineCount, routerCount, alerts, styleConfirmed, go }: Props) {
+export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages, onlineCount, routerCount, alerts, styleConfirmed, go }: Props) {
   const t = (a: string, b: string) => (ar ? a : b);
   const y = yesterdayAt(log); const diff = y == null ? null : activeNow - y;
   const series = buckets(log); const max = Math.max(1, ...series.map((b) => b.value ?? 0));
@@ -41,7 +41,7 @@ export function HomeTab({ ar, activeNow, log, counts, total, usedToday, lowPacka
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label={t('ملخص', 'Summary')}>
         <Kpi icon={<Ticket />} label={t('جاهزة للبيع', 'Ready to sell')} value={counts.unused} onClick={() => go('cards', 'unused')} />
         <Kpi icon={<CreditCard />} label={t('قاربت تنتهي', 'Almost used')} value={counts.almost} onClick={() => go('cards', 'almost')} />
-        <Kpi icon={<TrendingUp />} label={t('استُخدمت اليوم', 'Used today')} value={usedToday} onClick={() => go('cards', 'active')} />
+        <Kpi icon={<TrendingUp />} label={t('قيد الاستخدام', 'In use')} value={inUse} onClick={() => go('cards', 'active')} />
         <Kpi icon={<Radio />} label={t('الراوترات', 'Routers')} value={`${onlineCount}/${routerCount}`} onClick={() => go('more')} />
       </section>
 
