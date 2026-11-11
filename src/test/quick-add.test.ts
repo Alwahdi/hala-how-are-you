@@ -11,7 +11,7 @@ describe('quick add demo cards', () => {
     expect(createDemoCards(demoCards, 500, 1000, 'day')).toHaveLength(MAX_QUICK_ADD);
   });
   it('builds a customer message with number, code and package', () => {
-    const [c] = createDemoCards(demoCards, 1, 5000, 'month', () => 0);
+    const c = createDemoCards(demoCards, 1, 5000, "month", () => 0)[0]!;
     const m = buildNewCardMessage([c], 'en');
     expect(m).toContain('DEMO-005'); expect(m).toContain('10000000'); expect(m).toContain('5 GB'); expect(m).toContain('1 month');
   });
