@@ -86,8 +86,8 @@ function Onboarding() {
       invalid_host: t('اكتب اسم IP Cloud كما يظهر في الراوتر، مثل xxxx.sn.mynetname.net', 'Enter the IP Cloud name as shown on the router, e.g. xxxx.sn.mynetname.net'),
       auth: t('الراوتر رفض الدخول. الصق الأمر مرة ثانية ثم أعد المحاولة.', 'The router rejected the login. Paste the command again, then retry.'),
       tls: t('الشهادة لم تجهز بعد. انتظر دقيقة ثم أعد المحاولة.', 'The certificate is not ready yet. Wait a minute and retry.'),
-      timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
-      unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT أو المنفذ 443 مغلق.', 'We could not reach the router. It is probably behind CGNAT or port 443 is closed.'),
+      timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
+      unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
     };
     setError(msgs[r.error]);
   }
