@@ -6,20 +6,21 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   const W = 1080, H = 1350, P = 72, c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d')!; const css = getComputedStyle(document.documentElement);
   const v = (n: string, f: string) => css.getPropertyValue(n).trim() || f;
-  const bg = v('--background', '#0b0f0d'), card_ = v('--card', '#111814'), fg = v('--foreground', '#eef3ef'), muted = v('--muted-foreground', '#9aa59f'), primary = v('--primary', '#22e58a'), violet = v('--accent-violet', '#8b5cf6'), warning = v('--warning', '#f5b544'), border = v('--border', '#26302b');
+  const bg = v('--background', '#0b0f0d'), card_ = v('--card', '#111814'), fg = v('--foreground', '#eef3ef'), muted = v('--muted-foreground', '#9aa59f'), primary = v('--primary', '#22e58a'), violet = v('--secondary', '#8b5cf6'), warning = v('--warning', '#f5b544'), border = v('--border', '#26302b');
   const font = ar ? 'Cairo, sans-serif' : 'Manrope, sans-serif'; const L = (s: string) => ar ? iso(s) : s;
   const state = cardState(card); const accent = state === 'almostFinished' ? warning : primary;
   const used = card.downloadMB + card.uploadMB; const s = sessionsOf(card); const big = biggestSession(s);
   // background + soft glow + dot mesh
   x.fillStyle = bg; x.fillRect(0, 0, W, H);
-  const g = x.createRadialGradient(W / 2, -80, 40, W / 2, -80, 900); g.addColorStop(0, `color-mix(in oklab, ${primary} 22%, transparent)`); g.addColorStop(1, 'transparent');
-  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(W / 2, -80, 40, W / 2, -80, 900); g.addColorStop(0, primary); g.addColorStop(1, 'transparent');
+  x.globalAlpha = 0.18; x.fillStyle = g; x.fillRect(0, 0, W, H); x.globalAlpha = 1;
   x.fillStyle = 'rgba(255,255,255,0.035)'; for (let yy = 0; yy < 420; yy += 18) for (let xx = (yy / 18) % 2 ? 9 : 0; xx < W; xx += 18) { x.beginPath(); x.arc(xx, yy, 2.2, 0, 7); x.fill(); }
   x.direction = ar ? 'rtl' : 'ltr';
   const S = (px: number) => ar ? W - px : px; // start-aligned x
   const E = (px: number) => ar ? px : W - px; // end-aligned x
   const t = (str: string, px: number, y: number, size: number, color: string, weight = 400, align: 'start' | 'end' = 'start') => { x.font = `${weight} ${size}px ${font}`; x.fillStyle = color; x.textAlign = align === 'start' ? (ar ? 'right' : 'left') : (ar ? 'left' : 'right'); x.fillText(str, align === 'start' ? S(px) : E(px), y); };
   const box = (bx: number, by: number, bw: number, bh: number, fill: string, stroke?: string, r = 28) => { x.beginPath(); x.roundRect(ar ? W - bx - bw : bx, by, bw, bh, r); x.fillStyle = fill; x.fill(); if (stroke) { x.strokeStyle = stroke; x.lineWidth = 2; x.stroke(); } };
+  const tint = (bx: number, by: number, bw: number, bh: number, color: string, a: number, stroke?: string, r = 22) => { box(bx, by, bw, bh, card_, undefined, r); x.globalAlpha = a; box(bx, by, bw, bh, color, undefined, r); x.globalAlpha = 1; if (stroke) box(bx, by, bw, bh, 'transparent', stroke, r); };
   const bar = (by: number, ratio: number, color: string, h = 20, bx = P, bw = W - 2 * P) => { box(bx, by, bw, h, border, undefined, h / 2); box(bx, by, Math.max(h, bw * Math.max(0, Math.min(1, ratio))), h, color, undefined, h / 2); };
   // header
   x.font = `800 46px Manrope, sans-serif`; x.fillStyle = fg; x.textAlign = ar ? 'right' : 'left'; x.fillText('Mikro', S(P), 118); const mw = x.measureText('Mikro').width; x.fillStyle = primary; x.fillText('.', ar ? S(P) - mw : S(P) + mw, 118);
@@ -41,7 +42,7 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   if (!s.length) t(ar ? 'لا توجد جلسات بعد' : 'No sessions yet', P, y + 50, 28, muted);
   for (const z of s.slice(0, 4)) {
     const isBig = z === big && s.length > 1; const mb = z.downloadMB + z.uploadMB;
-    box(P, y, W - 2 * P, 104, isBig ? `color-mix(in oklab, ${violet} 16%, ${card_})` : card_, isBig ? violet : border, 22);
+    isBig ? tint(P, y, W - 2 * P, 104, violet, 0.16, violet) : box(P, y, W - 2 * P, 104, card_, border, 22);
     t(`${L(z.device)}${isBig ? (ar ? '  · الأكبر' : '  · Biggest') : ''}`, P + 28, y + 44, 28, fg, 700);
     t(L(formatDataSize(mb)), P + 28, y + 44, 28, isBig ? violet : fg, 800, 'end');
     t(`${L(z.start)} · ${formatDuration(z.minutes, ar)}`, P + 28, y + 84, 22, muted);
@@ -50,7 +51,7 @@ export async function renderReportImage(card: DemoCard, ar: boolean): Promise<Bl
   }
   // explanation
   const downHeavy = used > 0 && card.downloadMB / used > 0.7;
-  if (used > 0) { box(P, H - 190, W - 2 * P, 92, `color-mix(in oklab, ${accent} 10%, ${card_})`, undefined, 22); t(downHeavy ? (ar ? 'أغلب الاستهلاك تحميل، مثل الفيديو، لذلك انتهت الباقة أسرع.' : 'Mostly downloads like video, so the package ran out faster.') : (ar ? 'الاستهلاك موزع بين التحميل والرفع.' : 'Usage is spread across download and upload.'), P + 28, H - 132, 27, fg, 600); }
+  if (used > 0) { tint(P, H - 190, W - 2 * P, 92, accent, 0.12); t(downHeavy ? (ar ? 'أغلب الاستهلاك تحميل، مثل الفيديو، لذلك انتهت الباقة أسرع.' : 'Mostly downloads like video, so the package ran out faster.') : (ar ? 'الاستهلاك موزع بين التحميل والرفع.' : 'Usage is spread across download and upload.'), P + 28, H - 132, 27, fg, 600); }
   t(ar ? 'بيانات تجريبية · أُعد بواسطة Mikro' : 'Demonstration data · Prepared with Mikro', P, H - 48, 22, muted);
   return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('image')), 'image/png'));
 }
