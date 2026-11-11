@@ -30,12 +30,14 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set ap [:tostr [/ip service get api port]]; :set apd [:tostr [/ip service get api disabled]]; :set asp [:tostr [/ip service get api-ssl port]]; :set asd [:tostr [/ip service get api-ssl disabled]]} on-error={}',
     ':local um 0',
     ':do {:set um [:len [[:parse "/user-manager session find where active"]]]} on-error={}',
+    ':local au 0',
+    ':do {:set au [:len [/user find name=mikro-read]]} on-error={}',
     ':local pa ""',
     ':do {:set pa [:tostr [/ip cloud get public-address]]} on-error={}',
     // Behind NAT unless the IP Cloud public address sits on one of the router's own interfaces.
     ':local nat "unknown"',
     ':if ([:len $pa] > 0) do={:set nat "yes"; :foreach a in=[/ip address find] do={:local ad [:tostr [/ip address get $a address]]; :if ([:pick $ad 0 [:find $ad "/"]] = $pa) do={:set nat "no"}}}',
-    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"umActive\\":" . $um . "}")',
+    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"apiUser\\":" . $au . ",\\"umActive\\":" . $um . "}")',
     `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
   ].join('\n');
 }
@@ -67,7 +69,7 @@ import { readOnlyUserCommands } from './ip-cloud';
 /**
  * The one paste command for every RouterOS version: a single line (mobile terminals drop newlines),
  * no download from our site, and v7-only steps compiled at run time so v6 skips them without errors.
- * When an API password is given, v7 routers also get the read-only user used for direct IP Cloud access.
+ * When an API password is given, the router also gets the read-only API user (v6 and v7) used for automatic direct access.
  */
 export function buildPasteCommand(token: string, apiPassword?: string, url = REPORT_URL): string {
   const parts = [
@@ -77,7 +79,7 @@ export function buildPasteCommand(token: string, apiPassword?: string, url = REP
     `/system scheduler add name=${SCRIPT_NAME} interval=30s start-time=startup on-event=${SCRIPT_NAME}`,
   ];
   if (apiPassword) {
-    parts.push(`:if ([:pick [/system resource get version] 0 1] = "7") do={:do {:local f [:parse "${readOnlyUserCommands(apiPassword)}"]; $f} on-error={}}`);
+    parts.push(readOnlyUserCommands(apiPassword));
   }
   for (const name of [CARDS_SCRIPT, UM_SCRIPT]) parts.push(`/system scheduler remove [find name=${name}]`, `/system script remove [find name=${name}]`);
   parts.push(`/system script add name=${CARDS_SCRIPT} policy=read,write,test source="${escapeRos(cardsScriptSource(token, 'hotspot', url.replace('router-report', 'router-cards')))}"`);
@@ -99,11 +101,30 @@ export function majorVersion(version: string | undefined | null): 'v6' | 'v7' | 
   return m[1] === '6' ? 'v6' : 'v7';
 }
 
-/** Direct access is only useful when the router owns its public address and IP Cloud is on (v7 REST). */
 /** Direct access needs IP Cloud, a public address on the router itself and the API (8728/8729) switched on. Works on v6 and v7. */
 export function directAccessState(s: { cloudName?: string; behindNat?: string; apiDisabled?: string; apiSslDisabled?: string } | null | undefined): 'unavailable' | 'needs_api' | 'ready' {
   if (!s?.cloudName || s.behindNat !== 'no') return 'unavailable';
   return s.apiDisabled === 'true' && s.apiSslDisabled === 'true' ? 'needs_api' : 'ready';
+}
+
+const RETRY_FAILED_MS = 3 * 60_000;
+const REFRESH_CARDS_MS = 5 * 60_000;
+
+/**
+ * Decides when the server tries the direct API link on its own: right away for a new or reconnected router,
+ * every 5 minutes when it works (cards), and at most every 3 minutes after a failure so we never hammer the router's login.
+ */
+export function shouldTryDirect(
+  r: { cloud_host: string | null; direct_port: number | null; last_check_error: string | null; direct_checked_at: string | null; cards_synced_at: string | null },
+  s: Parameters<typeof directAccessState>[0] & { apiUser?: number },
+  now = Date.now(),
+): boolean {
+  if (directAccessState(s) !== 'ready') return false;
+  if (s?.apiUser === 0) return false;
+  const since = (iso: string | null) => (iso ? now - new Date(iso).getTime() : Infinity);
+  if (!r.direct_checked_at) return true;
+  if (r.last_check_error || !r.direct_port) return since(r.direct_checked_at) >= RETRY_FAILED_MS;
+  return since(r.cards_synced_at) >= REFRESH_CARDS_MS || since(r.direct_checked_at) >= REFRESH_CARDS_MS;
 }
 
 export const API_ENABLE_COMMAND = '/ip service set api disabled=no';

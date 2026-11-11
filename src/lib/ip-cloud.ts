@@ -38,14 +38,18 @@ export function normalizeCloudAddress(input: string, port?: number | string | nu
   return p === 443 ? host : `${host}:${p}`;
 }
 
-/** Read-only group and user for Mikro, joined by "; ". The password is alphanumeric, so it needs no quotes. */
+/**
+ * Read-only group and user for Mikro, one line, v6 and v7. The user is removed before its group (a group in use cannot be
+ * removed) and every step has its own on-error, so a leftover from an earlier paste can never stop the new password.
+ * Only read + api: direct access uses the RouterOS API, never REST or writes. The password is alphanumeric, so no quotes.
+ */
 export function readOnlyUserCommands(password: string): string {
   if (!/^[A-Za-z0-9]+$/.test(password)) throw new Error('API password must be alphanumeric');
   return [
-    `/user group remove [find name=${API_GROUP}]`,
-    `/user group add name=${API_GROUP} policy=read,api,rest-api,!write,!policy,!sensitive,!ftp,!ssh,!telnet,!winbox,!web,!reboot,!test,!sniff,!romon`,
-    `/user remove [find name=${API_USER}]`,
-    `/user add name=${API_USER} group=${API_GROUP} password=${password}`,
+    `:do {/user remove [find name=${API_USER}]} on-error={}`,
+    `:do {/user group remove [find name=${API_GROUP}]} on-error={}`,
+    `:do {/user group add name=${API_GROUP} policy=read,api} on-error={}`,
+    `:do {/user add name=${API_USER} group=${API_GROUP} password=${password}} on-error={:do {/user set [find name=${API_USER}] group=${API_GROUP} password=${password}} on-error={}}`,
   ].join('; ');
 }
 
