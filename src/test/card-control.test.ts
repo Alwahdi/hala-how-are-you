@@ -31,8 +31,8 @@ describe('card actions sent to the router', () => {
 describe('User Manager v6 and v7 reading', () => {
   it('installs the v6 reader on v6 and the v7 reader on v7', () => {
     const setup = buildSetupScript('t'.repeat(48));
-    expect(setup).toContain('/tool user-manager user find');
-    expect(setup).toContain('/user-manager user-profile find');
+    expect(setup).toContain('/tool user-manager user print as-value');
+    expect(setup).toContain('/user-manager user-profile print as-value');
     expect(cardsScriptSource('t', 'um6')).toContain('/tool user-manager profile profile-limitation');
     expect(cardsScriptSource('t', 'um6')).not.toContain('[/user-manager ');
   });

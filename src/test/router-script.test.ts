@@ -21,14 +21,15 @@ describe('router status push', () => {
   it('reports whether the read-only user exists', () => {
     expect(reportScriptSource('a'.repeat(48))).toContain('[:len [/user find name=mikro-read]]');
   });
-  it('tries the direct link automatically: at once, then every 3 minutes after a failure, never when the user is missing', () => {
+  it('tries the direct link automatically: at once, then every 30 minutes after a failure, never when the user is missing', () => {
     const ready = { cloudName: 'x.sn.mynetname.net', behindNat: 'no', apiDisabled: 'false', apiSslDisabled: 'true' };
     const now = Date.parse('2026-11-11T05:00:00Z');
     const fresh = { cloud_host: null, direct_port: null, last_check_error: null, direct_checked_at: null, cards_synced_at: null };
     expect(shouldTryDirect(fresh, ready, now)).toBe(true);
     const failed = { ...fresh, cloud_host: 'x', last_check_error: 'auth', direct_checked_at: new Date(now - 60_000).toISOString() };
     expect(shouldTryDirect(failed, ready, now)).toBe(false);
-    expect(shouldTryDirect({ ...failed, direct_checked_at: new Date(now - 180_000).toISOString() }, ready, now)).toBe(true);
+    expect(shouldTryDirect({ ...failed, direct_checked_at: new Date(now - 10 * 60_000).toISOString() }, ready, now)).toBe(false);
+    expect(shouldTryDirect({ ...failed, direct_checked_at: new Date(now - 30 * 60_000).toISOString() }, ready, now)).toBe(true);
     expect(shouldTryDirect(fresh, { ...ready, apiUser: 0 }, now)).toBe(false);
     expect(shouldTryDirect(fresh, { ...ready, behindNat: 'yes' }, now)).toBe(false);
   });

@@ -72,8 +72,10 @@ describe('router script pieces', () => {
   });
   it('card reading sends packages first and protects every batch', () => {
     const s = cardsScriptSource('a'.repeat(48), 'um6');
-    expect(s.indexOf('usermanager-profiles')).toBeLessThan(s.indexOf('usermanager-sessions'));
-    expect(s.indexOf('usermanager-sessions')).toBeLessThan(s.lastIndexOf('\\"source\\":\\"usermanager\\"'));
+    expect(s.indexOf('usermanager-profiles')).toBeLessThan(s.lastIndexOf('\\"source\\":\\"usermanager\\"'));
+    const h = cardsScriptSource('a'.repeat(48), 'hotspot');
+    expect(h.indexOf('hotspot-profiles')).toBeLessThan(h.indexOf('hotspot-sessions'));
+    expect(h.indexOf('hotspot-sessions')).toBeLessThan(h.lastIndexOf('\\"source\\":\\"hotspot\\"'));
     expect(s.match(/:do \{\/tool fetch/g)!.length).toBe(s.match(/\/tool fetch/g)!.length);
   });
 });
