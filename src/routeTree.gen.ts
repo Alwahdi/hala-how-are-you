@@ -16,6 +16,7 @@ import { Route as DesignSpecimenRouteImport } from './routes/design-specimen'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +53,11 @@ const AuthenticatedRoutersRoute = AuthenticatedRoutersRouteImport.update({
   path: '/routers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   id: '/api/public/router-report',
   path: '/api/public/router-report',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesByTo {
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesById {
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
+  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRouteTypes {
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/onboarding'
     | '/routers'
+    | '/welcome'
     | '/api/public/router-report'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/onboarding'
     | '/routers'
+    | '/welcome'
     | '/api/public/router-report'
   id:
     | '__root__'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
+    | '/_authenticated/welcome'
     | '/api/public/router-report'
   fileRoutesById: FileRoutesById
 }
@@ -178,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRoutersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/router-report': {
       id: '/api/public/router-report'
       path: '/api/public/router-report'
@@ -191,11 +210,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
+  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
+  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

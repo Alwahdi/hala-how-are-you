@@ -26,7 +26,12 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set sp [:tostr [/ip service get www-ssl port]]} on-error={}',
     ':local sd ""',
     ':do {:set sd [:tostr [/ip service get www-ssl disabled]]} on-error={}',
-    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\"}")',
+    ':local pa ""',
+    ':do {:set pa [:tostr [/ip cloud get public-address]]} on-error={}',
+    // Behind NAT unless the IP Cloud public address sits on one of the router's own interfaces.
+    ':local nat "unknown"',
+    ':if ([:len $pa] > 0) do={:set nat "yes"; :foreach a in=[/ip address find] do={:local ad [:tostr [/ip address get $a address]]; :if ([:pick $ad 0 [:find $ad "/"]] = $pa) do={:set nat "no"}}}',
+    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\"}")',
     `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
   ].join('\n');
 }
@@ -66,6 +71,12 @@ export function majorVersion(version: string | undefined | null): 'v6' | 'v7' | 
   const m = /^\s*(\d+)\./.exec(version ?? '');
   if (!m) return null;
   return m[1] === '6' ? 'v6' : 'v7';
+}
+
+/** Direct access is only useful when the router owns its public address and IP Cloud is on (v7 REST). */
+export function directAccessState(s: { version?: string; cloudName?: string; behindNat?: string; sslDisabled?: string } | null | undefined): 'unavailable' | 'needs_https' | 'ready' {
+  if (!s?.cloudName || !s.version?.startsWith('7') || s.behindNat !== 'no') return 'unavailable';
+  return s.sslDisabled === 'true' ? 'needs_https' : 'ready';
 }
 
 export function isOnline(lastSeenAt: string | null, now = Date.now()): boolean {

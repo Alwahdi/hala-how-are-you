@@ -59,7 +59,8 @@ function AuthPage() {
       done = true;
       const proof = sessionStorage.getItem(PROOF_KEY);
       if (proof) { await link({ data: { proof, language: ar ? 'ar' : 'en' } }).catch(() => null); sessionStorage.removeItem(PROOF_KEY); }
-      navigate({ to: '/routers', replace: true });
+      const { data: prof } = await supabase.from('profiles').select('account_type').eq('id', data.user.id).maybeSingle();
+      navigate({ to: prof?.account_type ? '/routers' : '/welcome', replace: true });
     }
     finish();
     const { data: sub } = supabase.auth.onAuthStateChange((e) => { if (e === 'SIGNED_IN') finish(); });
@@ -122,7 +123,8 @@ function AuthPage() {
   const country = COUNTRIES.find((c) => c.dial === dial);
 
   return (
-    <main className="landing-width flex min-h-screen flex-col py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+    <main className="app-shell flex min-h-screen flex-col py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <a href="/" className="text-lg font-extrabold">Mikro</a>
         <Button variant="ghost" onClick={toggleLanguage}><Globe2 />{ar ? 'English' : 'العربية'}</Button>
@@ -138,7 +140,7 @@ function AuthPage() {
           ))}
         </ol>}
 
-        <section className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <section className="space-y-5 app-panel p-5 sm:p-6">
           {step === 'phone' && (
             <form className="space-y-5" onSubmit={sendCode} noValidate>
               <Header icon={<Phone />} title={t('رقم جوالك', 'Your mobile number')} sub={t('نرسل لك رمزاً من 6 أرقام على WhatsApp.', 'We will send a 6-digit code on WhatsApp.')} />

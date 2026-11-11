@@ -10,7 +10,6 @@ import { Check, CheckCircle2, Cloud, Globe2, Loader2, Router, Terminal } from 'l
 import { buildPasteCommand } from '@/lib/router-script';
 import { createPushRouter } from '@/lib/ip-cloud.functions';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
-import { CloudConnectForm } from '@/components/cloud-connect-form';
 
 export const Route = createFileRoute('/_authenticated/onboarding')({
   head: () => ({ meta: [
@@ -25,7 +24,7 @@ export const Route = createFileRoute('/_authenticated/onboarding')({
 });
 
 type Step = 'basics' | 'push' | 'done';
-type Status = { identity?: string; board?: string; version?: string; cpu?: number; cloudName?: string; sslPort?: string; sslDisabled?: string };
+type Status = { identity?: string; board?: string; version?: string; cpu?: number; cloudName?: string; sslPort?: string; sslDisabled?: string; behindNat?: string };
 const LATER_KEY = 'mikro-onboarding-later';
 
 function Onboarding() {
@@ -41,7 +40,6 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
-  const [cloudDone, setCloudDone] = useState(false);
 
   // Wait for the first report.
   useEffect(() => {
@@ -69,7 +67,8 @@ function Onboarding() {
   const cloudReady = !!status?.cloudName && status.version?.startsWith('7');
 
   return (
-    <main className="landing-width min-h-screen py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+    <main className="app-shell min-h-screen py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <span className="text-lg font-extrabold">Mikro</span>
         <div className="flex gap-1">
@@ -88,7 +87,7 @@ function Onboarding() {
           ))}
         </ol>
 
-        <section className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <section className="space-y-5 app-panel p-5 sm:p-6">
           {step === 'basics' && (
             <form className="space-y-5" onSubmit={start}>
               <Head icon={<Router />} title={t('أهلاً بك! لنضف راوترك الأول', "Welcome! Let's add your first router")} sub={t('دقيقة تقريباً. لا نطلب كلمة مرور المدير أبداً.', 'About a minute. We never ask for the admin password.')} />
@@ -96,7 +95,7 @@ function Onboarding() {
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('أمر واحد يشتغل على v6 وv7، ونعرف الإصدار تلقائياً.', 'One command for v6 and v7; we detect the version.')}</li>
                 <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('يشتغل حتى لو الإنترنت خلف CGNAT.', 'Works even behind CGNAT.')}</li>
-                <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('لو IP Cloud مفعّل عندك، نعرضه لك بعد الربط للاتصال المباشر.', 'If IP Cloud is on, we offer direct access after linking.')}</li>
+                <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('لو راوترك عليه IP عام وIP Cloud مفعّل، نتصل فيه مباشرة تلقائياً.', 'If the router has a public IP and IP Cloud, we connect directly on our own.')}</li>
               </ul>
               <Button type="submit" className="h-12 w-full text-base" disabled={!name.trim() || busy}>{busy && <Loader2 className="animate-spin" />}{t('التالي', 'Next')}</Button>
               <Err e={error} />
@@ -105,7 +104,7 @@ function Onboarding() {
 
           {step === 'push' && (
             <div className="space-y-4">
-              <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('انسخ ← الصق في Terminal ← Enter', 'Copy → paste in Terminal → Enter')} />
+              <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('انسخ ← الصق في Terminal، ويتنفذ لحاله', 'Copy → paste in Terminal; it runs by itself')} />
               <PasteCommandPanel command={command} ar={ar} />
               <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" /><span className="flex-1">{t('ننتظر أول إشارة من راوترك... عادة أقل من دقيقة.', 'Waiting for the first signal from your router... usually under a minute.')}</span><bdi dir="ltr" className="tabular-nums text-muted-foreground">{waited}s</bdi></div>
               {waited >= 60 && (
@@ -131,15 +130,8 @@ function Onboarding() {
                 <p className="text-muted-foreground">{status?.identity ?? name} · <bdi dir="ltr">{status?.board} {status?.version}</bdi></p>
                 {status?.cpu != null && <p className="text-sm">{t('المعالج الآن', 'CPU now')}: <b>{status.cpu}%</b></p>}
               </div>
-              {cloudReady && routerId && !cloudDone && (
-                <div className="space-y-3 rounded-xl border border-primary/40 bg-primary/5 p-4">
-                  <p className="flex items-center gap-2 font-bold"><Cloud className="size-5 text-primary" />{t('راوترك فيه IP Cloud مفعّل', 'Your router has IP Cloud on')}</p>
-                  <p className="text-sm text-muted-foreground">{t('تقدر نتصل فيه مباشرة لتحديث أسرع. اختياري، والراوتر متصل الحين بأمر اللصق.', 'We can connect to it directly for faster updates. Optional; it is already linked by the paste command.')}</p>
-                  <CloudConnectForm routerId={routerId} ar={ar} defaultHost={status?.cloudName} defaultPort={status?.sslPort} httpsOff={status?.sslDisabled === 'true'} onConnected={() => setCloudDone(true)} onReconnect={() => navigate({ to: '/routers' })} />
-                </div>
-              )}
-              {cloudDone && <p role="status" className="flex items-center gap-2 rounded-xl bg-primary/10 p-3 text-sm text-primary"><Cloud className="size-4" />{t('تم الاتصال المباشر عبر IP Cloud.', 'Direct IP Cloud connection is on.')}</p>}
-              <Button className="h-12 w-full text-base" onClick={() => navigate({ to: '/routers' })}>{t('اذهب إلى راوتراتي', 'Go to my routers')}</Button>
+              {cloudReady && <p role="status" className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm"><Cloud className="mt-0.5 size-4 shrink-0 text-primary" />{status?.behindNat === 'no' ? t('راوترك عليه IP عام وIP Cloud مفعّل. نجرب الاتصال المباشر تلقائياً وتشوف النتيجة في راوتراتي.', 'Your router has a public IP and IP Cloud. We try a direct connection automatically; see it in My routers.') : t('راوترك خلف NAT، فالاتصال يكون عبر الإشارات كل 30 ثانية، وهذا كافٍ.', 'Your router is behind NAT, so it reports every 30 seconds. That is enough.')}</p>}
+                            <Button className="h-12 w-full text-base" onClick={() => navigate({ to: '/routers' })}>{t('اذهب إلى راوتراتي', 'Go to my routers')}</Button>
             </div>
           )}
         </section>
