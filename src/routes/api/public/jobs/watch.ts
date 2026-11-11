@@ -39,7 +39,7 @@ export const Route = createFileRoute('/api/public/jobs/watch')({
             patch['health_checked_at'] = new Date(now).toISOString();
             for (const i of issues.filter((x) => x.severity === 'critical')) await notify(sb, { owner: r.owner_id, router: r.id, kind: 'health', key: `${r.id}:health:${i.id}`, title: `${r.name}: ${i.ar[0]}`, body: i.ar[1], path: '/health', severity: 'critical', dedupHours: 24 * 7 });
           }
-          await sb.from('routers').update(patch).eq('id', r.id);
+          await sb.from('routers').update(patch as never).eq('id', r.id);
         }
 
         for (const owner of owners) {

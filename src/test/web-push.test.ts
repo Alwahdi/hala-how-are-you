@@ -6,12 +6,12 @@ import { b64u, encryptPayload, unb64u, vapidJwt, vapidKeys } from '@/lib/web-pus
 async function decrypt(body: Uint8Array, uaSecret: Uint8Array, uaPublic: Uint8Array, auth: Uint8Array) {
   const salt = body.slice(0, 16); const asPublic = body.slice(21, 86); const cipher = body.slice(86);
   const enc = new TextEncoder();
-  const h = async (s: Uint8Array, ikm: Uint8Array, info: Uint8Array, n: number) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: s, info }, await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']), n * 8));
+  const h = async (s: Uint8Array, ikm: Uint8Array, info: Uint8Array, n: number) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: s as BufferSource, info: info as BufferSource }, await crypto.subtle.importKey('raw', ikm as BufferSource, 'HKDF', false, ['deriveBits']), n * 8));
   const ecdh = p256.getSharedSecret(uaSecret, asPublic, true).slice(1);
   const ikm = await h(auth, ecdh, new Uint8Array([...enc.encode('WebPush: info\0'), ...uaPublic, ...asPublic]), 32);
   const cek = await h(salt, ikm, enc.encode('Content-Encoding: aes128gcm\0'), 16);
   const nonce = await h(salt, ikm, enc.encode('Content-Encoding: nonce\0'), 12);
-  const plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['decrypt']), cipher));
+  const plain = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce as BufferSource }, await crypto.subtle.importKey('raw', cek as BufferSource, 'AES-GCM', false, ['decrypt']), cipher as BufferSource));
   return new TextDecoder().decode(plain.slice(0, plain.lastIndexOf(2)));
 }
 
