@@ -1,6 +1,6 @@
 ---
 type: decision
-status: draft
+status: approved
 owner: founder
 updated: 2026-11-11
 related: [D-021-professional-landing-background-pattern.md]
