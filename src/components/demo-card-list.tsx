@@ -45,10 +45,10 @@ function DemoCardItem({ card, ar, onComplaint, onChange, onRemove }: Handlers & 
       </DialogTrigger>
       <div className="demo-card-actions">
         {state === 'almostFinished'
-          ? <Button type="button" size="sm" className="demo-card-quick demo-card-quick--renew" onClick={() => go('renew')}><RefreshCw aria-hidden="true"/>{t('تجديد', 'Renew')}</Button>
-          : <Button type="button" size="sm" variant="secondary" className="demo-card-quick" disabled={state === 'disabled'} onClick={() => go('reply')} aria-label={t(`إرسال الكرت ${card.id} للزبون`, `Send card ${card.id} to customer`)}><Send aria-hidden="true"/>{t('إرسال', 'Send')}</Button>}
+          ? <Button type="button" size="sm" variant="outline" className="demo-card-quick" onClick={() => go('renew')}><RefreshCw aria-hidden="true"/>{t('تجديد', 'Renew')}</Button>
+          : <Button type="button" size="sm" variant="outline" className="demo-card-quick" disabled={state === 'disabled'} onClick={() => go('reply')} aria-label={t(`إرسال الكرت ${card.id} للزبون`, `Send card ${card.id} to customer`)}><Send aria-hidden="true"/>{t('إرسال', 'Send')}</Button>}
         <DropdownMenu dir={ar ? 'rtl' : 'ltr'}>
-          <DropdownMenuTrigger asChild><Button type="button" size="icon" variant="outline" className="demo-card-more" aria-label={t(`خيارات الكرت ${card.id}`, `Options for ${card.id}`)}><MoreVertical/></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button type="button" size="icon" variant="ghost" className="demo-card-more" aria-label={t(`خيارات الكرت ${card.id}`, `Options for ${card.id}`)}><MoreVertical/></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="card-menu">
             <DropdownMenuItem disabled={state === 'disabled'} onSelect={() => go('reply')}><Send/>{t('إرسال للزبون', 'Send to customer')}</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => go('renew')}><RefreshCw/>{t('تجديد (إضافة باقة)', 'Renew (add data)')}</DropdownMenuItem>
