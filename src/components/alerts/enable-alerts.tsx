@@ -3,6 +3,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { Bell, BellRing, Check, ExternalLink, Loader2, Share, SquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { enablePush, pushState, type PushStatus } from '@/lib/push-client';
+import { PhoneCheck } from './phone-check';
 import { getPushKey, savePushSubscription, sendTestAlert } from '@/lib/alerts.functions';
 
 /** Turns phone alerts on, with clear help for iPhone (home screen), the editor preview and blocked permission. */
@@ -55,6 +56,7 @@ export function EnableAlerts({ ar, compact = false }: { ar: boolean; compact?: b
         {state !== 'on' && state !== 'ios-install' && state !== 'unsupported' && <Button className="h-11 flex-1" disabled={busy} onClick={turnOn}>{busy ? <Loader2 className="animate-spin" /> : <Bell />}{t('فعّل التنبيهات', 'Turn on alerts')}</Button>}
         {state === 'on' && <Button variant="outline" className="h-11 flex-1" disabled={busy} onClick={async () => { setBusy(true); const x = await test({ data: { ar } }).catch(() => ({ sent: 0 })); setTested(x.sent); setBusy(false); }}>{busy ? <Loader2 className="animate-spin" /> : <BellRing />}{t('أرسل تنبيه تجريبي', 'Send a test alert')}</Button>}
       </div>
+      {state === 'on' && !compact && <PhoneCheck ar={ar} />}
       {tested != null && <p role="status" className="mt-2 flex items-center gap-1.5 text-sm text-primary">{tested > 0 ? <><Check className="size-4" />{t('أرسلنا تنبيه تجريبي — لازم يظهر خلال ثوانٍ.', 'Test alert sent — it should appear in seconds.')}</> : t('ما وصل التنبيه لأي جهاز. فعّله من جديد.', 'No device received it. Turn alerts on again.')}</p>}
     </section>
   );
