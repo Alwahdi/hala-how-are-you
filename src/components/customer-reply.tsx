@@ -19,7 +19,7 @@ export function CustomerReply({ card, ar, onBack, backLabel, buildMessage }: Pro
     <p className="text-sm text-muted-foreground">{t('رسالة جاهزة للزبون. أنت من يختار جهة الاتصال ويرسل.', 'A ready message for your customer. You choose the contact and send it.')}</p>
     <div className="reply-options">
       <div role="group" aria-label={t('لغة الرسالة', 'Message language')}><Button size="sm" variant={seg(lang === 'ar')} onClick={() => setLang('ar')}>عربي</Button><Button size="sm" variant={seg(lang === 'en')} onClick={() => setLang('en')}>English</Button></div>
-      {!isNew && <div role="group" aria-label={t('طول الرسالة', 'Message length')}><Button size="sm" variant={seg(tone === 'short')} onClick={() => setTone('short')}>{t('مختصرة', 'Short')}</Button><Button size="sm" variant={seg(tone === 'detailed')} onClick={() => setTone('detailed')}>{t('مع الجلسات', 'With sessions')}</Button></div>
+      {!isNew && <div role="group" aria-label={t('طول الرسالة', 'Message length')}><Button size="sm" variant={seg(tone === 'short')} onClick={() => setTone('short')}>{t('مختصرة', 'Short')}</Button><Button size="sm" variant={seg(tone === 'detailed')} onClick={() => setTone('detailed')}>{t('مع الجلسات', 'With sessions')}</Button></div>}
     </div>
     <pre className="reply-preview" dir={lang === 'ar' ? 'rtl' : 'ltr'} lang={lang} aria-label={t('معاينة الرسالة', 'Message preview')}>{msg}</pre>
     <div className="reply-actions">
