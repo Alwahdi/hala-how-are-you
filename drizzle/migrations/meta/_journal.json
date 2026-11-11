@@ -43,6 +43,13 @@
       "when": 1794371877177,
       "tag": "0005_profile_role_router_role",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794372694564,
+      "tag": "0006_router_cards_sessions_direct_api",
+      "breakpoints": true
     }
   ]
 }

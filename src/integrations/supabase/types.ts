@@ -131,6 +131,135 @@ export type Database = {
         }
         Relationships: []
       }
+      router_cards: {
+        Row: {
+          bytes: number
+          comment: string | null
+          disabled: boolean
+          first_seen_at: string
+          limit_bytes: number | null
+          limit_uptime_s: number | null
+          name: string
+          profile: string | null
+          router_id: string
+          source: string
+          synced_at: string
+          uptime_s: number
+        }
+        Insert: {
+          bytes?: number
+          comment?: string | null
+          disabled?: boolean
+          first_seen_at?: string
+          limit_bytes?: number | null
+          limit_uptime_s?: number | null
+          name: string
+          profile?: string | null
+          router_id: string
+          source: string
+          synced_at?: string
+          uptime_s?: number
+        }
+        Update: {
+          bytes?: number
+          comment?: string | null
+          disabled?: boolean
+          first_seen_at?: string
+          limit_bytes?: number | null
+          limit_uptime_s?: number | null
+          name?: string
+          profile?: string | null
+          router_id?: string
+          source?: string
+          synced_at?: string
+          uptime_s?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_cards_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_profiles: {
+        Row: {
+          name: string
+          rate_limit: string | null
+          router_id: string
+          shared_users: string | null
+          source: string
+          synced_at: string
+        }
+        Insert: {
+          name: string
+          rate_limit?: string | null
+          router_id: string
+          shared_users?: string | null
+          source: string
+          synced_at?: string
+        }
+        Update: {
+          name?: string
+          rate_limit?: string | null
+          router_id?: string
+          shared_users?: string | null
+          source?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_profiles_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_sessions: {
+        Row: {
+          address: string | null
+          bytes: number
+          mac: string
+          router_id: string
+          source: string
+          synced_at: string
+          uptime_s: number
+          username: string
+        }
+        Insert: {
+          address?: string | null
+          bytes?: number
+          mac: string
+          router_id: string
+          source: string
+          synced_at?: string
+          uptime_s?: number
+          username: string
+        }
+        Update: {
+          address?: string | null
+          bytes?: number
+          mac?: string
+          router_id?: string
+          source?: string
+          synced_at?: string
+          uptime_s?: number
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "router_sessions_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       router_status_log: {
         Row: {
           created_at: string
@@ -164,9 +293,13 @@ export type Database = {
         Row: {
           api_secret_encrypted: string | null
           api_user: string | null
+          cards_sync_started_at: string | null
+          cards_synced_at: string | null
           cloud_host: string | null
           connection_method: string
           created_at: string
+          direct_port: number | null
+          direct_tls: boolean | null
           id: string
           last_check_error: string | null
           last_seen_at: string | null
@@ -180,9 +313,13 @@ export type Database = {
         Insert: {
           api_secret_encrypted?: string | null
           api_user?: string | null
+          cards_sync_started_at?: string | null
+          cards_synced_at?: string | null
           cloud_host?: string | null
           connection_method?: string
           created_at?: string
+          direct_port?: number | null
+          direct_tls?: boolean | null
           id?: string
           last_check_error?: string | null
           last_seen_at?: string | null
@@ -196,9 +333,13 @@ export type Database = {
         Update: {
           api_secret_encrypted?: string | null
           api_user?: string | null
+          cards_sync_started_at?: string | null
+          cards_synced_at?: string | null
           cloud_host?: string | null
           connection_method?: string
           created_at?: string
+          direct_port?: number | null
+          direct_tls?: boolean | null
           id?: string
           last_check_error?: string | null
           last_seen_at?: string | null
