@@ -1,6 +1,6 @@
 // Browser-safe rules for packages (Hotspot profiles and User Manager profiles): reading them in owner words,
 // checking a new or edited package, and the fixed line the router script runs. Nothing here talks to the router.
-import { durationToSeconds } from './routeros-api';
+import { durationToSeconds } from './duration';
 
 export type PkgSource = 'hotspot' | 'usermanager';
 export type PkgAction = 'add' | 'edit' | 'del';
