@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Cloud, Copy, Globe2, Loader2, Router, Terminal, TriangleAlert } from 'lucide-react';
 import { buildFallbackCommand, buildPasteCommand, hashToken, newToken } from '@/lib/router-script';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
-import { buildIpCloudSetup } from '@/lib/ip-cloud';
+import { buildReadOnlyUserCommand, CLOUD_NAME_COMMAND, HTTPS_SETUP_COMMAND } from '@/lib/ip-cloud';
 import { connectIpCloudRouter, createIpCloudRouter } from '@/lib/ip-cloud.functions';
 
 export const Route = createFileRoute('/_authenticated/onboarding')({
@@ -42,6 +42,8 @@ function Onboarding() {
   const [command, setCommand] = useState('');
   const [copied, setCopied] = useState(false);
   const [host, setHost] = useState('');
+  const [port, setPort] = useState('');
+  const [cloudError, setCloudError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
@@ -73,22 +75,26 @@ function Onboarding() {
     const r = await createCloud({ data: { name: name.trim() } }).catch(() => ({ ok: false as const }));
     setBusy(false);
     if (!r.ok) return setError(t('ما قدرنا نجهز الربط. حاول مرة ثانية.', 'Could not prepare the connection. Try again.'));
-    setRouterId(r.id); setCommand(buildIpCloudSetup(r.password)); setStep('cloud');
+    setRouterId(r.id); setCommand(buildReadOnlyUserCommand(r.password)); setStep('cloud');
   }
 
   async function testCloud(e: React.FormEvent) {
     e.preventDefault(); if (!routerId) return;
     setBusy(true); setError(null);
-    const r = await connectCloud({ data: { id: routerId, host } }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
+    setCloudError(null);
+    const r = await connectCloud({ data: { id: routerId, host, port } }).catch(() => ({ ok: false as const, error: 'unreachable' as const }));
     setBusy(false);
     if (r.ok) { setStatus(r.status); return setStep('done'); }
+    const portLabel = (host.match(/:(\d+)\s*$/)?.[1]) || port || '443';
+    const unreachable = t(`ما وصلنا للراوتر على المنفذ ${portLabel}. تأكد من رقم المنفذ، وأن الإنترنت ليس خلف CGNAT، وأن الراوتر v7 (v6 لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.`, `We could not reach the router on port ${portLabel}. Check the port, that the line is not behind CGNAT, and that the router runs v7 (v6 is not supported here). The paste command works in all cases.`);
     const msgs = {
-      invalid_host: t('اكتب اسم IP Cloud كما يظهر في الراوتر، مثل xxxx.sn.mynetname.net', 'Enter the IP Cloud name as shown on the router, e.g. xxxx.sn.mynetname.net'),
-      auth: t('الراوتر رفض الدخول. الصق الأمر مرة ثانية ثم أعد المحاولة.', 'The router rejected the login. Paste the command again, then retry.'),
-      tls: t('الشهادة لم تجهز بعد. انتظر دقيقة ثم أعد المحاولة.', 'The certificate is not ready yet. Wait a minute and retry.'),
-      timeout: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
-      unreachable: t('ما وصلنا للراوتر. غالباً الإنترنت خلف CGNAT، أو المنفذ 443 مغلق، أو الراوتر v6 (لا يدعم هذه الطريقة). أمر اللصق يشتغل في كل الحالات.', 'We could not reach the router. It may be behind CGNAT, port 443 may be closed, or it runs v6 (not supported here). The paste command works in all cases.'),
+      invalid_host: t('اكتب اسم IP Cloud كما يظهر في الراوتر، مثل xxxx.sn.mynetname.net، ورقم منفذ بين 1 و65535.', 'Enter the IP Cloud name as shown on the router, e.g. xxxx.sn.mynetname.net, and a port between 1 and 65535.'),
+      auth: t('الراوتر رفض الدخول. تأكد أنك لصقت أمر المستخدم في الخطوة 2، ثم أعد المحاولة.', 'The router rejected the login. Make sure you pasted the user command in step 2, then retry.'),
+      tls: t('خدمة HTTPS في الراوتر ما عندها شهادة صالحة. الصق أمر تفعيل HTTPS تحت، انتظر دقيقة، ثم أعد المحاولة.', 'The router HTTPS service has no valid certificate. Paste the HTTPS command below, wait a minute, then retry.'),
+      timeout: unreachable,
+      unreachable,
     };
+    if (r.error === 'tls') setCloudError('tls');
     setError(msgs[r.error]);
   }
 
@@ -163,19 +169,30 @@ function Onboarding() {
           )}
 
           {step === 'cloud' && (
-            <div className="space-y-4">
-              <Head icon={<Cloud />} title={t('خطوتان للربط عبر IP Cloud', 'Two steps for IP Cloud')} sub={t('ننشئ مستخدماً للقراءة فقط ونفعل اتصالاً مشفراً.', 'We create a read-only user and enable an encrypted connection.')} />
-              <p className="text-sm font-semibold">1. {t('الصق الأمر في Terminal وانتظر حتى يطبع اسم IP Cloud', 'Paste in Terminal and wait until it prints the IP Cloud name')}</p>
-              <Cmd command={command} />
-              <Button variant="outline" className="h-11 w-full" onClick={copy}><Copy />{copied ? t('تم النسخ ✓', 'Copied ✓') : t('نسخ الأمر', 'Copy command')}</Button>
-              <form className="space-y-3" onSubmit={testCloud}>
-                <Label htmlFor="host" className="text-sm font-semibold">2. {t('الصق اسم IP Cloud هنا', 'Paste the IP Cloud name here')}</Label>
-                <Input id="host" dir="ltr" required className="h-12" placeholder="xxxx.sn.mynetname.net" value={host} onChange={(e) => setHost(e.target.value)} />
-                <Button type="submit" className="h-12 w-full text-base" disabled={busy}>{busy && <Loader2 className="animate-spin" />}{t('اختبر الاتصال', 'Test connection')}</Button>
+            <div className="space-y-5">
+              <Head icon={<Cloud />} title={t('اربط عبر IP Cloud', 'Connect with IP Cloud')} sub={t('اكتب اسم IP Cloud والمنفذ، وننشئ مستخدماً للقراءة فقط. لا نطلب كلمة مرور المدير.', 'Enter the IP Cloud name and port; we use a read-only user. We never ask for the admin password.')} />
+              <form className="space-y-5" onSubmit={testCloud}>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">1. {t('عنوان الراوتر', 'Router address')}</p>
+                  <div className="flex gap-2" dir="ltr">
+                    <div className="flex-1 space-y-1"><Label htmlFor="host" className="text-xs text-muted-foreground">IP Cloud / DDNS</Label><Input id="host" dir="ltr" required autoFocus inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} className="h-12" placeholder="xxxx.sn.mynetname.net" value={host} onChange={(e) => setHost(e.target.value)} /></div>
+                    <div className="w-24 space-y-1"><Label htmlFor="port" className="text-xs text-muted-foreground">{t('المنفذ', 'Port')}</Label><Input id="port" dir="ltr" inputMode="numeric" maxLength={5} className="h-12 text-center" placeholder="443" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ''))} /></div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('اترك المنفذ فاضي إذا ما غيّرت منفذ خدمة www-ssl (الافتراضي 443).', 'Leave the port empty if you did not change the www-ssl port (default 443).')}</p>
+                  <Hint summary={t('ما تعرف اسم IP Cloud؟', "Don't know your IP Cloud name?")} body={t('الصق هذا في Terminal، وبيطبع الاسم (ويفعّل IP Cloud لو كان مطفي):', 'Paste this in Terminal; it prints the name (and turns IP Cloud on if it was off):')} command={CLOUD_NAME_COMMAND} ar={ar} />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">2. {t('أنشئ مستخدم قراءة فقط لـ Mikro', 'Create a read-only user for Mikro')}</p>
+                  <p className="text-xs text-muted-foreground">{t('الصقه مرة وحدة في Terminal. يقدر يقرأ الحالة فقط، وما يقدر يغيّر أي إعداد.', 'Paste it once in Terminal. It can only read status and cannot change any setting.')}</p>
+                  <Cmd command={command} />
+                  <CopyBtn text={command} ar={ar} />
+                </div>
+                <Button type="submit" className="h-12 w-full text-base" disabled={busy || !host.trim()}>{busy && <Loader2 className="animate-spin" />}{t('اتصل واختبر', 'Connect and test')}</Button>
               </form>
               <Err e={error} />
+              <Hint open={cloudError === 'tls'} summary={t('خدمة HTTPS مو مفعّلة أو بدون شهادة؟', 'HTTPS service off or without a certificate?')} body={t('هذا يصدر شهادة لاسم IP Cloud ويفعّل خدمة www-ssl على نفس منفذك:', 'This issues a certificate for the IP Cloud name and turns on www-ssl on your current port:')} command={HTTPS_SETUP_COMMAND} ar={ar} />
               {error && <Button variant="secondary" className="h-11 w-full" onClick={switchToPush}><Terminal />{t('استخدم أمر اللصق بدلاً من ذلك', 'Use the paste command instead')}</Button>}
-              <p className="flex gap-2 text-xs text-muted-foreground"><TriangleAlert className="size-4 shrink-0" />{t('هذا يفتح المنفذ 443 للإنترنت. يفضل تقييده بعناوين موثوقة من الجدار الناري.', 'This exposes port 443. Restrict it to trusted addresses in the firewall when possible.')}</p>
+              <p className="flex gap-2 text-xs text-muted-foreground"><TriangleAlert className="size-4 shrink-0" />{t('هذه الطريقة تفتح منفذ HTTPS للإنترنت. يفضل تقييده بعناوين موثوقة من الجدار الناري.', 'This method exposes the HTTPS port. Restrict it to trusted addresses in the firewall when possible.')}</p>
             </div>
           )}
 
@@ -209,6 +226,19 @@ function MethodCard({ icon, title, body, badge, onClick, disabled }: { icon: Rea
 }
 function Cmd({ command }: { command: string }) {
   return <pre dir="ltr" className="max-h-44 overflow-auto rounded-lg bg-muted p-3 text-xs whitespace-pre-wrap break-all">{command}</pre>;
+}
+function CopyBtn({ text, ar }: { text: string; ar: boolean }) {
+  const [done, setDone] = useState(false);
+  return <Button type="button" variant="outline" className="h-11 w-full" onClick={async () => { await navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 2000); }}><Copy />{done ? (ar ? 'تم النسخ ✓' : 'Copied ✓') : (ar ? 'نسخ الأمر' : 'Copy command')}</Button>;
+}
+function Hint({ summary, body, command, ar, open }: { summary: string; body: string; command: string; ar: boolean; open?: boolean }) {
+  return (
+    <details className="rounded-lg border border-border p-3 text-sm" open={open || undefined}>
+      <summary className="cursor-pointer font-medium text-primary">{summary}</summary>
+      <p className="mt-2 text-xs text-muted-foreground">{body}</p>
+      <div className="mt-2 space-y-2"><Cmd command={command} /><CopyBtn text={command} ar={ar} /></div>
+    </details>
+  );
 }
 function Err({ e }: { e: string | null }) {
   return e ? <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{e}</p> : null;
