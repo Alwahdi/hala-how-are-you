@@ -223,27 +223,33 @@ export type Database = {
       router_profiles: {
         Row: {
           name: string
+          price: string | null
           rate_limit: string | null
           router_id: string
           shared_users: string | null
           source: string
           synced_at: string
+          validity: string | null
         }
         Insert: {
           name: string
+          price?: string | null
           rate_limit?: string | null
           router_id: string
           shared_users?: string | null
           source: string
           synced_at?: string
+          validity?: string | null
         }
         Update: {
           name?: string
+          price?: string | null
           rate_limit?: string | null
           router_id?: string
           shared_users?: string | null
           source?: string
           synced_at?: string
+          validity?: string | null
         }
         Relationships: [
           {
