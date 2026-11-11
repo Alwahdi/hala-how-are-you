@@ -40,7 +40,7 @@ export async function sealSetup(code: string, p: SetupPayload): Promise<string> 
 }
 export async function openSetup(code: string, sealed: string): Promise<SetupPayload | null> {
   try {
-    const [iv, ct] = sealed.split('.');
+    const [iv = '', ct = ''] = sealed.split('.');
     const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(iv) as BufferSource }, await keyFor(code), unb64(ct) as BufferSource);
     const p = JSON.parse(new TextDecoder().decode(pt));
     return typeof p.token === 'string' && typeof p.password === 'string' ? p : null;
