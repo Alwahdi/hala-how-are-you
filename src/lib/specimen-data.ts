@@ -39,17 +39,20 @@ export const biggestSession = (s: DemoSession[]) => s.reduce<DemoSession | undef
 export const filterCards = (cards: DemoCard[], query: string, state: CardState | 'all') => cards.filter(c => c.id.toLowerCase().includes(query.trim().toLowerCase()) && (state === 'all' || cardState(c) === state));
 
 export type Tone = 'short' | 'detailed';
+/** Wraps Latin values in Unicode isolates so they keep their order inside Arabic text. */
+export const iso = (v: string | number) => `\u2066${v}\u2069`;
 export function buildCustomerMessage(card: DemoCard, lang: Language, tone: Tone) {
   const ar = lang === 'ar'; const s = sessionsOf(card); const big = biggestSession(s); const used = card.downloadMB + card.uploadMB;
-  const left = formatDataSize(remainingMB(card)), total = formatDataSize(card.limitMB), usedS = formatDataSize(used), time = formatDuration(card.usedMinutes, ar);
+  const L = (v: string | number) => ar ? iso(v) : String(v); const D = (mb: number) => L(formatDataSize(mb));
+  const left = D(remainingMB(card)), total = D(card.limitMB), usedS = D(used), time = formatDuration(card.usedMinutes, ar), id = L(card.id);
   const downHeavy = used > 0 && card.downloadMB / used > 0.7;
-  if (used === 0) return ar ? `مرحباً، الكرت ${card.id} لم يُستخدم بعد، والباقة كاملة ${total}.` : `Hello, card ${card.id} has not been used yet. The full ${total} is available.`;
+  if (used === 0) return ar ? `مرحباً، الكرت ${id} لم يُستخدم بعد، والباقة كاملة ${total}.` : `Hello, card ${id} has not been used yet. The full ${total} is available.`;
   const lines = ar
-    ? [`مرحباً، هذه تفاصيل الكرت ${card.id}:`, `• الباقة: ${total}`, `• المستهلك: ${usedS}`, `• المتبقي: ${left}`, `• مدة الاتصال: ${time} في ${s.length} جلسة`]
-    : [`Hello, here are the details for card ${card.id}:`, `• Package: ${total}`, `• Used: ${usedS}`, `• Remaining: ${left}`, `• Connection time: ${time} over ${s.length} session${s.length === 1 ? '' : 's'}`];
+    ? [`مرحباً، هذه تفاصيل الكرت ${id}:`, `• الباقة: ${total}`, `• المستهلك: ${usedS}`, `• المتبقي: ${left}`, `• مدة الاتصال: ${time} في ${s.length} جلسة`]
+    : [`Hello, here are the details for card ${id}:`, `• Package: ${total}`, `• Used: ${usedS}`, `• Remaining: ${left}`, `• Connection time: ${time} over ${s.length} session${s.length === 1 ? '' : 's'}`];
   if (tone === 'detailed') {
-    s.forEach((x, i) => lines.push(ar ? `  ${i + 1}) ${x.start} · ${formatDuration(x.minutes, true)} · ${formatDataSize(x.downloadMB + x.uploadMB)} · ${x.device}` : `  ${i + 1}) ${x.start} · ${formatDuration(x.minutes, false)} · ${formatDataSize(x.downloadMB + x.uploadMB)} · ${x.device}`));
-    if (big) lines.push(ar ? `أكبر جلسة: ${formatDataSize(big.downloadMB + big.uploadMB)} على جهاز ${big.device}.` : `Biggest session: ${formatDataSize(big.downloadMB + big.uploadMB)} on ${big.device}.`);
+    s.forEach((x, i) => lines.push(ar ? `  ${i + 1}) ${L(x.start)} · ${formatDuration(x.minutes, true)} · ${D(x.downloadMB + x.uploadMB)} · ${L(x.device)}` : `  ${i + 1}) ${x.start} · ${formatDuration(x.minutes, false)} · ${formatDataSize(x.downloadMB + x.uploadMB)} · ${x.device}`));
+    if (big) lines.push(ar ? `أكبر جلسة: ${D(big.downloadMB + big.uploadMB)} على جهاز ${L(big.device)}.` : `Biggest session: ${formatDataSize(big.downloadMB + big.uploadMB)} on ${big.device}.`);
   }
   if (downHeavy) lines.push(ar ? 'أغلب الاستهلاك تحميل، مثل مشاهدة الفيديو، وهذا سبب انتهاء الباقة بسرعة.' : 'Most of the usage was downloading, such as watching video, which is why the package ran out quickly.');
   lines.push(ar ? 'شكراً لك.' : 'Thank you.');
