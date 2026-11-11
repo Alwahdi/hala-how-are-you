@@ -27,3 +27,4 @@ related: [../AGENTS.md, 05-operations/status.md]
 - [قاموس المصطلحات](00-company/glossary.md)
 - [المشاكل](01-discovery/problems.md)
 - [خارطة الطريق](05-operations/roadmap.md)
+- [06-mikrotik](06-mikrotik/README.md) — مرجع MikroTik RouterOS والمخاطر
