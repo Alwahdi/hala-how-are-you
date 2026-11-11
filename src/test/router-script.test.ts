@@ -17,6 +17,11 @@ describe('router status push', () => {
     expect(f).toContain('b'.repeat(48));
     expect(f).toContain('/system scheduler add name=mikro-report');
   });
+  it('keeps version-specific syntax out of the compiled script (works on v6 and v7)', () => {
+    const f = buildSetupFile('c'.repeat(48));
+    expect(f).not.toContain('[/system health get [find');
+    expect(f).toContain(':parse');
+  });
   it('detects the RouterOS major version from the report', () => {
     expect(majorVersion('6.49.10 (long-term)')).toBe('v6');
     expect(majorVersion('7.15.3 (stable)')).toBe('v7');

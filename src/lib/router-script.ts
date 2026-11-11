@@ -17,8 +17,9 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':local hs 0',
     ':do {:set hs [:len [/ip hotspot active find]]} on-error={}',
     ':local temp ""',
-    ':do {:set temp [:tostr [/system health get temperature]]} on-error={}',
-    ':if ($temp = "") do={:do {:set temp [:tostr [/system health get [find name=temperature] value]]} on-error={}}',
+    // v6 and v7 read temperature differently; :parse compiles at run time so the other version's syntax cannot break the script.
+    ':do {:set temp [:tostr [[:parse "/system health get temperature"]]]} on-error={}',
+    ':if ($temp = "") do={:do {:set temp [:tostr [[:parse "/system health get [find name=temperature] value"]]]} on-error={}}',
     ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\"}")',
     `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
   ].join('\n');
