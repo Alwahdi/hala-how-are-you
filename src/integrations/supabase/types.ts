@@ -644,6 +644,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_finished_cards: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "owner" | "engineer" | "admin"
