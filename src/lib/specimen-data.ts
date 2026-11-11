@@ -6,7 +6,7 @@ export const demoCards = [
   { id: 'DEMO-003', active: true, usage: 68.2, limitMB: 5000, downloadMB: 3000, uploadMB: 410, usedMinutes: 160, limitMinutes: 360 },
   { id: 'DEMO-004', active: true, usage: 85, limitMB: 1000, downloadMB: 780, uploadMB: 70, usedMinutes: 130, limitMinutes: 180 },
 ];
-export type DemoCard = typeof demoCards[number];
+export type DemoCard = typeof demoCards[number] & { code?: string; isNew?: boolean };
 export type CardState = 'unused' | 'inUse' | 'almostFinished';
 export const LOW_REMAINING_RATIO = 0.2;
 export const remainingMB = (card: DemoCard) => card.limitMB - card.downloadMB - card.uploadMB;
@@ -46,6 +46,7 @@ export function buildCustomerMessage(card: DemoCard, lang: Language, tone: Tone)
   const L = (v: string | number) => ar ? iso(String(v).replace(/ /g, "\u00A0")) : String(v); const D = (mb: number) => L(formatDataSize(mb));
   const left = D(remainingMB(card)), total = D(card.limitMB), usedS = D(used), time = formatDuration(card.usedMinutes, ar), id = L(card.id);
   const downHeavy = used > 0 && card.downloadMB / used > 0.7;
+  if (used === 0 && card.code) return buildNewCardMessage([card], lang);
   if (used === 0) return ar ? `مرحباً، الكرت ${id} لم يُستخدم بعد، والباقة كاملة ${total}.` : `Hello, card ${id} has not been used yet. The full ${total} is available.`;
   const lines = ar
     ? [`مرحباً، هذه تفاصيل الكرت ${id}:`, `• الباقة: ${total}`, `• المستهلك: ${usedS}`, `• المتبقي: ${left}`, `• مدة الاتصال: ${time} في ${s.length} جلسة`]
@@ -57,4 +58,26 @@ export function buildCustomerMessage(card: DemoCard, lang: Language, tone: Tone)
   if (downHeavy) lines.push(ar ? 'أغلب الاستهلاك تحميل، مثل مشاهدة الفيديو، وهذا سبب انتهاء الباقة بسرعة.' : 'Most of the usage was downloading, such as watching video, which is why the package ran out quickly.');
   lines.push(ar ? 'شكراً لك.' : 'Thank you.');
   return lines.join('\n');
+}
+
+export const PACKAGE_OPTIONS_MB = [1000, 3000, 5000, 10000] as const;
+export type Validity = 'day' | 'week' | 'month' | 'none';
+export const VALIDITY_MINUTES: Record<Validity, number> = { day: 1440, week: 10080, month: 43200, none: 0 };
+export const MAX_QUICK_ADD = 20;
+export const validityLabel = (v: Validity, ar: boolean) => ({ day: ar ? 'يوم' : '1 day', week: ar ? 'أسبوع' : '1 week', month: ar ? 'شهر' : '1 month', none: ar ? 'بدون حد' : 'No limit' })[v];
+const validityOf = (minutes: number): Validity => (Object.entries(VALIDITY_MINUTES).find(([, m]) => m === minutes)?.[0] as Validity) ?? 'none';
+/** Demo-only: builds unused cards in memory with sequential ids and 8-digit Latin codes. Nothing reaches a router. */
+export function createDemoCards(existing: DemoCard[], count: number, limitMB: number, validity: Validity, rand: () => number = Math.random): DemoCard[] {
+  const n = Math.max(1, Math.min(MAX_QUICK_ADD, Math.floor(count)));
+  let next = Math.max(0, ...existing.map(c => Number(c.id.replace(/\D/g, '')) || 0)) + 1;
+  return Array.from({ length: n }, () => ({ id: `DEMO-${String(next++).padStart(3, '0')}`, active: false, usage: 0, limitMB, downloadMB: 0, uploadMB: 0, usedMinutes: 0, limitMinutes: VALIDITY_MINUTES[validity], code: String(Math.floor(rand() * 9e7) + 1e7), isNew: true }));
+}
+export function buildNewCardMessage(cards: DemoCard[], lang: Language) {
+  const ar = lang === 'ar'; const L = (v: string | number) => ar ? iso(String(v).replace(/ /g, '\u00A0')) : String(v);
+  const first = cards[0]; if (!first) return '';
+  const pkg = L(formatDataSize(first.limitMB)), val = validityLabel(validityOf(first.limitMinutes), ar);
+  const head = ar ? (cards.length > 1 ? `مرحباً، هذه كروتك (${L(cards.length)}):` : 'مرحباً، هذا كرتك:') : (cards.length > 1 ? `Hello, here are your ${cards.length} cards:` : 'Hello, here is your card:');
+  const rows = cards.map(c => ar ? `• الرقم: ${L(c.id)} · الرمز: ${L(c.code ?? '')}` : `• Number: ${c.id} · Code: ${c.code ?? ''}`);
+  const tail = ar ? [`الباقة: ${pkg} · المدة: ${val}`, 'اتصل بالشبكة، ثم أدخل الرمز في صفحة الدخول.', 'شكراً لك.'] : [`Package: ${pkg} · Validity: ${val}`, 'Connect to the network, then enter the code on the login page.', 'Thank you.'];
+  return [head, ...rows, ...tail].join('\n');
 }

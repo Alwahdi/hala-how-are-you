@@ -36,3 +36,4 @@ related: [../templates/decision.md]
 - [D-022](D-022-mesh-texture-and-color-roles.md) — mesh texture and color roles (approved)
 - [D-023](D-023-owner-first-card-concept-and-surfaces.md) — owner-first card concept and surface rules (approved)
 - [D-024](D-024-customer-reply-assistant-demo.md) — customer reply assistant and card search, demo only (approved)
+- [D-025](D-025-quick-add-send-and-mobile-first.md) — quick add card, quick send, mobile-first sheets (approved)

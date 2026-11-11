@@ -12,6 +12,7 @@ related: [roadmap.md]
 الخطوة الجاية: حسم قواعد العمل المفتوحة مع المؤسس؛ ثم استكمال التحقق والمنافسين والسوق.
 
 ## وين وصلنا
+- [confirmed] أضيف زر «إضافة» كرت سريع وزر «إرسال» على كل كرت، ونوافذ سفلية للجوال وفق [D-025](../04-decisions/D-025-quick-add-send-and-mobile-first.md)؛ تحقق بالمتصفح على 360/390/1280، ولم تنشر التغييرات.
 - [confirmed] أعيدت خلفية صفحة Mikro بعد اعتراض المؤسس على نمط D-020؛ البديل موثق في [D-021](../04-decisions/D-021-professional-landing-background-pattern.md) ونتائجه في [سجل الصفحة](../00-company/conversion-landing-page.md)، ولم تنشر التغييرات.
 - [confirmed] اكتملت خطة [D-020](../04-decisions/D-020-landing-dialog-and-detail-refinement.md) وتحقيقاتها في [سجل الصفحة](../00-company/conversion-landing-page.md)؛ التالي مراجعة المؤسس واستكمال الخصوصية، ولا نشر منفذ للتغييرات.
 - [confirmed] نفذت تحسينات تصور الكروت للجوال ضمن [D-019](../04-decisions/D-019-readable-demo-card-preview.md)؛ نتائج القراءة والفتح والبحث واللغتين في [سجل الصفحة](../00-company/conversion-landing-page.md)، ولم تنشر هذه التغييرات.
