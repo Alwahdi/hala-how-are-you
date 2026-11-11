@@ -116,3 +116,13 @@ describe('card tasks', () => {
     expect(bulkJobLine('J', 'usermanager', 'del', Array.from({ length: 50 }, (_, i) => `c${i}`))!.split('|')[4]!.split(',')).toHaveLength(40);
   });
 });
+
+describe('data amounts on a card', () => {
+  it('shows a 10G limit from a 1000-based menu as 10 GB, not 9.3 GB', async () => {
+    const { formatBytes, isDecimalSize } = await import('@/lib/card-status');
+    expect(isDecimalSize(10_000_000_000)).toBe(true);
+    expect(formatBytes(10_000_000_000, true)).toBe('10 GB');
+    expect(isDecimalSize(2 * 1024 ** 3)).toBe(false);
+    expect(formatBytes(2 * 1024 ** 3)).toBe('2.0 GB');
+  });
+});
