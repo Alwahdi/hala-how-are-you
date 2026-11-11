@@ -40,7 +40,6 @@ function Onboarding() {
   const [waited, setWaited] = useState(0);
   const [routerId, setRouterId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
-  const [copied, setCopied] = useState(false);
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
   const [cloudError, setCloudError] = useState<string | null>(null);
@@ -103,7 +102,6 @@ function Onboarding() {
     setRouterId(null); setError(null); await choosePush();
   }
 
-  async function copy() { await navigator.clipboard.writeText(command); setCopied(true); setTimeout(() => setCopied(false), 2000); }
   function later() { sessionStorage.setItem(LATER_KEY, '1'); navigate({ to: '/routers' }); }
 
   const idx = { basics: 0, method: 1, push: 2, cloud: 2, done: 3 }[step];
