@@ -24,7 +24,7 @@ export const Route = createFileRoute('/_authenticated/onboarding')({
 });
 
 type Step = 'basics' | 'method' | 'push' | 'cloud' | 'done';
-type Status = { identity?: string; board?: string; version?: string; cpu?: number };
+type Status = { identity?: string | undefined; board?: string | undefined; version?: string | undefined; cpu?: number | undefined };
 const LATER_KEY = 'mikro-onboarding-later';
 
 function Onboarding() {

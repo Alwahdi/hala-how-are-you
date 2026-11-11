@@ -15,7 +15,7 @@ async function encrypt(secret: string, text: string) {
   return `${b64(iv)}.${b64(ct)}`;
 }
 async function decrypt(secret: string, blob: string) {
-  const [iv, ct] = blob.split('.');
+  const [iv = '', ct = ''] = blob.split('.');
   return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(iv) }, await aesKey(secret), unb64(ct)));
 }
 
@@ -29,7 +29,7 @@ async function probe(host: string, password: string): Promise<Probe> {
     if (res.status === 401 || res.status === 403) return { ok: false, error: 'auth' };
     if (!res.ok) return { ok: false, error: 'unreachable' };
     const resource = (await res.json()) as Record<string, string>;
-    const id = await get('/system/identity').then((r) => (r.ok ? r.json() as Promise<{ name?: string }> : {})).catch(() => ({} as { name?: string }));
+    const id = await get('/system/identity').then((r) => (r.ok ? (r.json() as Promise<{ name?: string }>) : ({} as { name?: string }))).catch(() => ({} as { name?: string }));
     const hs = await get('/ip/hotspot/active').then((r) => (r.ok ? r.json() as Promise<unknown[]> : null)).catch(() => null);
     return { ok: true, status: mapResource(resource, id.name, hs ? hs.length : undefined) };
   } catch (e) {

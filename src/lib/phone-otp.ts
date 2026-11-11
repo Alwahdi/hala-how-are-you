@@ -28,7 +28,7 @@ export function normalizePhone(input: string, dial = '+967'): string | null {
 }
 
 export function newOtp(): string {
-  const n = crypto.getRandomValues(new Uint32Array(1))[0] % 10 ** OTP_LENGTH;
+  const n = (crypto.getRandomValues(new Uint32Array(1))[0] ?? 0) % 10 ** OTP_LENGTH;
   return String(n).padStart(OTP_LENGTH, '0');
 }
 
