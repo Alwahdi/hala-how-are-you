@@ -8,5 +8,5 @@ export function CardStateChip({ state, ar }: { state: CardState; ar: boolean }) 
 }
 export function UsageBar({ ratio, state, label }: { ratio: number; state: CardState; label: string }) {
   const pct = Math.max(0, Math.min(100, ratio * 100));
-  return <div className={`usage-bar usage-bar--${state}`} role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label={label}><span style={{ inlineSize: `${pct}%` }}/></div>;
+  return <div className={`usage-bar usage-bar--${state}`} role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label={label}><span style={{ inlineSize: pct > 0 ? `max(${pct}%, 12px)` : "0%" }}/></div>;
 }

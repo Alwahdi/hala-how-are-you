@@ -312,7 +312,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-line strong { font-size:15px; }
 .status-chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; border:1px solid currentColor; }
 .status-chip--inUse { color:var(--primary); } .status-chip--unused { color:var(--muted-foreground); } .status-chip--almostFinished { color:var(--warning); }
-.usage-bar { height:10px; border-radius:999px; background:color-mix(in oklab,var(--foreground) 10%,transparent); overflow:hidden; }
+.usage-bar { height:10px; border-radius:999px; background:color-mix(in oklab,var(--foreground) 18%,transparent); box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--border) 80%,transparent); overflow:hidden; }
 .usage-bar>span { display:block; height:100%; border-radius:inherit; background:var(--primary); }
 .usage-bar--almostFinished>span { background:var(--warning); } .usage-bar--unused>span { background:color-mix(in oklab,var(--muted-foreground) 70%,transparent); }
 .dialog-hero { display:flex; flex-direction:column; gap:8px; padding:16px; border-radius:12px; border:1px solid var(--border); }
@@ -323,8 +323,8 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 
 /* D-024 search, sessions, customer reply */
 .summary-tile { cursor:pointer; text-align:start; transition:border-color .15s; } .summary-tile:hover { border-color:color-mix(in oklab,var(--primary) 45%,transparent); } .summary-tile[aria-pressed=true] { outline:2px solid var(--ring); outline-offset:2px; } .summary-tile:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
-.card-search { position:relative; display:flex; align-items:center; gap:8px; } .card-search>svg { position:absolute; inset-inline-start:14px; color:var(--muted-foreground); pointer-events:none; } .card-search input { height:48px; padding-inline-start:42px; font-size:15px; text-align:start; } .card-search>button { position:absolute; inset-inline-end:4px; }
-.filter-chips { display:flex; flex-wrap:wrap; gap:8px; margin-block:12px 4px; } .filter-chips button { min-height:36px; border-radius:999px; }
+.card-search { position:relative; display:flex; align-items:center; gap:8px; } .card-search>svg { position:absolute; inset-inline-start:14px; color:var(--muted-foreground); pointer-events:none; } .card-search input { height:48px; padding-inline-start:42px; padding-inline-end:52px; font-size:15px; text-align:start; } .card-search>button { position:absolute; inset-inline-end:4px; width:44px; height:44px; }
+.filter-chips { display:flex; flex-wrap:wrap; gap:8px; margin-block:12px 4px; } .filter-chips button { min-height:44px; border-radius:999px; }
 .empty-results { display:flex; flex-direction:column; align-items:center; gap:10px; padding:32px 16px; border:1px dashed var(--border); border-radius:12px; color:var(--muted-foreground); }
 .reply-cta { display:flex; flex-wrap:wrap; gap:8px; } .reply-cta button { flex:1 1 160px; min-height:44px; }
 .sessions-block { display:flex; flex-direction:column; gap:10px; }
@@ -358,7 +358,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-dialog { gap:16px; }
 @media(max-width:760px){
   .choice-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .filter-chips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:-8px; padding-inline:8px; } .filter-chips::-webkit-scrollbar { display:none; } .filter-chips button { flex-shrink:0; min-height:40px; }
+  .filter-chips { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; margin-inline:-8px; padding-inline:8px; } .filter-chips::-webkit-scrollbar { display:none; } .filter-chips button { flex-shrink:0; min-height:44px; }
   .summary-tiles { gap:8px; } .summary-tile { min-height:96px; }
   .demo-card-list { gap:12px; }
   /* Bottom sheet */
@@ -369,7 +369,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 
 /* D-026 card actions, two-step add, keyboard-safe mobile */
 .demo-card-item .demo-card-top { padding-inline-end:150px; }
-.demo-card-quick { min-height:40px; border-radius:999px; gap:6px; }
+.demo-card-quick { min-height:44px; border-radius:999px; gap:6px; }
 .demo-card-more { width:40px; height:40px; border-radius:999px; }
 .demo-card-item.is-disabled .demo-card-row { opacity:.6; }
 .status-chip--disabled { color:var(--destructive); border-color:color-mix(in oklab,var(--destructive) 45%,transparent); }
@@ -413,7 +413,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .demo-card-actions { display:flex; padding:0 20px 16px; position:static; }
 .demo-card-more { z-index:1; }
 .demo-card-more { position:absolute; top:10px; inset-inline-end:8px; width:44px; height:44px; border-radius:12px; color:var(--muted-foreground); }
-.demo-card-quick { min-height:40px; border-radius:999px; gap:6px; }
+.demo-card-quick { min-height:44px; border-radius:999px; gap:6px; }
 .demo-card-item svg, .filter-chips svg { stroke-width:2; }
 .demo-card-identity svg { width:18px; height:18px; }
 .status-chip svg { width:14px; height:14px; }
