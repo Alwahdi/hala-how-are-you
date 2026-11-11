@@ -73,6 +73,8 @@ export const Route = createFileRoute('/api/public/router-report')({
 /** Hands the router at most one queued task as a fixed-format line the router script understands (anything else is ignored there). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function nextJob(sb: any, routerId: string): Promise<string | null> {
+  // A card action the router did not pick up within 5 minutes is dropped, so it never runs much later by surprise.
+  await sb.from('router_jobs').update({ status: 'expired', done_at: new Date().toISOString(), payload: {} }).eq('router_id', routerId).eq('kind', 'card_action').eq('status', 'pending').lt('requested_at', new Date(Date.now() - 5 * 60_000).toISOString());
   const { data: j } = await sb.from('router_jobs').select('id, kind, payload').eq('router_id', routerId).eq('status', 'pending').order('requested_at').limit(1).maybeSingle();
   if (!j) return null;
   const now = new Date().toISOString();
