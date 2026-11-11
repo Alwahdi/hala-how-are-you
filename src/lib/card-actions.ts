@@ -43,7 +43,8 @@ export function bulkJobLine(id: string, source: string, action: string, names: s
   return ok.length ? ['bulk', id, source, action, ok.join(',')].join('|') : null;
 }
 
-export const ROUTER_RESULTS = ['ok', 'missing', 'exists', 'error'] as const;
+/** partial: a package edit kept a login script it did not write (speed and devices changed, price and validity not). */
+export const ROUTER_RESULTS = ['ok', 'missing', 'exists', 'error', 'partial'] as const;
 export type RouterResult = (typeof ROUTER_RESULTS)[number];
 
 /** A random password that is easy to read aloud and type: no 0/O/1/l/I. */

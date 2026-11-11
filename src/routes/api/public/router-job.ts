@@ -24,7 +24,7 @@ export const Route = createFileRoute('/api/public/router-job')({
         const doneAt = new Date().toISOString();
 
         if (parsed.data.result) {
-          const ok = parsed.data.result === 'ok';
+          const ok = parsed.data.result === 'ok' || parsed.data.result === 'partial';
           const count = parsed.data.removed;
           const { data: job } = await supabaseAdmin.from('router_jobs').update({ status: ok ? 'done' : 'failed', done_at: doneAt, result: count != null ? `${parsed.data.result}:${count}` : parsed.data.result }).eq('id', parsed.data.job).eq('router_id', router.id).in('kind', ['card_action', 'card_bulk', 'package']).eq('status', 'sent').select('id, kind, payload').maybeSingle();
           if (!job) return new Response('ok');
