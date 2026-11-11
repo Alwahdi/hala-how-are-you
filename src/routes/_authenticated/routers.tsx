@@ -6,12 +6,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PasteCommandPanel } from '@/components/paste-command-panel';
 import { buildFallbackCommand, buildPasteCommand, buildRemoveCommand, hashToken, isOnline, newToken } from '@/lib/router-script';
-import { Globe2, Plus, Copy, Trash2, LogOut } from 'lucide-react';
+import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2 } from 'lucide-react';
 
 export const Route = createFileRoute('/_authenticated/routers')({
   head: () => ({ meta: [
@@ -43,7 +41,7 @@ function RoutersPage() {
   const { data: routers = [], isLoading } = useQuery({
     queryKey: ['routers'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('routers').select('id, name, ros_version, last_seen_at, last_status, created_at').order('created_at');
+      const { data, error } = await supabase.from('routers').select('id, name, ros_version, connection_method, last_seen_at, last_status, last_check_error, created_at').order('created_at');
       if (error) throw error;
       return data;
     },
@@ -60,22 +58,27 @@ function RoutersPage() {
     const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
-  const [addOpen, setAddOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [command, setCommand] = useState<{ main: string; fallback: string } | null>(null);
+  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; fallback: string } | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function addRouter(e: React.FormEvent) {
-    e.preventDefault(); setError(null);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
+  // Issue a fresh token so the owner gets a new paste command; the old one stops working.
+  async function startReconnect(id: string, routerName: string) {
+    setBusyId(id); setError(null);
     const token = newToken();
-    const { error } = await supabase.from('routers').insert({ owner_id: u.user.id, name: name.trim(), token_hash: await hashToken(token) });
-    if (error) return setError(error.message);
-    setCommand({ main: buildPasteCommand(token), fallback: buildFallbackCommand(token) });
-    qc.invalidateQueries({ queryKey: ['routers'] });
+    const { error } = await supabase.from('routers').update({ token_hash: await hashToken(token) }).eq('id', id);
+    setBusyId(null);
+    if (error) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
+    setReconnect({ id, name: routerName, main: buildPasteCommand(token), fallback: buildFallbackCommand(token) });
+  }
+
+  async function checkCloudNow(id: string) {
+    setBusyId(id);
+    await refreshCloud().catch(() => null);
+    await qc.invalidateQueries({ queryKey: ['routers'] });
+    setBusyId(null);
   }
 
   async function copy(text: string) { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -86,7 +89,6 @@ function RoutersPage() {
     qc.invalidateQueries({ queryKey: ['routers'] });
   }
 
-  function closeAdd() { setAddOpen(false); setCommand(null); setName(''); setCopied(false); setError(null); }
 
   return (
     <main className="landing-width min-h-screen py-8" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
@@ -120,9 +122,7 @@ function RoutersPage() {
                     <h2 className="text-lg font-bold">{r.name}</h2>
                     <p className="text-xs text-muted-foreground" dir="ltr">{[s.board, s.version && `RouterOS ${s.version}`].filter(Boolean).join(' · ') || r.ros_version}</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${online ? 'bg-primary/15 text-primary' : 'bg-destructive/15 text-destructive'}`}>
-                    {online ? t('● متصل', '● Online') : r.last_seen_at ? t('○ منقطع', '○ Offline') : t('○ بانتظار أول إرسال', '○ Waiting')}
-                  </span>
+                  <StatusChip state={online ? 'online' : r.last_seen_at ? 'offline' : 'waiting'} ar={ar} />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{ago(r.last_seen_at, ar)}</p>
                 {r.last_status && (
@@ -135,32 +135,42 @@ function RoutersPage() {
                     <Stat label={t('الحرارة', 'Temperature')} value={s.temperature ? `${s.temperature}°C` : '-'} />
                   </dl>
                 )}
-                <Button variant="ghost" size="sm" className="mt-3 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
+                {!online && (
+                  <p className="mt-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                    {r.connection_method === 'ip_cloud'
+                      ? (r.last_check_error ? t('ما قدرنا نوصل للراوتر عبر IP Cloud. تأكد أنه شغال ومتصل بالإنترنت.', 'We could not reach the router via IP Cloud. Check it is on and online.') : t('نتحقق من الراوتر كل 30 ثانية وهذه الصفحة مفتوحة.', 'We check the router every 30 seconds while this page is open.'))
+                      : r.last_seen_at ? t('الراوتر توقف عن الإرسال. لو انطفى أو انمسح منه السكربت، اضغط «إعادة الربط» والصق الأمر من جديد.', 'The router stopped reporting. If it was reset or the script was removed, tap Reconnect and paste the command again.')
+                      : t('ما وصلت أول إشارة بعد. اضغط «إعادة الربط» لعرض أمر اللصق.', 'No first signal yet. Tap Reconnect to show the paste command.')}
+                  </p>
+                )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {r.connection_method === 'ip_cloud' ? (
+                    <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحقق الآن', 'Check now')}</Button>
+                  ) : (
+                    <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
+                  )}
+                  <Button variant="ghost" className="h-11 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
+                </div>
               </article>
             );
           })}
         </div>
       )}
 
-      <Dialog open={addOpen} onOpenChange={(o) => (o ? setAddOpen(true) : closeAdd())}>
-        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+      {error && <p role="alert" className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+
+      <Dialog open={!!reconnect} onOpenChange={(o) => !o && setReconnect(null)}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{command ? t('الصق هذا الأمر في الراوتر', 'Paste this into the router') : t('أضف راوتر', 'Add router')}</DialogTitle>
-            <DialogDescription>{command ? t('افتح Winbox ← New Terminal والصق الأمر. لن يظهر هذا الأمر مرة ثانية.', 'Open Winbox → New Terminal and paste. This command will not be shown again.') : t('الراوتر يرسل حالته فقط، ولا نطلب كلمة مروره.', 'The router only sends its status; we never ask for its password.')}</DialogDescription>
+            <DialogTitle>{t('إعادة ربط', 'Reconnect')} {reconnect?.name}</DialogTitle>
+            <DialogDescription>{t('الصق هذا الأمر في Terminal. الأمر القديم توقف عن العمل، وهذا يستبدله.', 'Paste this into Terminal. The old command no longer works; this replaces it.')}</DialogDescription>
           </DialogHeader>
-          {command ? (
-            <div className="space-y-3">
-              <PasteCommandPanel command={command.main} fallback={command.fallback} ar={ar} />
-              <p className="text-xs text-muted-foreground">{t('بعد اللصق تظهر حالة الراوتر هنا خلال دقيقة تقريباً.', 'The router should appear online here within about a minute.')}</p>
-            </div>
-          ) : (
-            <form className="space-y-4" onSubmit={addRouter}>
-              <div className="space-y-2"><Label htmlFor="rname">{t('اسم الراوتر', 'Router name')}</Label><Input id="rname" required maxLength={60} value={name} onChange={(e) => setName(e.target.value)} placeholder={t('مثلاً: برج الحي', 'e.g. Main tower')} /></div>
-              <p className="text-xs text-muted-foreground">{t('نعرف إصدار RouterOS تلقائياً من الراوتر. يحتاج v6.43 أو أحدث.', 'We detect the RouterOS version automatically. Requires v6.43 or newer.')}</p>
-              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full">{t('أنشئ أمر الربط', 'Create connect command')}</Button>
-            </form>
-          )}
+          {reconnect && <PasteCommandPanel command={reconnect.main} fallback={reconnect.fallback} ar={ar} />}
+          {reconnect && (() => {
+            const r = routers.find((x) => x.id === reconnect.id);
+            const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;
+            return <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-3 text-sm">{on ? <><StatusChip state="online" ar={ar} />{t('وصلت إشارة من الراوتر.', 'Signal received from the router.')}</> : <><Loader2 className="size-4 animate-spin text-primary" />{t('ننتظر إشارة من الراوتر...', 'Waiting for a signal from the router...')}</>}</div>;
+          })()}
         </DialogContent>
       </Dialog>
 
@@ -179,6 +189,13 @@ function RoutersPage() {
       </Dialog>
     </main>
   );
+}
+
+function StatusChip({ state, ar }: { state: 'online' | 'offline' | 'waiting'; ar: boolean }) {
+  const label = { online: ar ? 'متصل' : 'Online', offline: ar ? 'غير متصل' : 'Offline', waiting: ar ? 'بانتظار أول إشارة' : 'Waiting' }[state];
+  const tone = { online: 'bg-primary/15 text-primary', offline: 'bg-destructive/15 text-destructive', waiting: 'bg-muted text-muted-foreground' }[state];
+  const dot = { online: 'bg-primary animate-pulse', offline: 'bg-destructive', waiting: 'bg-muted-foreground' }[state];
+  return <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tone}`}><span aria-hidden className={`size-2 rounded-full ${dot}`} />{label}</span>;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
