@@ -286,9 +286,11 @@ export type Database = {
           bytes: number
           comment: string | null
           disabled: boolean
+          expires_at: string | null
           finished_at: string | null
           first_seen_at: string
           first_used_at: string | null
+          last_online_at: string | null
           limit_bytes: number | null
           limit_uptime_s: number | null
           name: string
@@ -304,9 +306,11 @@ export type Database = {
           bytes?: number
           comment?: string | null
           disabled?: boolean
+          expires_at?: string | null
           finished_at?: string | null
           first_seen_at?: string
           first_used_at?: string | null
+          last_online_at?: string | null
           limit_bytes?: number | null
           limit_uptime_s?: number | null
           name: string
@@ -322,9 +326,11 @@ export type Database = {
           bytes?: number
           comment?: string | null
           disabled?: boolean
+          expires_at?: string | null
           finished_at?: string | null
           first_seen_at?: string
           first_used_at?: string | null
+          last_online_at?: string | null
           limit_bytes?: number | null
           limit_uptime_s?: number | null
           name?: string
@@ -587,6 +593,7 @@ export type Database = {
         Row: {
           api_secret_encrypted: string | null
           api_user: string | null
+          card_runs: Json
           cards_sync_started_at: string | null
           cards_synced_at: string | null
           cloud_host: string | null
@@ -611,6 +618,7 @@ export type Database = {
         Insert: {
           api_secret_encrypted?: string | null
           api_user?: string | null
+          card_runs?: Json
           cards_sync_started_at?: string | null
           cards_synced_at?: string | null
           cloud_host?: string | null
@@ -635,6 +643,7 @@ export type Database = {
         Update: {
           api_secret_encrypted?: string | null
           api_user?: string | null
+          card_runs?: Json
           cards_sync_started_at?: string | null
           cards_synced_at?: string | null
           cloud_host?: string | null
