@@ -65,6 +65,39 @@ export type Database = {
         }
         Relationships: []
       }
+      network_settings: {
+        Row: {
+          charset: string
+          confirmed: boolean
+          length: number
+          mode: string
+          owner_id: string
+          prefix: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          charset?: string
+          confirmed?: boolean
+          length?: number
+          mode: string
+          owner_id: string
+          prefix?: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          charset?: string
+          confirmed?: boolean
+          length?: number
+          mode?: string
+          owner_id?: string
+          prefix?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       phone_otps: {
         Row: {
           attempts: number
@@ -141,6 +174,7 @@ export type Database = {
           limit_uptime_s: number | null
           name: string
           profile: string | null
+          pw_mode: string | null
           router_id: string
           source: string
           synced_at: string
@@ -155,6 +189,7 @@ export type Database = {
           limit_uptime_s?: number | null
           name: string
           profile?: string | null
+          pw_mode?: string | null
           router_id: string
           source: string
           synced_at?: string
@@ -169,6 +204,7 @@ export type Database = {
           limit_uptime_s?: number | null
           name?: string
           profile?: string | null
+          pw_mode?: string | null
           router_id?: string
           source?: string
           synced_at?: string
@@ -187,27 +223,33 @@ export type Database = {
       router_profiles: {
         Row: {
           name: string
+          price: string | null
           rate_limit: string | null
           router_id: string
           shared_users: string | null
           source: string
           synced_at: string
+          validity: string | null
         }
         Insert: {
           name: string
+          price?: string | null
           rate_limit?: string | null
           router_id: string
           shared_users?: string | null
           source: string
           synced_at?: string
+          validity?: string | null
         }
         Update: {
           name?: string
+          price?: string | null
           rate_limit?: string | null
           router_id?: string
           shared_users?: string | null
           source?: string
           synced_at?: string
+          validity?: string | null
         }
         Relationships: [
           {

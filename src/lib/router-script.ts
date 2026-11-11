@@ -46,16 +46,25 @@ export const CARDS_URL = REPORT_URL.replace('router-report', 'router-cards');
 export const CARDS_SCRIPT = 'mikro-cards';
 export const UM_SCRIPT = 'mikro-um';
 
-/** Sends every card in batches of 40 (behind NAT this is how we read cards). Fields are read from the item array, so missing ones stay empty. */
+/**
+ * Sends every card in batches of 40, then the packages (behind NAT this is how we read cards). Fields are read from the item
+ * array, so missing ones stay empty. The password itself never leaves the router: only "same as name" / "none" / "other".
+ */
 export function cardsScriptSource(token: string, kind: 'hotspot' | 'usermanager', url = CARDS_URL): string {
   const menu = kind === 'hotspot' ? '/ip hotspot user' : '/user-manager user';
   const fields = kind === 'hotspot' ? ['name', 'profile', 'uptime', 'bytes-in', 'bytes-out', 'limit-uptime', 'limit-bytes-total', 'disabled', 'comment'] : ['name', 'group', 'disabled', 'comment'];
-  const row = fields.map((f) => `"\\"" . [:tostr ($r->"${f}")] . "\\""`).join(' . "," . ');
-  const send = (done: string) => `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"source\\":\\"${kind}\\",\\"page\\":" . $p . ",\\"done\\":${done},\\"rows\\":[" . $b . "]}") output=none`;
+  const row = fields.map((f) => `"\\"" . [:tostr ($r->"${f}")] . "\\""`).join(' . "," . ') + ' . ",\\"" . $pm . "\\""';
+  const pmenu = kind === 'hotspot' ? '/ip hotspot user profile' : '/user-manager profile';
+  const pfields = kind === 'hotspot' ? ['name', 'rate-limit', 'shared-users', 'session-timeout'] : ['name', 'name-for-users', 'validity', 'price'];
+  const prow = pfields.map((f) => `"\\"" . [:tostr ($r->"${f}")] . "\\""`).join(' . "," . ');
+  const send = (done: string, what = kind as string) => `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"source\\":\\"${what}\\",\\"page\\":" . $p . ",\\"done\\":${done},\\"rows\\":[" . $b . "]}") output=none`;
   return [
     ':local p 0', ':local b ""', ':local n 0',
-    `:foreach u in=[${menu} find] do={:local r [${menu} get $u]; :if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = 40) do={${send('false')}; :set b ""; :set n 0; :set p ($p + 1)}}`,
+    `:foreach u in=[${menu} find] do={:local r [${menu} get $u]; :local pw [:tostr ($r->"password")]; :local pm "other"; :if ($pw = "") do={:set pm "none"}; :if ($pw = [:tostr ($r->"name")]) do={:set pm "same"}; :if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = 40) do={${send('false')}; :set b ""; :set n 0; :set p ($p + 1)}}`,
     send('true'),
+    ':set b ""; :set n 0; :set p 0',
+    `:foreach u in=[${pmenu} find] do={:local r [${pmenu} get $u]; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${prow} . "]"); :set n ($n + 1)}}`,
+    send('true', `${kind}-profiles`),
   ].join('\n');
 }
 
@@ -82,10 +91,10 @@ export function buildPasteCommand(token: string, apiPassword?: string, url = REP
     parts.push(readOnlyUserCommands(apiPassword));
   }
   for (const name of [CARDS_SCRIPT, UM_SCRIPT]) parts.push(`/system scheduler remove [find name=${name}]`, `/system script remove [find name=${name}]`);
-  parts.push(`/system script add name=${CARDS_SCRIPT} policy=read,write,test source="${escapeRos(cardsScriptSource(token, 'hotspot', url.replace('router-report', 'router-cards')))}"`);
+  parts.push(`/system script add name=${CARDS_SCRIPT} policy=read,write,test,sensitive source="${escapeRos(cardsScriptSource(token, 'hotspot', url.replace('router-report', 'router-cards')))}"`);
   parts.push(`/system scheduler add name=${CARDS_SCRIPT} interval=5m start-time=startup on-event=${CARDS_SCRIPT}`);
   // User Manager (v7 package) only where it is installed; its menu does not exist elsewhere.
-  parts.push(`:if (([:len [/system package find name=user-manager]] > 0) && ([:pick [/system resource get version] 0 1] = "7")) do={/system script add name=${UM_SCRIPT} policy=read,write,test source="${escapeRos((cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
+  parts.push(`:if (([:len [/system package find name=user-manager]] > 0) && ([:pick [/system resource get version] 0 1] = "7")) do={/system script add name=${UM_SCRIPT} policy=read,write,test,sensitive source="${escapeRos((cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
   parts.push(`/system script run ${SCRIPT_NAME}`, `:do {/system script run ${CARDS_SCRIPT}} on-error={}`);
   return parts.join('; ');
 }

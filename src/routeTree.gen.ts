@@ -17,6 +17,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
@@ -60,6 +61,11 @@ const AuthenticatedRoutersRoute = AuthenticatedRoutersRouteImport.update({
   path: '/routers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/routers'
+    | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-report'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/routers'
+    | '/settings'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-report'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
+    | '/_authenticated/settings'
     | '/_authenticated/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-report'
@@ -222,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRoutersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/welcome': {
       id: '/_authenticated/welcome'
       path: '/welcome'
@@ -250,6 +269,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
@@ -257,6 +277,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
 }
 

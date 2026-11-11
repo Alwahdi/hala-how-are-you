@@ -1,0 +1,1 @@
+ALTER TABLE public.router_profiles ADD COLUMN IF NOT EXISTS validity text, ADD COLUMN IF NOT EXISTS price text;

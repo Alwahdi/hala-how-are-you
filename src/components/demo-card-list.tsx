@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ban, Download, Eye, MessageSquareReply, MessageSquareWarning, Monitor, MoreVertical, Power, RefreshCw, Send, Ticket, Trash2, Upload } from 'lucide-react';
+import { Ban, Download, Eye, MessageSquareReply, MessageSquareWarning, Monitor, MoreVertical, Power, RefreshCw, Send, Ticket, Trash2, Upload , ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -31,10 +31,10 @@ function DemoCardItem({ card, ar, onComplaint, onChange, onRemove }: Handlers & 
   return <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setStep('details'); }}>
     <div className={`demo-card-item${state === 'disabled' ? ' is-disabled' : ''}`}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className={`demo-card-row demo-card-row--${state}`} aria-label={t(`تفاصيل الكرت ${card.id}`, `Card details ${card.id}`)}>
+        <Button variant="ghost" className={`demo-card-row tap-card demo-card-row--${state}`} aria-label={t(`تفاصيل الكرت ${card.id}`, `Card details ${card.id}`)}>
           <span className="demo-card-top">
             <span className="demo-card-identity"><Ticket aria-hidden="true"/><bdi dir="ltr" className="numeral">{card.id}</bdi>{card.isNew && <span className="new-tag">{t('جديد', 'New')}</span>}</span>
-            <CardStateChip state={state} ar={ar}/>
+            <span className="inline-flex items-center gap-1"><CardStateChip state={state} ar={ar}/><ChevronRight aria-hidden="true" className="tap-chevron"/></span>
           </span>
           <UsageBar ratio={remainingRatio(card)} state={state} label={t('المتبقي من الباقة', 'Remaining allowance')}/>
           <span className="demo-card-line">
