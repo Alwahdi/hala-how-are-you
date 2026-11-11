@@ -75,6 +75,48 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
   ].join('\n');
 }
 
+/**
+ * Turns RouterOS code into a RouterOS string expression, with {x} replaced by the script variable $x.
+ * Used for commands under menus that exist on only one RouterOS version: they are compiled at run time with :parse.
+ * Every variable put in was checked on our server (letters, digits and a few safe symbols only).
+ */
+export function rosExpr(code: string): string {
+  const lit = (t: string) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$')}"`;
+  const parts: string[] = [];
+  let last = 0;
+  for (const m of code.matchAll(/\{([a-z]+)\}/g)) { parts.push(lit(code.slice(last, m.index)), `$${m[1]}`); last = m.index! + m[0].length; }
+  parts.push(lit(code.slice(last)));
+  return `(${parts.filter((x) => x !== '""').join(' . ')})`;
+}
+
+// Renew = the same card number gets its allowance back. Hotspot: counters to zero, on again, its expiry timer and expiry note cleared.
+const HS_RENEW = String.raw`/ip hotspot user reset-counters $u; /ip hotspot user set $u disabled=no; :do {/system scheduler remove [find name=("mikro-exp-" . $n)]} on-error={}; :local c [:tostr [/ip hotspot user get $u comment]]; :if ((([:pick $c 3 4] = "/") || ([:pick $c 4 5] = "-")) && ([:typeof [:find $c ":"]] = "num")) do={/ip hotspot user set $u comment=""}`;
+// User Manager v6: its package is cleared and activated again with zeroed counters (the router's own package first, ours as fallback).
+const UM6_RENEW = rosExpr(':local i [/tool user-manager user find username="{n}"]; :local p [:tostr [/tool user-manager user get $i actual-profile]]; :if ([:len $p] = 0) do={:set p "{v}"}; :local c [/tool user-manager user get $i customer]; /tool user-manager user clear-profiles $i; /tool user-manager user reset-counters $i; /tool user-manager user set $i disabled=no; :if ($p != "-") do={/tool user-manager user create-and-activate-profile $i customer=$c profile=$p}');
+// User Manager v7: the package is added again; it starts when the current one ends (or at once if it already ended).
+const UM7_RENEW = rosExpr('/user-manager user set [find name="{n}"] disabled=no; :if ("{v}" != "-") do={/user-manager user-profile add user="{n}" profile="{v}"}');
+
+type Reply = (res: string, extra?: string) => string;
+
+/** bulk|job|source|action|name,name,...: turn off, turn on or remove several cards in one go. Replies how many were found. */
+function bulkTask(reply: Reply): string {
+  return String.raw`:if ([:pick $job 0 5] = "bulk|") do={:local r [:pick $job 5 [:len $job]]; :local i [:find $r "|"]; :local jid [:pick $r 0 $i]; :set r [:pick $r ($i + 1) [:len $r]]; :set i [:find $r "|"]; :local src [:pick $r 0 $i]; :set r [:pick $r ($i + 1) [:len $r]]; :set i [:find $r "|"]; :local act [:pick $r 0 $i]; :local c 0; :foreach n in=[:toarray [:pick $r ($i + 1) [:len $r]]] do={:do {` +
+    String.raw`:if ($src = "hotspot") do={:local u [/ip hotspot user find name=$n]; :if ([:len $u] > 0) do={:if ($act = "off") do={/ip hotspot user set $u disabled=yes; :do {/ip hotspot active remove [find user=$n]} on-error={}}; :if ($act = "on") do={/ip hotspot user set $u disabled=no}; :if ($act = "del") do={:do {/ip hotspot active remove [find user=$n]} on-error={}; /ip hotspot user remove $u}; :set c ($c + 1)}}; ` +
+    String.raw`:if ($src = "usermanager") do={:local b "/user-manager user"; :local k "name"; :if ([:pick $ver 0 1] = "6") do={:set b "/tool user-manager user"; :set k "username"}; :local sel ("[find " . $k . "=\"" . $n . "\"]"); :local cmd ($b . " remove " . $sel); :if ($act = "off") do={:set cmd ($b . " set " . $sel . " disabled=yes")}; :if ($act = "on") do={:set cmd ($b . " set " . $sel . " disabled=no")}; :local f [:parse (":return [:len [" . $b . " find " . $k . "=\"" . $n . "\"]]")]; :if ([$f] > 0) do={:local g [:parse $cmd]; $g; :set c ($c + 1); :if ($act != "on") do={:do {/ip hotspot active remove [find user=$n]} on-error={}}}}` +
+    `} on-error={}}; ${reply('"ok"', String.raw`,\"removed\":" . $c . "`)}}`;
+}
+
+const UM6_PKG = rosExpr(':local c [/tool user-manager customer get [:pick [/tool user-manager customer find] 0] login]; :if ("{act}" = "del") do={/tool user-manager profile profile-limitation remove [find profile="{nm}"]; :do {/tool user-manager profile limitation remove [find name="{nm}"]} on-error={}; /tool user-manager profile remove [find name="{nm}"]} else={:if ("{act}" = "add") do={/tool user-manager profile add name="{nm}" name-for-users="{nm}" owner=$c starts-at=logon}; :local sh "off"; :if ("{dev}" != "0") do={:set sh "{dev}"}; /tool user-manager profile set [find name="{nm}"] validity={val} price={pr} override-shared-users=$sh; :local pl [/tool user-manager profile profile-limitation find profile="{nm}"]; :if ([:len $pl] = 0) do={:if ([:len [/tool user-manager profile limitation find name="{nm}"]] = 0) do={/tool user-manager profile limitation add name="{nm}" owner=$c}; /tool user-manager profile profile-limitation add profile="{nm}" limitation="{nm}"; :set pl [/tool user-manager profile profile-limitation find profile="{nm}"]}; :local ln [/tool user-manager profile profile-limitation get [:pick $pl 0] limitation]; /tool user-manager profile limitation set [find name=$ln] rate-limit-rx={up} rate-limit-tx={dn} uptime-limit={upt} transfer-limit={by}}');
+const UM7_PKG = rosExpr(':if ("{act}" = "del") do={/user-manager profile-limitation remove [find profile="{nm}"]; :do {/user-manager limitation remove [find name="{nm}"]} on-error={}; /user-manager profile remove [find name="{nm}"]} else={:if ("{act}" = "add") do={/user-manager profile add name="{nm}" name-for-users="{nm}" starts-when=first-auth}; :local sh "off"; :if ("{dev}" != "0") do={:set sh "{dev}"}; :local va "{val}"; :if ($va = "0s") do={:set va "unlimited"}; /user-manager profile set [find name="{nm}"] validity=$va price={pr} override-shared-users=$sh; :local pl [/user-manager profile-limitation find profile="{nm}"]; :if ([:len $pl] = 0) do={:if ([:len [/user-manager limitation find name="{nm}"]] = 0) do={/user-manager limitation add name="{nm}"}; /user-manager profile-limitation add profile="{nm}" limitation="{nm}"; :set pl [/user-manager profile-limitation find profile="{nm}"]}; :local ln [/user-manager profile-limitation get [:pick $pl 0] limitation]; /user-manager limitation set [find name=$ln] rate-limit-rx={up} rate-limit-tx={dn} uptime-limit={upt} transfer-limit={by}}');
+
+/** pkg|job|source|action|name|devices|down|up|validity|uptime|bytes|price|onlogin: add, edit or remove one package. */
+function packageTask(reply: Reply): string {
+  return String.raw`:if ([:pick $job 0 4] = "pkg|") do={:local r [:pick $job 4 [:len $job]]; :local f ({}); :for k from=0 to=10 do={:local i [:find $r "|"]; :set ($f->$k) [:pick $r 0 $i]; :set r [:pick $r ($i + 1) [:len $r]]}; :local jid ($f->0); :local src ($f->1); :local act ($f->2); :local nm ($f->3); :local dev ($f->4); :local dn ($f->5); :local up ($f->6); :local val ($f->7); :local upt ($f->8); :local by ($f->9); :local pr ($f->10); :local ol $r; :if ($ol = "-") do={:set ol ""}; :local res "ok"; :do {` +
+    String.raw`:if ($src = "hotspot") do={:local p [/ip hotspot user profile find name=$nm]; :if (($act = "add") && ([:len $p] > 0)) do={:set res "exists"}; :if (($act != "add") && ([:len $p] = 0)) do={:set res "missing"}; :if ($res = "ok") do={:if ($act = "add") do={/ip hotspot user profile add name=$nm; :set p [/ip hotspot user profile find name=$nm]}; :if ($act = "del") do={/ip hotspot user profile remove $p} else={:local sh $dev; :if ($dev = "0") do={:set sh "unlimited"}; /ip hotspot user profile set $p shared-users=$sh rate-limit=($up . "/" . $dn) on-login=$ol}}}; ` +
+    String.raw`:if ($src = "usermanager") do={:local v6 ([:pick $ver 0 1] = "6"); :local pm "/user-manager profile"; :if ($v6) do={:set pm "/tool user-manager profile"}; :local cnt [:parse (":return [:len [" . $pm . " find name=\"" . $nm . "\"]]")]; :local ex [$cnt]; :if (($act = "add") && ($ex > 0)) do={:set res "exists"}; :if (($act != "add") && ($ex = 0)) do={:set res "missing"}; :if ($res = "ok") do={:local cmd ` + UM7_PKG + String.raw`; :if ($v6) do={:set cmd ` + UM6_PKG + String.raw`}; :local g [:parse $cmd]; $g}}` +
+    `} on-error={:set res "error"}; ${reply('$res')}}`;
+}
+
 export const CARDS_URL = REPORT_URL.replace('router-report', 'router-cards');
 export const CARDS_SCRIPT = 'mikro-cards';
 export const UM_SCRIPT = 'mikro-um';
