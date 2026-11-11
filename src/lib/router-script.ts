@@ -75,26 +75,61 @@ export const CARDS_URL = REPORT_URL.replace('router-report', 'router-cards');
 export const CARDS_SCRIPT = 'mikro-cards';
 export const UM_SCRIPT = 'mikro-um';
 
+export type CardsKind = 'hotspot' | 'um6' | 'um7';
+
+const q = (expr: string) => String.raw`"\"" . ` + expr + String.raw` . "\""`;
+const fld = (f: string) => q(`[:tostr ($r->"${f}")]`);
+// Comments may hold quotes or backslashes that would break the JSON, so those are sent empty.
+const SAFE_COMMENT = String.raw`:local cm [:tostr ($r->"comment")]; :if (([:typeof [:find $cm "\""]] != "nil") || ([:typeof [:find $cm "\\"]] != "nil")) do={:set cm ""}`;
+
 /**
- * Sends every card in batches of 40, then the packages (behind NAT this is how we read cards). Fields are read from the item
- * array, so missing ones stay empty. The password itself never leaves the router: only "same as name" / "none" / "other".
+ * Sends every card in batches of 40, then the packages, then who is online (behind NAT this is how we read cards).
+ * Fields are read from the item array, so missing ones stay empty. The password itself never leaves the router:
+ * only "same as name" / "none" / "other". Each kind uses its own menus: Hotspot, User Manager v6 (/tool) or v7.
  */
-export function cardsScriptSource(token: string, kind: 'hotspot' | 'usermanager', url = CARDS_URL): string {
-  const menu = kind === 'hotspot' ? '/ip hotspot user' : '/user-manager user';
-  const fields = kind === 'hotspot' ? ['name', 'profile', 'uptime', 'bytes-in', 'bytes-out', 'limit-uptime', 'limit-bytes-total', 'disabled', 'comment'] : ['name', 'group', 'disabled', 'comment'];
-  const row = fields.map((f) => `"\\"" . [:tostr ($r->"${f}")] . "\\""`).join(' . "," . ') + ' . ",\\"" . $pm . "\\""';
-  const pmenu = kind === 'hotspot' ? '/ip hotspot user profile' : '/user-manager profile';
-  const pfields = kind === 'hotspot' ? ['name', 'rate-limit', 'shared-users', 'session-timeout'] : ['name', 'name-for-users', 'validity', 'price'];
-  const prow = pfields.map((f) => `"\\"" . [:tostr ($r->"${f}")] . "\\""`).join(' . "," . ');
-  const send = (done: string, what = kind as string) => `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"source\\":\\"${what}\\",\\"page\\":" . $p . ",\\"done\\":${done},\\"rows\\":[" . $b . "]}") output=none`;
-  return [
+export function cardsScriptSource(token: string, kind: CardsKind | 'usermanager', url = CARDS_URL): string {
+  const k: CardsKind = kind === 'usermanager' ? 'um7' : kind;
+  const src = k === 'hotspot' ? 'hotspot' : 'usermanager';
+  const send = (done: string, what: string) => `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"source\\":\\"${what}\\",\\"page\\":" . $p . ",\\"done\\":${done},\\"rows\\":[" . $b . "]}") output=none`;
+  const add = (row: string, what: string, max = 40) => `:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = ${max}) do={${send('false', what)}; :set b ""; :set n 0; :set p ($p + 1)}`;
+  const reset = ':set b ""; :set n 0; :set p 0';
+  const T = {
+    hotspot: { menu: '/ip hotspot user', name: 'name', fields: ['name', 'profile', 'uptime', 'bytes-in', 'bytes-out', 'limit-uptime', 'limit-bytes-total', 'disabled'], pmenu: '/ip hotspot user profile', smenu: '/ip hotspot active', s: ['user', 'mac-address', 'uptime'], sb: ['bytes-in', 'bytes-out'], sa: 'address' },
+    um6: { menu: '/tool user-manager user', name: 'username', fields: ['username', 'actual-profile', 'uptime-used', 'download-used', 'upload-used', 'disabled'], pmenu: '/tool user-manager profile', smenu: '/tool user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-ip' },
+    um7: { menu: '/user-manager user', name: 'name', fields: ['name', '-', '-', '-', '-', 'disabled'], pmenu: '/user-manager profile', smenu: '/user-manager session', s: ['user', 'calling-station-id', 'uptime'], sb: ['download', 'upload'], sa: 'user-address' },
+  }[k];
+  const userRow = [...T.fields.map((f) => (f === '-' ? '"\\"\\""' : fld(f))), ...(k === 'hotspot' ? [fld('limit-bytes-total').replace(/.*/, (x) => x)] : [])];
+  // Hotspot rows: name,profile,uptime,in,out,limit-uptime,limit-bytes,disabled,comment,pw. UM rows: name,profile,uptime,down,up,disabled,comment,pw.
+  const hsRow = [fld('name'), fld('profile'), fld('uptime'), fld('bytes-in'), fld('bytes-out'), fld('limit-uptime'), fld('limit-bytes-total'), fld('disabled'), q('$cm'), q('$pm')];
+  const umRow = [...userRow, q('$cm'), q('$pm')];
+  const row = (k === 'hotspot' ? hsRow : umRow).join(' . "," . ');
+  const lines = [
     ':local p 0', ':local b ""', ':local n 0',
-    `:foreach u in=[${menu} find] do={:local r [${menu} get $u]; :local pw [:tostr ($r->"password")]; :local pm "other"; :if ($pw = "") do={:set pm "none"}; :if ($pw = [:tostr ($r->"name")]) do={:set pm "same"}; :if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${row} . "]"); :set n ($n + 1); :if ($n = 40) do={${send('false')}; :set b ""; :set n 0; :set p ($p + 1)}}`,
-    send('true'),
-    ':set b ""; :set n 0; :set p 0',
-    `:foreach u in=[${pmenu} find] do={:local r [${pmenu} get $u]; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${prow} . "]"); :set n ($n + 1)}}`,
-    send('true', `${kind}-profiles`),
-  ].join('\n');
+    `:foreach u in=[${T.menu} find] do={:local r [${T.menu} get $u]; :local pw [:tostr ($r->"password")]; :local pm "other"; :if ($pw = "") do={:set pm "none"}; :if ($pw = [:tostr ($r->"${T.name}")]) do={:set pm "same"}; ${SAFE_COMMENT}; ${add(row, src)}}`,
+    send('true', src),
+    reset,
+  ];
+  if (k === 'hotspot') {
+    // Packages: name,rate,devices,session-timeout,idle,keepalive,pool,mikhmon (price/validity that Mikhmon keeps in on-login).
+    const prow = [fld('name'), fld('rate-limit'), fld('shared-users'), fld('session-timeout'), fld('idle-timeout'), fld('keepalive-timeout'), fld('address-pool'), q('$mk')].join(' . "," . ');
+    lines.push(String.raw`:foreach u in=[/ip hotspot user profile find] do={:local r [/ip hotspot user profile get $u]; :local ol [:tostr ($r->"on-login")]; :local mk ""; :local s [:find $ol ":put (\","]; :if ([:typeof $s] = "num") do={:local e [:find $ol "\")" $s]; :if ([:typeof $e] = "num") do={:set mk [:pick $ol ($s + 7) $e]}}; :if (([:typeof [:find $mk "\""]] != "nil") || ([:typeof [:find $mk "\\"]] != "nil")) do={:set mk ""}; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ` + prow + String.raw` . "]"); :set n ($n + 1)}}`);
+  } else {
+    // Packages: name,name-for-users,validity,price,devices,rate(rx/tx),uptime-limit,transfer-limit (from the first linked limitation).
+    const lim = k === 'um6' ? { pl: '/tool user-manager profile profile-limitation', l: '/tool user-manager profile limitation', shared: 'override-shared-users' } : { pl: '/user-manager profile-limitation', l: '/user-manager limitation', shared: '-' };
+    const prow = [fld('name'), fld('name-for-users'), fld('validity'), fld('price'), lim.shared === '-' ? '"\\"\\""' : fld(lim.shared), q('$rl'), q('$ul'), q('$tl')].join(' . "," . ');
+    lines.push(String.raw`:foreach u in=[${lim.pl.replace(/ profile-limitation$| profile-limitation$/, '').replace(/\/(tool user-manager profile|user-manager)$/, (m) => m)} find] do={}`.replace(/.*/, ''));
+    lines.push(`:foreach u in=[${T.pmenu} find] do={:local r [${T.pmenu} get $u]; :local rl ""; :local ul ""; :local tl ""; :do {:foreach x in=[${lim.pl} find where profile=($r->"name")] do={:local ln [${lim.pl} get $x limitation]; :local l [${lim.l} find where name=$ln]; :if (([:len $l] > 0) && ($rl = "")) do={:local lr [${lim.l} get [:pick $l 0]]; :set rl ([:tostr ($lr->"rate-limit-rx")] . "/" . [:tostr ($lr->"rate-limit-tx")]); :set ul [:tostr ($lr->"uptime-limit")]; :set tl [:tostr ($lr->"transfer-limit")]}}} on-error={}; :if ($n < 50) do={:if ($n > 0) do={:set b ($b . ",")}; :set b ($b . "[" . ${prow} . "]"); :set n ($n + 1)}}`);
+  }
+  lines.push(send('true', `${src}-profiles`), reset);
+  // Who is online: user,mac,uptime,bytes,address (all of them, in batches).
+  const srow = [...T.s.map(fld), q(`[:tostr (($r->"${T.sb[0]}") + ($r->"${T.sb[1]}"))]`), fld(T.sa)].join(' . "," . ');
+  const where = k === 'hotspot' ? '' : ' where active';
+  lines.push(`:foreach u in=[${T.smenu} find${where}] do={:local r [${T.smenu} get $u]; :local cm [:tostr ($r->"user")]; :if (([:typeof [:find $cm "\\""]] = "nil") && ([:typeof [:find $cm "\\\\"]] = "nil")) do={${add(srow, `${src}-sessions`)}}}`, send('true', `${src}-sessions`));
+  if (k === 'um7') {
+    // Which package each card has and its state (waiting / running / used): v7 keeps this outside the user.
+    lines.push(reset, `:foreach u in=[/user-manager user-profile find] do={:local r [/user-manager user-profile get $u]; ${add([fld('user'), fld('profile'), fld('state')].join(' . "," . '), 'usermanager-links')}}`, send('true', 'usermanager-links'));
+  }
+  return lines.filter(Boolean).join('\n');
 }
 
 /** Escape a script so it can live inside a RouterOS double-quoted string. */
@@ -131,9 +166,11 @@ function setupParts(token: string, apiPassword?: string, url = REPORT_URL): stri
   for (const name of [CARDS_SCRIPT, UM_SCRIPT]) parts.push(`/system scheduler remove [find name=${name}]`, `/system script remove [find name=${name}]`);
   parts.push(`/system script add name=${CARDS_SCRIPT} policy=read,write,test,sensitive source="${escapeRos(cardsScriptSource(token, 'hotspot', url.replace('router-report', 'router-cards')))}"`);
   parts.push(`/system scheduler add name=${CARDS_SCRIPT} interval=5m start-time=startup on-event=${CARDS_SCRIPT}`);
-  // User Manager (v7 package) only where it is installed; its menu does not exist elsewhere.
-  parts.push(`:if (([:len [/system package find name=user-manager]] > 0) && ([:pick [/system resource get version] 0 1] = "7")) do={/system script add name=${UM_SCRIPT} policy=read,write,test,sensitive source="${escapeRos((cardsScriptSource(token, 'usermanager', url.replace('router-report', 'router-cards'))))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}}`);
-  parts.push(`/system script run ${SCRIPT_NAME}`, `:do {/system script run ${CARDS_SCRIPT}} on-error={}`);
+  // User Manager only where its package is installed (its menus do not exist elsewhere); v6 keeps it under /tool.
+  const cu = url.replace('router-report', 'router-cards');
+  const umAdd = (k: CardsKind) => `/system script add name=${UM_SCRIPT} policy=read,write,test,sensitive source="${escapeRos(cardsScriptSource(token, k, cu))}"; /system scheduler add name=${UM_SCRIPT} interval=5m start-time=startup on-event=${UM_SCRIPT}`;
+  parts.push(`:if ([:len [/system package find where name="user-manager" and disabled=no]] > 0) do={:if ([:pick [/system resource get version] 0 1] = "7") do={${umAdd('um7')}} else={${umAdd('um6')}}}`);
+  parts.push(`/system script run ${SCRIPT_NAME}`, `:do {/system script run ${CARDS_SCRIPT}} on-error={}`, `:do {/system script run ${UM_SCRIPT}} on-error={}`);
   return parts;
 }
 
