@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useServerFn } from '@tanstack/react-start';
+import { refreshIpCloudRouters } from '@/lib/ip-cloud.functions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
@@ -46,6 +49,17 @@ function RoutersPage() {
     },
     refetchInterval: 15_000,
   });
+  const navigate = useNavigate();
+  const refreshCloud = useServerFn(refreshIpCloudRouters);
+  // First visit with no routers: open the guided setup (unless the owner chose "later").
+  useEffect(() => {
+    if (!isLoading && routers.length === 0 && !sessionStorage.getItem('mikro-onboarding-later')) navigate({ to: '/onboarding', replace: true });
+  }, [isLoading, routers.length, navigate]);
+  // IP Cloud routers are pulled by us, only while this page is open.
+  useEffect(() => {
+    const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
+    run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
+  }, [refreshCloud, qc]);
   const [addOpen, setAddOpen] = useState(false);
   const [name, setName] = useState('');
   const [version, setVersion] = useState<'v7' | 'v6'>('v7');
@@ -85,7 +99,7 @@ function RoutersPage() {
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" aria-label={ar ? 'English' : 'العربية'} onClick={toggleLanguage}><Globe2 /></Button>
           <Button variant="ghost" size="icon" aria-label={t('خروج', 'Sign out')} onClick={() => supabase.auth.signOut().then(() => location.assign('/auth'))}><LogOut /></Button>
-          <Button onClick={() => setAddOpen(true)}><Plus />{t('أضف راوتر', 'Add router')}</Button>
+          <Button onClick={() => navigate({ to: '/onboarding' })}><Plus />{t('أضف راوتر', 'Add router')}</Button>
         </div>
       </header>
 
