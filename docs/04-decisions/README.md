@@ -33,4 +33,4 @@ related: [../templates/decision.md]
 | [D-019](D-019-readable-demo-card-preview.md) | تصور كروت مقروء للجوال وتفاصيل تجريبية قابلة للفتح | approved | 2026-11-08 |
 | [D-020](D-020-landing-dialog-and-detail-refinement.md) | نافذة التسجيل وتحسين المسافات والكروت والخلفية وأيقونة المتصفح | approved | 2026-11-10 |
 | [D-021](D-021-professional-landing-background-pattern.md) | خلفية صفحة Mikro بنمط شبكي متدرج يغطي الصفحة | draft | 2026-11-11 |
-- [D-022](D-022-mesh-texture-and-color-roles.md) — mesh texture and color roles (draft)
+- [D-022](D-022-mesh-texture-and-color-roles.md) — mesh texture and color roles (approved)
