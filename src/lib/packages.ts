@@ -7,9 +7,9 @@ export type PkgAction = 'add' | 'edit' | 'del';
 /** Speeds and sizes are kept as plain numbers: kbps for speed, MB for data, seconds for time. 0 means "no limit". */
 export type PkgInput = {
   source: PkgSource; action: PkgAction; name: string;
-  price?: number; sell?: number; devices?: number;
-  downKbps?: number; upKbps?: number;
-  validityS?: number; uptimeS?: number; dataMB?: number;
+  price?: number | undefined; sell?: number | undefined; devices?: number | undefined;
+  downKbps?: number | undefined; upKbps?: number | undefined;
+  validityS?: number | undefined; uptimeS?: number | undefined; dataMB?: number | undefined;
 };
 
 /** Package names travel inside RouterOS commands: letters, digits, dot, dash and underscore only. */

@@ -49,7 +49,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [explained, setExplained] = useState(false);
   const [pkgHelp, setPkgHelp] = useState(false);
-  const [form, setForm] = useState<{ edit?: ProfileRow } | null>(null);
+  const [form, setForm] = useState<{ edit?: ProfileRow | undefined } | null>(null);
   const [confirmClean, setConfirmClean] = useState(false);
   const [cleanMsg, setCleanMsg] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ action: 'renew' | 'off' | 'del'; card: CardRow } | null>(null);

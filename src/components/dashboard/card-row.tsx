@@ -53,11 +53,11 @@ export function CardListRow({ c, ar, live, ready, selecting, selected, job, onOp
         )}
       </button>
       {!selecting && (
-        <DropdownMenu>
+        <DropdownMenu dir={ar ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
             <button type="button" className="flex size-11 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted" aria-label={t(`إجراءات ${c.name}`, `Actions for ${c.name}`)}><MoreVertical className="size-5" /></button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56" dir={ar ? 'rtl' : 'ltr'}>
+          <DropdownMenuContent align="end" className="w-56">
             {item('copy', <Copy className="size-4" />, t('نسخ الرقم', 'Copy number'))}
             {item('send', <MessageCircle className="size-4" />, t('أرسل للزبون', 'Send to customer'))}
             {canAct && <DropdownMenuSeparator />}
