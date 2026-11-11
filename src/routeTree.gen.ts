@@ -17,6 +17,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
+import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
 
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +59,11 @@ const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicRouterCardsRoute = ApiPublicRouterCardsRouteImport.update({
+  id: '/api/public/router-cards',
+  path: '/api/public/router-cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   id: '/api/public/router-report',
   path: '/api/public/router-report',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesByTo {
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRoutesById {
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
+  '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
 }
 export interface FileRouteTypes {
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/welcome'
+    | '/api/public/router-cards'
     | '/api/public/router-report'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/welcome'
+    | '/api/public/router-cards'
     | '/api/public/router-report'
   id:
     | '__root__'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/_authenticated/welcome'
+    | '/api/public/router-cards'
     | '/api/public/router-report'
   fileRoutesById: FileRoutesById
 }
@@ -136,6 +148,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DesignSpecimenRoute: typeof DesignSpecimenRoute
   PrivacyRoute: typeof PrivacyRoute
+  ApiPublicRouterCardsRoute: typeof ApiPublicRouterCardsRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
 }
 
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/router-cards': {
+      id: '/api/public/router-cards'
+      path: '/api/public/router-cards'
+      fullPath: '/api/public/router-cards'
+      preLoaderRoute: typeof ApiPublicRouterCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/router-report': {
       id: '/api/public/router-report'
       path: '/api/public/router-report'
@@ -228,6 +248,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DesignSpecimenRoute: DesignSpecimenRoute,
   PrivacyRoute: PrivacyRoute,
+  ApiPublicRouterCardsRoute: ApiPublicRouterCardsRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
 }
 export const routeTree = rootRouteImport
