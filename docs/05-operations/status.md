@@ -2,7 +2,7 @@
 type: status
 status: approved
 owner: founder
-updated: 2026-11-10
+updated: 2026-11-11
 related: [roadmap.md]
 ---
 # الحالة الحالية
@@ -12,6 +12,7 @@ related: [roadmap.md]
 الخطوة الجاية: حسم قواعد العمل المفتوحة مع المؤسس؛ ثم استكمال التحقق والمنافسين والسوق.
 
 ## وين وصلنا
+- [confirmed] اعتُمدت تجربة أول ربط حقيقي بالراوتر وفق [D-027](../04-decisions/D-027-router-connection-spike.md)؛ جُهزت الخطة وملفات الخادم، والمرحلة 1 تنتظر استئجار المؤسس للخادم (VPS). ملاحظات الواجهة المتبقية مؤجلة بطلب المؤسس.
 - [confirmed] أضيفت قائمة خيارات الكرت (تجديد/تعطيل) والإضافة بخطوتين وإرسال SMS/WhatsApp مع صورة تقرير جديدة وفق [D-026](../04-decisions/D-026-card-actions-two-step-add-mobile-polish.md)؛ تحقق بالمتصفح بمحاكاة جوال 390، ولم يُختبر على جوال حقيقي ولم ينشر.
 - [confirmed] أضيف زر «إضافة» كرت سريع وزر «إرسال» على كل كرت، ونوافذ سفلية للجوال وفق [D-025](../04-decisions/D-025-quick-add-send-and-mobile-first.md)؛ تحقق بالمتصفح على 360/390/1280، ولم تنشر التغييرات.
 - [confirmed] أعيدت خلفية صفحة Mikro بعد اعتراض المؤسس على نمط D-020؛ البديل موثق في [D-021](../04-decisions/D-021-professional-landing-background-pattern.md) ونتائجه في [سجل الصفحة](../00-company/conversion-landing-page.md)، ولم تنشر التغييرات.
