@@ -32,13 +32,27 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     ':do {:set um [:len [[:parse "/user-manager session find where active"]]]} on-error={}',
     ':local au 0',
     ':do {:set au [:len [/user find name=mikro-read]]} on-error={}',
+    // Health check fields (read only): time sync, router date, enabled services, socks/proxy, users, hotspot idle timeout, shared users.
+    ':local ntp ""', ':do {:set ntp [:tostr [/system ntp client get enabled]]} on-error={}',
+    ':local cd ""', ':do {:set cd [:tostr [/system clock get date]]} on-error={}',
+    ':local svc ""', ':do {:foreach s in=[/ip service find where disabled=no] do={:set svc ($svc . [/ip service get $s name] . ",")}} on-error={}',
+    ':local sk ""', ':do {:set sk [:tostr [/ip socks get enabled]]} on-error={}',
+    ':local px ""', ':do {:set px [:tostr [/ip proxy get enabled]]} on-error={}',
+    ':local uc 0', ':do {:set uc [:len [/user find]]} on-error={}',
+    ':local idl ""', ':do {:foreach h in=[/ip hotspot find] do={:set idl [:tostr [/ip hotspot get $h idle-timeout]]}} on-error={}',
+    ':local shr ""', ':do {:foreach q in=[/ip hotspot user profile find] do={:set shr ($shr . [:tostr [/ip hotspot user profile get $q shared-users]] . ",")}} on-error={}',
     ':local pa ""',
     ':do {:set pa [:tostr [/ip cloud get public-address]]} on-error={}',
     // Behind NAT unless the IP Cloud public address sits on one of the router's own interfaces.
     ':local nat "unknown"',
     ':if ([:len $pa] > 0) do={:set nat "yes"; :foreach a in=[/ip address find] do={:local ad [:tostr [/ip address get $a address]]; :if ([:pick $ad 0 [:find $ad "/"]] = $pa) do={:set nat "no"}}}',
-    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"apiUser\\":" . $au . ",\\"umActive\\":" . $um . "}")',
-    `/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=none`,
+    ':local json ("{\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"apiUser\\":" . $au . ",\\"ntp\\":\\"" . $ntp . "\\",\\"clockDate\\":\\"" . $cd . "\\",\\"services\\":\\"" . $svc . "\\",\\"socks\\":\\"" . $sk . "\\",\\"proxy\\":\\"" . $px . "\\",\\"users\\":" . $uc . ",\\"idle\\":\\"" . $idl . "\\",\\"shared\\":\\"" . $shr . "\\",\\"umActive\\":" . $um . "}")',
+    // The reply may carry one task. Only the tasks written here can run: restart, or remove used-up Hotspot cards
+    // (each card is checked on the router itself before removal). Nothing else in the reply is ever executed.
+    ':local job ""',
+    `:do {:local res [/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=user as-value]; :set job ($res->"data")} on-error={}`,
+    ':if ([:pick $job 0 7] = "reboot|") do={:delay 2s; /system reboot}',
+    `:if ([:pick $job 0 3] = "rm|") do={:local rest [:pick $job 3 [:len $job]]; :local jid [:pick $rest 0 [:find $rest "|"]]; :local c 0; :foreach n in=[:toarray [:pick $rest ([:find $rest "|"] + 1) [:len $rest]]] do={:local u [/ip hotspot user find name=$n]; :if ([:len $u] > 0) do={:local r [/ip hotspot user get $u]; :local done false; :do {:if (($r->"uptime") >= ($r->"limit-uptime")) do={:set done true}} on-error={}; :do {:if ((($r->"bytes-in") + ($r->"bytes-out")) >= ($r->"limit-bytes-total")) do={:set done true}} on-error={}; :if ($done) do={/ip hotspot user remove $u; :set c ($c + 1)}}}; :do {/tool fetch url="${url.replace('router-report', 'router-job')}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"job\\":\\"" . $jid . "\\",\\"removed\\":" . $c . "}") output=none} on-error={}}`,
   ].join('\n');
 }
 
@@ -84,7 +98,7 @@ export function buildPasteCommand(token: string, apiPassword?: string, url = REP
   const parts = [
     `/system scheduler remove [find name=${SCRIPT_NAME}]`,
     `/system script remove [find name=${SCRIPT_NAME}]`,
-    `/system script add name=${SCRIPT_NAME} policy=read,write,test source="${escapeRos(reportScriptSource(token, url))}"`,
+    `/system script add name=${SCRIPT_NAME} policy=read,write,test,reboot source="${escapeRos(reportScriptSource(token, url))}"`,
     `/system scheduler add name=${SCRIPT_NAME} interval=30s start-time=startup on-event=${SCRIPT_NAME}`,
   ];
   if (apiPassword) {
