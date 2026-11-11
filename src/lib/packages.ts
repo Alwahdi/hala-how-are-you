@@ -81,8 +81,8 @@ export function humanData(bytes: number | null | undefined, ar: boolean): string
   if (!bytes) return null;
   // RouterOS takes "10G" as 10,000,000,000 in some menus and 1024-based in others: show the round one.
   const decimal = bytes % 1048576 !== 0 && bytes % 1_000_000 === 0;
-  const mb = decimal ? (bytes / 1_000_000) * (1024 / 1000) ** 0 : bytes / 1024 / 1024;
   if (decimal) { const g = bytes / 1e9; return g >= 1 ? (ar ? `${+g.toFixed(1)} جيجا` : `${+g.toFixed(1)} GB`) : (ar ? `${Math.round(bytes / 1e6)} ميجا` : `${Math.round(bytes / 1e6)} MB`); }
+  const mb = bytes / 1024 / 1024;
   if (mb >= 1024) { const g = +(mb / 1024).toFixed(1); return ar ? `${g} جيجا` : `${g} GB`; }
   return ar ? `${Math.round(mb)} ميجا` : `${Math.round(mb)} MB`;
 }
