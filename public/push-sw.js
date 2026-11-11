@@ -4,7 +4,14 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('push', (event) => {
   let msg = { title: 'Mikro', body: '', path: '/alerts', tag: 'mikro' };
   try { msg = { ...msg, ...event.data.json() }; } catch (_) { if (event.data) msg.body = event.data.text(); }
-  event.waitUntil(self.registration.showNotification(msg.title, { body: msg.body, tag: msg.tag, renotify: true, icon: '/icon-192.png', badge: '/icon-192.png', dir: 'auto', data: { path: msg.path } }));
+  event.waitUntil((async () => {
+    let shown = true;
+    try { await self.registration.showNotification(msg.title, { body: msg.body, tag: msg.tag, renotify: true, icon: '/icon-192.png', badge: '/icon-192.png', dir: 'auto', data: { path: msg.path } }); }
+    catch (_) { shown = false; await self.registration.showNotification(msg.title, { body: msg.body }).then(() => { shown = true; }, () => {}); }
+    // Tell open Mikro pages the alert arrived, so the phone check can confirm delivery.
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    all.forEach((c) => c.postMessage({ type: 'mikro-push', tag: msg.tag, shown }));
+  })());
 });
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
