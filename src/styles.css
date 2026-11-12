@@ -521,3 +521,4 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .voucher-artwork {position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:-1;}
 .voucher-logo {position:absolute;left:2%;top:4%;width:12%;height:22%;object-fit:contain;}
 .voucher-studio {display:grid;gap:28px;align-items:start;} @media(min-width:1024px){.voucher-studio {grid-template-columns:minmax(0,1fr) minmax(290px,.9fr);}.voucher-stage{position:sticky;top:24px;}}
+@media(max-width:1023px){.voucher-stage{grid-row:1;}.voucher-stage > .voucher-sheet-preview{display:none;}}
