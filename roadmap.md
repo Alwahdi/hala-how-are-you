@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
+- [ ] Replace rejected visual templates — present a reference-faithful sample for founder approval before app changes
 - [x] Study current functionality and inspect founder's uploaded visual references
 - [x] Resolve A4 and requirement for later reprinting; retain credential encryption as a safety requirement
 - [x] Approve implementation plan and private credential archive policy
