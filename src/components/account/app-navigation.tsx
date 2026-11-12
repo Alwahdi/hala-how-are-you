@@ -16,8 +16,8 @@ export function AppNavigation() {
     { id:'account', to:'/account' as const, label:t('الحساب','Account'), icon:UserRound, search:{} },
   ];
   return <nav className="app-navigation" dir={ar ? 'rtl' : 'ltr'} aria-label={t('التنقل الرئيسي','Main navigation')}>
-    <Link to="/dashboard" className="brand-word mb-7 hidden text-xl lg:block">Mikro<span className="text-primary">.</span></Link>
-    {items.map(({id,to,label,icon:Icon,search}) => <Button asChild variant="ghost" key={id} className="app-nav-link"><Link to={to} search={search} activeOptions={{exact:true,includeSearch:true}} activeProps={{}} inactiveProps={{}} aria-current={current===id?'page':undefined}><Icon /><span>{label}</span></Link></Button>)}
+    <span className="brand-word mb-7 hidden text-xl lg:block">Mikro<span className="text-primary">.</span></span>
+    {items.map(({id,to,label,icon:Icon,search}) => <Button asChild variant="ghost" key={id} className="app-nav-link"><Link to={to} search={search} activeOptions={{exact:true,includeSearch:true}} activeProps={{'aria-current':current===id?'page':undefined}} inactiveProps={{'aria-current':current===id?'page':undefined}}><Icon /><span>{label}</span></Link></Button>)}
     <div className="mt-auto hidden space-y-1 border-t border-border pt-5 lg:block">
       <Button asChild variant="ghost" className="app-nav-link"><Link to="/dashboard" search={{tab:'active'}}><Activity />{t('النشطون','Active users')}</Link></Button>
       <Button asChild variant="ghost" className="app-nav-link"><Link to="/health"><HeartPulse />{t('صحة الشبكة','Network health')}</Link></Button>
