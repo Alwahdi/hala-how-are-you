@@ -1,11 +1,24 @@
 import { z } from "zod";
+export const MAX_VOUCHERS = 1500;
+export const VOUCHER_CHUNK = 100;
+export const VOUCHER_PROTOCOL = 3;
+export function issuanceHold(status: Record<string, unknown> | null, seen: string | null, now = Date.now()) {
+  if (!seen || !Number.isFinite(Date.parse(seen)) || now - Date.parse(seen) > 90000) return "offline";
+  if (status?.["voucherProtocol"] !== VOUCHER_PROTOCOL) return "upgrade";
+  const cpu = status["cpu"], memory = status["freeMemory"], disk = status["freeHdd"];
+  if (typeof cpu !== "number" || typeof memory !== "number" || typeof disk !== "number") return "health_unknown";
+  if (cpu >= 80) return "cpu";
+  if (memory < 16 * 1024 * 1024) return "memory";
+  if (disk < 4 * 1024 * 1024) return "disk";
+  return null;
+}
 export const issuanceSchema = z
   .object({
     routerId: z.string().uuid(),
     source: z.enum(["hotspot", "usermanager"]),
     packageName: z.string().regex(/^[\w.@-]{1,32}$/),
     label: z.string().min(1).max(80),
-    count: z.number().int().min(1).max(500),
+    count: z.number().int().min(1).max(MAX_VOUCHERS),
     length: z.number().int().min(6).max(16),
     prefix: z.string().regex(/^[\w-]{0,6}$/),
     suffix: z.string().regex(/^[\w-]{0,6}$/),
@@ -29,6 +42,9 @@ export const issuanceSchema = z
   })
   .refine((v) => !!v.manualName || v.length - v.prefix.length - v.suffix.length >= 4, {
     message: "Keep at least four random characters.",
+  })
+  .refine((v) => !!v.manualName || (v.charset === "digits" ? 10 : 29) ** (v.length - v.prefix.length - v.suffix.length) >= v.count * 100, {
+    message: "space_small",
   });
 export type IssueInput = z.infer<typeof issuanceSchema>;
 export function passwordInput(v:IssueInput):IssueInput {

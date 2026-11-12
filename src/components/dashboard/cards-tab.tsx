@@ -20,6 +20,7 @@ import { CardListRow, STATE_LABEL, STATE_TONE, type QuickAction, type RowJob } f
 import { CardDetail } from './card-detail';
 import { EngineerDetails, PackageCard, PackageHelp, type PkgSummary } from './package-card';
 import { PackageForm } from './package-form';
+import { collectPages } from '@/lib/voucher-pages';
 
 export { STATE_LABEL, STATE_TONE };
 
@@ -47,8 +48,8 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [filter, setFilter] = useState<CardState | 'all' | 'online'>(initialFilter ?? 'all');
   const [pkg, setPkg] = useState<string | null>(null);
   const [batch,setBatch]=useState('');
-  const {data: batchRows=[]}=useQuery({queryKey:['card-issuance-batches'],queryFn:async()=>{const {data,error}=await supabase.from('voucher_batches').select('id,label,source').order('created_at',{ascending:false});if(error)throw error;return data??[];}});
-  const {data: batchItems=[]}=useQuery({queryKey:['card-issuance-items',batch],enabled:!!batch,queryFn:async()=>{const {data,error}=await supabase.from('voucher_items').select('router_id,source,name').eq('batch_id',batch).eq('state','confirmed');if(error)throw error;return data??[];}});
+  const {data: batchRows=[]}=useQuery({queryKey:['card-issuance-batches'],queryFn:()=>collectPages(async offset=>{const {data,error,count}=await supabase.from('voucher_batches').select('id,label,source',{count:'exact'}).order('created_at',{ascending:false}).order('id').range(offset,offset+99);if(error||count===null)throw error??Error('read_failed');return {rows:data??[],total:count};})});
+  const {data: batchItems=[]}=useQuery({queryKey:['card-issuance-items',batch],enabled:!!batch,queryFn:()=>collectPages(async offset=>{const {data,error,count}=await supabase.from('voucher_items').select('router_id,source,name',{count:'exact'}).eq('batch_id',batch).eq('state','confirmed').order('ordinal').range(offset,offset+99);if(error||count===null)throw error??Error('read_failed');return {rows:data??[],total:count};})});
   const batchKeys=useMemo(()=>new Set(batchItems.map(key)),[batchItems]);
   const [page, setPage] = useState(0);
   const [openKey, setOpenKey] = useState<string | null>(null);

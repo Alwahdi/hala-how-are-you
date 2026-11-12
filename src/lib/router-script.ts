@@ -1,4 +1,4 @@
-import { voucherDispatcher } from './voucher-router';
+import { voucherDispatcher, voucherWorker } from './voucher-router';
 // Builds the RouterOS paste commands that make a router push its status to Mikro.
 export const REPORT_URL = 'https://mikro.alwahdi.com/api/public/router-report';
 export const OFFLINE_AFTER_MS = 90_000;
@@ -59,7 +59,7 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     // Behind NAT unless the IP Cloud public address sits on one of the router's own interfaces.
     ':local nat "unknown"',
     ':if ([:len $pa] > 0) do={:set nat "yes"; :foreach a in=[/ip address find] do={:local ad [:tostr [/ip address get $a address]]; :if ([:pick $ad 0 [:find $ad "/"]] = $pa) do={:set nat "no"}}}',
-    ':local json ("{\\"voucherProtocol\\":2,\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"apiUser\\":" . $au . ",\\"ntp\\":\\"" . $ntp . "\\",\\"clockDate\\":\\"" . $cd . "\\",\\"services\\":\\"" . $svc . "\\",\\"socks\\":\\"" . $sk . "\\",\\"proxy\\":\\"" . $px . "\\",\\"users\\":" . $uc . ",\\"idle\\":\\"" . $idl . "\\",\\"shared\\":\\"" . $shr . "\\",\\"umActive\\":" . $um . ",\\"umi\\":\\"" . $umi . "\\",\\"umr\\":" . $umr . ",\\"act\\":\\"" . $act . "\\",\\"actMore\\":\\"" . $am . "\\",\\"tz\\":\\"" . $tz . "\\"}")',
+    ':local json ("{\\"voucherProtocol\\":3,\\"identity\\":\\"" . $id . "\\",\\"board\\":\\"" . $board . "\\",\\"version\\":\\"" . $ver . "\\",\\"uptime\\":\\"" . $up . "\\",\\"cpu\\":" . $cpu . ",\\"freeMemory\\":" . $fm . ",\\"totalMemory\\":" . $tm . ",\\"freeHdd\\":" . $fh . ",\\"totalHdd\\":" . $th . ",\\"hotspotActive\\":" . $hs . ",\\"temperature\\":\\"" . $temp . "\\",\\"cloudName\\":\\"" . $cn . "\\",\\"sslPort\\":\\"" . $sp . "\\",\\"sslDisabled\\":\\"" . $sd . "\\",\\"publicAddress\\":\\"" . $pa . "\\",\\"behindNat\\":\\"" . $nat . "\\",\\"apiPort\\":\\"" . $ap . "\\",\\"apiDisabled\\":\\"" . $apd . "\\",\\"apiSslPort\\":\\"" . $asp . "\\",\\"apiSslDisabled\\":\\"" . $asd . "\\",\\"apiUser\\":" . $au . ",\\"ntp\\":\\"" . $ntp . "\\",\\"clockDate\\":\\"" . $cd . "\\",\\"services\\":\\"" . $svc . "\\",\\"socks\\":\\"" . $sk . "\\",\\"proxy\\":\\"" . $px . "\\",\\"users\\":" . $uc . ",\\"idle\\":\\"" . $idl . "\\",\\"shared\\":\\"" . $shr . "\\",\\"umActive\\":" . $um . ",\\"umi\\":\\"" . $umi . "\\",\\"umr\\":" . $umr . ",\\"act\\":\\"" . $act . "\\",\\"actMore\\":\\"" . $am . "\\",\\"tz\\":\\"" . $tz . "\\"}")',
     // The reply may carry one task. Only the tasks written here can run: restart, or remove used-up Hotspot cards
     // (each card is checked on the router itself before removal). Nothing else in the reply is ever executed.
     ':local job ""',
@@ -246,6 +246,7 @@ function setupParts(token: string, apiPassword?: string, url = REPORT_URL): stri
     `/system script add name=${SCRIPT_NAME} policy=read,write,test,reboot source="${escapeRos(reportScriptSource(token, url))}"`,
     `/system scheduler add name=${SCRIPT_NAME} interval=30s start-time=startup on-event=${SCRIPT_NAME}`,
   ];
+  parts.push(`/system scheduler remove [find name=mikro-issue]`, `/system script remove [find name=mikro-issue]`, `/system script add name=mikro-issue policy=read,write,test,sensitive source="${escapeRos(voucherWorker(token, url))}"`, `/system scheduler add name=mikro-issue interval=30s start-time=startup on-event=mikro-issue`);
   if (apiPassword) {
     parts.push(readOnlyUserCommands(apiPassword));
   }
@@ -261,7 +262,7 @@ function setupParts(token: string, apiPassword?: string, url = REPORT_URL): stri
 }
 
 export function buildRemoveCommand(): string {
-  return [SCRIPT_NAME, CARDS_SCRIPT, UM_SCRIPT].map((n) => `/system scheduler remove [find name=${n}]; /system script remove [find name=${n}]`).join('; ');
+  return [SCRIPT_NAME, CARDS_SCRIPT, UM_SCRIPT, "mikro-issue"].map((n) => `/system scheduler remove [find name=${n}]; /system script remove [find name=${n}]`).join('; ');
 }
 
 /** Map a RouterOS version string like "7.15.3 (stable)" to our major label. */
