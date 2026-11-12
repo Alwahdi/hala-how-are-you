@@ -13,8 +13,10 @@ export const Route = createFileRoute('/_authenticated/account')({ head:()=>({met
 function Account(){
   const { ar } = useLanguage(); const t=(a:string,b:string)=>ar?a:b; const navigate=useNavigate();
   const [busy,setBusy]=useState(false);const [error,setError]=useState(false);
-  const {data:profile}=useQuery({queryKey:['account-summary'],queryFn:async()=>{const {data:u}=await supabase.auth.getUser();if(!u.user)return null;const {data,error}=await supabase.from('profiles').select('network_name,city').eq('id',u.user.id).maybeSingle();if(error)throw error;return data;}});
+  const {data:profile,isPending,isError,refetch}=useQuery({queryKey:['account-summary'],queryFn:async()=>{const {data:u}=await supabase.auth.getUser();if(!u.user)return null;const {data,error}=await supabase.from('profiles').select('network_name,city').eq('id',u.user.id).maybeSingle();if(error)throw error;return data;}});
   return <main className="app-shell min-h-screen py-6"><PageLanguage titles={['حسابك','Your account']} /><PageHeading title={t('حسابك','Your account')} />
+    {isPending&&<p role="status" className="mt-4 text-sm text-muted-foreground">{t('جارٍ قراءة الحساب…','Loading account…')}</p>}
+    {isError&&<div className="mt-4"><p role="alert" className="text-sm text-destructive">{t('تعذر قراءة بيانات الحساب.','Could not load account details.')}</p><Button variant="outline" onClick={()=>{void refetch();}}>{t('أعد المحاولة','Retry')}</Button></div>}
     <div className="account-layout mt-6">
       <div><div className="flex items-center gap-4 border-b border-border pb-6"><span className="grid size-14 shrink-0 place-items-center rounded-md bg-primary/10 text-primary"><UserRound /></span><div className="min-w-0"><h2 className="break-words text-lg font-semibold">{profile?.network_name || t('حساب Mikro','Mikro account')}</h2>{profile?.city && <p className="mt-1 text-sm text-muted-foreground">{profile.city}</p>}</div></div><SignInMethods ar={ar} /></div>
       <div className="space-y-2">
