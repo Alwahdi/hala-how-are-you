@@ -1404,7 +1404,7 @@ function Studio() {
             )}
             {!capable && form.routerId && (
               <p role="alert" className="text-sm text-warning">
-                {t(
+                {readiness.data?.verified || readiness.data?.testRouters.includes(form.routerId) ? t("الإصدار متوقف مؤقتًا: يلزم تقرير حديث وأمر ربط محدّث ومعالج وذاكرة ومساحة جاهزة.","Issuance held: a recent report, updated setup script and healthy CPU, memory and disk are required.") : t(
                   "الإصدار غير مفعّل حتى اجتياز اختبار الراوتر التجريبي، ثم النشر وإعادة الربط بموافقتك.",
                   "Issuance is disabled until test-router verification, then approved publication and reconnect.",
                 )}
