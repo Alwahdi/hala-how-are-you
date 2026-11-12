@@ -745,6 +745,7 @@ export type Database = {
         Row: {
           batch_id: string
           id: string
+          lease_at: string | null
           name: string
           ordinal: number
           owner_id: string
@@ -757,6 +758,7 @@ export type Database = {
         Insert: {
           batch_id: string
           id?: string
+          lease_at?: string | null
           name: string
           ordinal: number
           owner_id: string
@@ -769,6 +771,7 @@ export type Database = {
         Update: {
           batch_id?: string
           id?: string
+          lease_at?: string | null
           name?: string
           ordinal?: number
           owner_id?: string
@@ -855,6 +858,11 @@ export type Database = {
           _source: string
         }
         Returns: string
+      }
+      claim_voucher_item: { Args: { rid: string }; Returns: Json }
+      confirm_voucher_item: {
+        Args: { iid: string; res: string; rid: string }
+        Returns: undefined
       }
       create_voucher_batch: { Args: { b: Json; items: Json }; Returns: string }
       has_role: {
