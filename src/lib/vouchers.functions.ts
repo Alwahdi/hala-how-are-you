@@ -14,7 +14,8 @@ export const issueVouchers = createServerFn({ method: "POST" })
       .eq("owner_id", context.userId).maybeSingle();
     if (priorError) throw Error("read_failed");
     if (prior) return { id: prior.id };
-    if (process.env["VOUCHER_ISSUANCE_VERIFIED"] !== "true") throw Error("issuer_testing_required");
+    const testRouters=(process.env["VOUCHER_ISSUANCE_TEST_ROUTERS"]??'').split(',');
+    if (process.env["VOUCHER_ISSUANCE_VERIFIED"] !== "true" && !testRouters.includes(data.routerId)) throw Error("issuer_testing_required");
     const { data: router, error } = await context.supabase
       .from("routers")
       .select("id,last_status,last_seen_at")
@@ -89,7 +90,7 @@ export const issueVouchers = createServerFn({ method: "POST" })
 export const voucherReadiness = createServerFn({method:"GET"})
   .middleware([requireSupabaseAuth]).handler(async()=> {
     setResponseHeader("Cache-Control","no-store");
-    return {verified:process.env["VOUCHER_ISSUANCE_VERIFIED"] === "true"};
+    return {verified:process.env["VOUCHER_ISSUANCE_VERIFIED"] === "true",testRouters:(process.env["VOUCHER_ISSUANCE_TEST_ROUTERS"]??'').split(',').filter(Boolean)};
   });
 const batchSchema = z.object({ batchId: z.string().uuid() });
 export const printableVouchers = createServerFn({ method: "POST" })
