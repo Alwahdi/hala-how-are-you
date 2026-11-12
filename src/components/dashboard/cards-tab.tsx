@@ -46,6 +46,10 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<CardState | 'all' | 'online'>(initialFilter ?? 'all');
   const [pkg, setPkg] = useState<string | null>(null);
+  const [batch,setBatch]=useState('');
+  const {data: batchRows=[]}=useQuery({queryKey:['card-issuance-batches'],queryFn:async()=>{const {data,error}=await supabase.from('voucher_batches').select('id,label,source').order('created_at',{ascending:false});if(error)throw error;return data??[];}});
+  const {data: batchItems=[]}=useQuery({queryKey:['card-issuance-items',batch],enabled:!!batch,queryFn:async()=>{const {data,error}=await supabase.from('voucher_items').select('router_id,source,name').eq('batch_id',batch).eq('state','confirmed');if(error)throw error;return data??[];}});
+  const batchKeys=useMemo(()=>new Set(batchItems.map(key)),[batchItems]);
   const [page, setPage] = useState(0);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [explained, setExplained] = useState(false);
