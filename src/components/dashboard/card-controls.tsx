@@ -74,6 +74,7 @@ export function CardControls({ card, router, live, ar, onRenamed }: { card: Card
 
   return (
     <section aria-label={t('تحكم بالكرت', 'Card control')} className="space-y-3">
+      {jobError && <div role="alert" className="text-sm text-destructive"><p>{t('تعذر قراءة نتيجة الأمر؛ لا نؤكد اكتماله.', 'Could not read the outcome; completion is unconfirmed.')}</p><Button variant="outline" onClick={() => { retryOutcome(); }}>{t('إعادة قراءة النتيجة', 'Retry outcome')}</Button></div>}
       <h3 className="text-sm font-bold">{t('تحكم بالكرت', 'Card control')}</h3>
       {!online && <p className="rounded-xl bg-muted p-3 text-sm text-muted-foreground">{t('الراوتر غير متصل الآن. الأوامر تشتغل لما يرجع.', 'The router is offline now. Actions work once it is back.')}</p>}
 
