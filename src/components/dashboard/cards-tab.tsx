@@ -197,7 +197,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
               {canAdd && <Button variant="outline" className="h-10" onClick={() => setForm({})}><Plus />{t('باقة جديدة', 'New package')}</Button>}
             </div>
             {pkgHelp && <div className="mb-3"><PackageHelp ar={ar} /></div>}
-            {showPackages && (packages.length === 0 ? <p className="app-panel p-4 text-sm text-muted-foreground">{t('ما وصلت باقات بعد. تصل مع أول قراءة للكروت (بعد اكتمال قراءة الكروت)، أو أضف باقة جديدة.', 'No packages yet. They arrive with the first card read (after a completed card read), or add a new one.')}</p> : (
+            {showPackages && (packages.length === 0 ? <p className="app-panel p-4 text-sm text-muted-foreground">{t('ما وصلت باقات بعد. تظهر بعد اكتمال قراءة الراوتر، أو أضف باقة جديدة.', 'No packages yet. They appear after the router completes a read, or add a new one.')}</p> : (
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {packages.map((e) => <PackageCard key={e.id} e={e} ar={ar} selected={pkg === e.id} onClick={() => { setPkg(pkg === e.id ? null : e.id); resetPage(); }} />)}
               </div>

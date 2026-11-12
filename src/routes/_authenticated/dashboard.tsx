@@ -16,7 +16,7 @@ import { EnableAlerts } from '@/components/alerts/enable-alerts';
 import type { ProfileRow, RouterRow, Session } from '@/components/dashboard/types';
 import type { LogPoint } from '@/lib/active-history';
 import { QueryNotice } from '@/components/query-notice';
-import { activeTotal, freshSession } from '@/lib/operations-ui';
+import { activeTotal, freshSession, packageKey } from '@/lib/operations-ui';
 import { isOnline } from '@/lib/router-script';
 
 type Tab = 'home' | 'cards' | 'active' | 'more';
@@ -80,7 +80,7 @@ function Dashboard() {
     },
   });
   const { data: routers = [], isLoading, isSuccess: routersReady, isError: routersError, refetch: retryRouters } = useQuery({
-    queryKey: ['routers'],
+    queryKey: ['routers'], retry: false,
     queryFn: async () => {
       const { data, error } = await supabase.from('routers').select('id, name, role, ros_version, connection_method, cloud_host, direct_port, direct_tls, last_seen_at, last_status, last_check_error, cards_synced_at').order('created_at');
       if (error) throw error;
@@ -90,8 +90,8 @@ function Dashboard() {
   });
   // First load shows each page of 1000 as it arrives, with a progress bar; later refreshes swap the list quietly.
   const [partial, setPartial] = useState<{ cards: CardRow[]; total: number | null } | null>(null);
-  const { data: loadedCards, isFetching: cardsFetching, isError: cardsError, refetch: retryCards } = useQuery({ queryKey: ['cards'], queryFn: () => allCards((c, total) => setPartial((p) => (p === null || c.length >= p.cards.length ? { cards: c, total } : p))), refetchInterval: 60_000 });
-  const { data: pkgs = [], isError: pkgsError, refetch: retryPkgs } = useQuery({ queryKey: ['profiles-pkg'], queryFn: async () => { const { data, error } = await supabase.from('router_profiles').select('*'); if (error) throw error; return data as ProfileRow[]; }, refetchInterval: 120_000 });
+  const { data: loadedCards, isFetching: cardsFetching, isError: cardsError, refetch: retryCards } = useQuery({ queryKey: ['cards'], retry: false, queryFn: () => allCards((c, total) => setPartial((p) => (p === null || c.length >= p.cards.length ? { cards: c, total } : p))), refetchInterval: 60_000 });
+  const { data: pkgs = [], isError: pkgsError, refetch: retryPkgs } = useQuery({ queryKey: ['profiles-pkg'], retry: false, queryFn: async () => { const { data, error } = await supabase.from('router_profiles').select('*'); if (error) throw error; return data as ProfileRow[]; }, refetchInterval: 120_000 });
   const rawCards = loadedCards ?? partial?.cards ?? [];
   const cards = useMemo(() => withPackage(rawCards, pkgs), [rawCards, pkgs]);
   const cardsLoad = loadedCards ? null : { loaded: partial?.cards.length ?? 0, total: partial?.total ?? null, fetching: cardsFetching };
@@ -115,15 +115,15 @@ function Dashboard() {
   }, [profile, profileReady, routersReady, routers.length, navigate]);
 
   const onlineCount = routers.filter((r) => isOnline(r.last_seen_at)).length;
-  const reportedActive = routers.reduce((n, r) => { const s = (r.last_status ?? {}) as { hotspotActive?: number; umActive?: number }; return n + (s.hotspotActive ?? 0) + (s.umActive ?? 0); }, 0);
+  
   const currentSessions = sessions.filter((s) => freshSession(s, routers));
   const activeNow = sessionsError || routersError ? null : activeTotal(routers);
   const counts = useMemo(() => { const c: Record<CardState, number> = { unused: 0, active: 0, almost: 0, finished: 0, expired: 0, disabled: 0 }; for (const card of cards) c[cardState(card)]++; return c; }, [cards]);
   const lowPackages = useMemo(() => {
-    const m = new Map<string, { total: number; ready: number }>();
-    for (const c of cards) { const k = c.profile || '-'; const e = m.get(k) ?? { total: 0, ready: 0 }; e.total++; if (cardState(c) === 'unused') e.ready++; m.set(k, e); }
-    return [...m.entries()].filter(([, e]) => e.total >= 30 && e.ready < LOW_READY).map(([name, e]) => ({ name, ready: e.ready }));
-  }, [cards]);
+    const m = new Map<string, { total: number; ready: number; name: string }>();
+    for (const c of cards) { const name = `${c.profile || '-'} · ${routers.find((r) => r.id === c.router_id)?.name ?? ''}`; const k = packageKey({ router_id: c.router_id, source: c.source, name: c.profile || '-' }); const e = m.get(k) ?? { total: 0, ready: 0, name }; e.total++; if (cardState(c) === 'unused') e.ready++; m.set(k, e); }
+    return [...m.entries()].filter(([, e]) => e.total >= 30 && e.ready < LOW_READY).map(([, e]) => ({ name: e.name, ready: e.ready }));
+  }, [cards, routers]);
   const alerts = routers.flatMap((r) => routerAlerts(r as never, ar));
   const styleConfirmed = cards.length === 0 || styles.some((s) => s.confirmed);
 
