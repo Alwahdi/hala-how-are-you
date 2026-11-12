@@ -13,4 +13,7 @@
 - [x] Inspect public and authenticated screens, Arabic/English and desktop/mobile
 - [x] Reproduce stale-status, failed-load and rejected-save cases without router actions
 - [x] Write prioritized findings and proposed acceptance checks in docs/03-product/ui-ux-audit-2026-11-12.md
-- [ ] Implement changes and update approved status/index documents — blocked on founder approval
+- [x] Implement approved UI outcomes, freshness, package scoping, action safety and mobile improvements; update status/index
+- [x] Run unit suite and browser acceptance checks without router mutations
+- [ ] Verify a real successful save and read-back — needs an approved test account/settings scope
+- [ ] Verify actual job execution and reconnect handshake — needs an approved test router, not the production network

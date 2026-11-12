@@ -60,6 +60,8 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - `docs/05-operations/roadmap.md` checkbox updated if a task closed.
 
 ## Architecture rules
+- Operational UI derives live state from recent router/session reports, scopes packages by router/source/name, and confirms writes before success; this prevents stale, cross-router and rejected-write outcomes from looking valid.
+- Reconnect confirmation precedes issuing credentials and waits for a later report; keep credential replacement behavior unchanged until a separately approved lifecycle change.
 - Early-access CTAs open one controlled dialog with the shared in-memory draft; a single mounted form prevents duplicate field IDs and preserves privacy navigation without storing contacts locally.
 - Serve the browser icon as a real public SVG referenced by root head links; this avoids CDN-pointer incompatibility and stale template icons.
 - Interface concepts and the design specimen share browser-safe voucher controls and demo data; this keeps mobile inspection, detail dialogs and non-live labeling consistent without router calls.
