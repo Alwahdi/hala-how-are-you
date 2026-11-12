@@ -28,7 +28,7 @@ export function voucherCommands(
   const receipt = `mikro-issued-${marker}`;
   return `:local u [${base} find ${field}="${name}"]; :local receipt [/system script find name="${receipt}"]; :if ([:len $u] > 0) do={:if ([:len $receipt] != 1) do={:error "exists"}; :if ([/system script get $receipt source] != [:tostr $u]) do={:error "exists"}; :if ([${base} get $u password] != "${password}") do={:error "credentials_changed"}} else={:if ([:len $receipt] > 0) do={:error "previous_account_removed"}; ${add}; :set u [${base} find ${field}="${name}"]; /system script add name="${receipt}" source=[:tostr $u] comment="Mikro issuance receipt"}; ${assign}; ${base} set $u disabled=no`;
 }
-export function voucherDispatcher(token: string, url: string) {
+export function voucherDispatcher(token: string, url: string, chained = false) {
   const expr = (source: string, version: string) => {
     let cmd = voucherCommands(source, version, "NAME", "PASSWORD", "PROFILE", "MARKER", 0, 0);
     cmd = cmd
@@ -67,6 +67,21 @@ export function voucherDispatcher(token: string, url: string) {
     url.replace("router-report", "voucher-result") +
     String.raw`" check-certificate=yes http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ` +
     token +
-    String.raw`" http-data=("{\"item\":\"" . $jid . "\",\"result\":\"" . $vr . "\"}") output=none} on-error={}}`
+    String.raw`" http-data=("{\"item\":\"" . $jid . "\",\"result\":\"" . $vr . "\"}") output=none} on-error={:return}` +
+    (chained ? `; :delay 500ms; :set job ""; :do {:local nx [/tool fetch url="${url.replace("router-report", "voucher-next")}" check-certificate=yes http-method=post http-header-field="X-Mikro-Token: ${token}" output=user as-value]; :set job ($nx->"data")} on-error={:return}` : "") + "}"
   );
+}
+
+export function voucherWorker(token: string, url: string) {
+  return [
+    ':if ([:len [/system script job find where script="mikro-issue"]] > 1) do={:return}',
+    ':local ver [/system resource get version]', ':local job ""', ':local started [/system resource get uptime]',
+    ':for tick from=1 to=10 do={',
+    ':if (([/system resource get uptime] - $started) > 20s) do={:return}',
+    ':if ([/system resource get cpu-load] >= 80) do={:return}',
+    ':if ([/system resource get free-memory] < 16777216) do={:return}',
+    ':if ([/system resource get free-hdd-space] < 4194304) do={:return}',
+    `:if ($job = "") do={:do {:local nx [/tool fetch url="${url.replace("router-report", "voucher-next")}" check-certificate=yes http-method=post http-header-field="X-Mikro-Token: ${token}" output=user as-value]; :set job ($nx->"data")} on-error={:return}}`,
+    ':if ([:pick $job 0 6] != "issue|") do={:return}', voucherDispatcher(token, url, true), '}',
+  ].join("; ");
 }

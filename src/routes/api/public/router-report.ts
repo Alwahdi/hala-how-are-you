@@ -64,9 +64,7 @@ export const Route = createFileRoute('/api/public/router-report')({
         // Not behind NAT + IP Cloud + API on: connect directly on our own (8729 then 8728), no owner input. Push stays the backup.
         const host = normalizeCloudHost(status.cloudName);
         let job = await nextJob(supabaseAdmin, router.id);
-        const archiveKey=process.env['VOUCHER_ARCHIVE_KEY'];
-        const testRouters=(process.env['VOUCHER_ISSUANCE_TEST_ROUTERS']??'').split(',');
-        if(!job && status.voucherProtocol===2 && archiveKey && (process.env['VOUCHER_ISSUANCE_VERIFIED']==='true'||testRouters.includes(router.id))){const {dispatchVoucher}=await import('@/lib/voucher-dispatch.server');job=await dispatchVoucher(router.id,status.version,archiveKey);}
+        // Issuance is now handled by the lightweight, independently leased v3 worker.
 
         if (host && directAccessState(status) === 'ready' && status.apiUser === 0) {
           // The router says our read-only user is missing: show that instead of trying a login that cannot work.
