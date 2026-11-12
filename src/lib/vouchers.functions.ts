@@ -24,7 +24,7 @@ export const issueVouchers = createServerFn({ method: "POST" })
     if (error || !router) throw Error("not_allowed");
     const status = router.last_status as Record<string, unknown> | null;
     if (
-      status?.["voucherProtocol"] !== 1 ||
+      status?.["voucherProtocol"] !== 2 ||
       !router.last_seen_at ||
       Date.now() - Date.parse(router.last_seen_at) > 90000
     )

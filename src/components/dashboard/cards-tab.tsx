@@ -115,8 +115,8 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const selectedPkg = packages.find((e) => e.id === pkg);
   const list = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    return mine.filter((c) => (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || packageKey({ router_id: c.router_id, source: c.source, name: c.profile || '-' }) === pkg) && (!ql || c.name.toLowerCase().includes(ql) || (c.comment ?? '').toLowerCase().includes(ql)));
-  }, [mine, filter, pkg, q, onlineSet]);
+    return mine.filter((c) => (!batch || batchKeys.has(key(c))) && (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || packageKey({ router_id: c.router_id, source: c.source, name: c.profile || '-' }) === pkg) && (!ql || c.name.toLowerCase().includes(ql) || (c.comment ?? '').toLowerCase().includes(ql)));
+  }, [mine, filter, pkg, q, onlineSet,batch,batchKeys]);
   const pages = Math.max(1, Math.ceil(list.length / PAGE));
   const pg = Math.min(page, pages - 1);
   const shown = list.slice(pg * PAGE, pg * PAGE + PAGE);
@@ -217,6 +217,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             </div>
           )}
 
+          <label className="block text-sm"><span className="mb-2 block text-muted-foreground">{t('دفعة الإصدار','Issuance batch')}</span><select className="h-11 w-full rounded-md border border-input bg-card px-3" value={batch} onChange={e=>{setBatch(e.target.value);resetPage();}}><option value="">{t('كل الدفعات','All batches')}</option>{batchRows.filter(b=>b.source===source).map(b=><option key={b.id} value={b.id}>{b.label}</option>)}</select></label>
           <div className="card-filters" role="group" aria-label={t('الحالة', 'Status')}>
             {filterChips.filter((f)=>moreFilters || ['all','online','unused'].includes(f) || filter===f).map((f) => (
               <Button variant="ghost" key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">

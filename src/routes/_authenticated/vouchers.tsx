@@ -150,7 +150,7 @@ function Studio() {
   };
   const router = data?.routers.find((r) => r.id === form.routerId);
   const status=router?.last_status as Record<string,unknown>|null;
-  const capable = readiness.data?.verified === true && status?.["voucherProtocol"] === 1 && !!router?.last_seen_at && Date.now()-Date.parse(router.last_seen_at)<90000;
+  const capable = readiness.data?.verified === true && status?.["voucherProtocol"] === 2 && !!router?.last_seen_at && Date.now()-Date.parse(router.last_seen_at)<90000;
   const selected = print?.cards.filter((c) => print.selected.has(c.name)) ?? [];
   let paperError = false,
     pages = 0;
