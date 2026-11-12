@@ -17,6 +17,7 @@ related: [status.md]
 ## المرحلة 2: إكمال الاستكشاف ⏳
 - [x] نموذج الكرت الواحد والدفعات وتحسين قواعد الإصدار وفق [D-045](../04-decisions/D-045-single-and-batch-issuance.md). [confirmed]
 - [ ] إكمال اختبار دورة الإصدار والأرشيف ثم التفعيل وفق D-045. [confirmed]
+- [x] اختبار دفعات المنصة والمختبر وPDF ضمن [حدود التحقق](../03-product/voucher-release-verification.md). [confirmed]
 - [x] قوالب الكروت وA4 وحفظها وPDF التجريبي وفق [D-044](../04-decisions/D-044-voucher-issuance-and-printing.md). [confirmed]
 - [ ] تفعيل الإصدار بعد استكمال المتبقي والتحقق التجريبي وفق D-044؛ لا راوتر إنتاج تلقائيًا. [confirmed]
 - [x] إعادة تصميم الشاشات والرحلات للهاتف والتحقق ضمن [D-043](../04-decisions/D-043-mobile-first-app-redesign.md). [confirmed]
