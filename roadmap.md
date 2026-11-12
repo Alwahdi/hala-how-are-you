@@ -1,5 +1,11 @@
 # Roadmap
 
+## Voucher issuance, templates and A4 printing (requested 2026-11-12)
+- [x] Study current functionality and inspect founder's uploaded visual references
+- [x] Resolve A4 and requirement for later reprinting; retain credential encryption as a safety requirement
+- [ ] Approve implementation plan and private credential archive policy
+- [ ] Implement confirmed issuance, batch views, templates and printing; verify without production router operations
+
 ## Whole-app mobile-first UX redesign (requested 2026-11-12)
 - [x] Review NN/g references and map relevant principles to every current user journey
 - [x] Audit account/setup/operations; later dialog checks blocked automatic writes/probes; prior page side effects remain unverified
