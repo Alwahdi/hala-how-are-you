@@ -7,6 +7,7 @@ export const SCRIPT_NAME = 'mikro-report';
 export function reportScriptSource(token: string, url = REPORT_URL): string {
   const reply = (res: string, extra = '') => `:do {/tool fetch url="${url.replace('router-report', 'router-job')}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"job\\":\\"" . $jid . "\\",\\"result\\":\\"" . ${res} . "\\"${extra}}") output=none} on-error={}`;
   return [
+    ':if ([:len [/system script job find where script="mikro-report"]] > 1) do={:return}',
     ':local id [/system identity get name]',
     ':local board [/system resource get board-name]',
     ':local ver [/system resource get version]',
