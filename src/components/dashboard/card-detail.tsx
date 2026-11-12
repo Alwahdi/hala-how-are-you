@@ -23,7 +23,7 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
   return (
     <>
       <DialogHeader>
-        <DialogTitle dir="ltr" className="font-mono text-2xl">{card.name}</DialogTitle>
+        <DialogTitle dir="ltr" className="break-all font-mono text-2xl">{card.name}</DialogTitle>
         <DialogDescription><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATE_TONE[st]}`}>{t(...STATE_LABEL[st])}</span><span className="ms-2">{card.source === 'usermanager' ? 'User Manager' : 'Hotspot'}</span></DialogDescription>
       </DialogHeader>
       <div className="flex items-center gap-4">
@@ -60,7 +60,7 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
         </div>
       ) : <p className="text-sm text-muted-foreground">{card.last_online_at ? t(`غير متصل الآن · آخر مرة شفناه ${ago(card.last_online_at, true)}`, `Not online now · last seen ${ago(card.last_online_at, false)}`) : t('لا يوجد اتصال حي مؤكد الآن', 'No confirmed live session now')}</p>}
 
-      <dl className="grid grid-cols-2 gap-3 text-sm">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
         <Item icon={<Layers />} label={t('الباقة', 'Package')} value={`${card.profile || '-'}${pkg?.price ? ` · ${pkg.price}` : ''}`} />
         <Item icon={<Server />} label={t('الراوتر', 'Router')} value={router?.name ?? ''} />
         <Item icon={<CalendarClock />} label={card.first_used_at ? t('أول استخدام', 'First used') : t('أول ظهور في Mikro', 'First seen in Mikro')} value={new Date(card.first_used_at ?? card.first_seen_at).toLocaleDateString('en-GB')} />

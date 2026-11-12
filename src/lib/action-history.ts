@@ -5,7 +5,7 @@ export function actionHistoryLabel(kind: string, payload: Record<string, unknown
   if(kind==='remove_cards') return t('إزالة كروت خلص رصيدها','Remove used-up cards')+(auto?t(' · صيانة تلقائية',' · Automatic maintenance'):'');
   const action=typeof payload?.action==='string'?payload.action:'';
   if(kind==='card_action') return actions[action]?t(...actions[action]):t('إجراء على كرت','Card action');
-  if(kind==='bulk_action') return t('إجراء جماعي على الكروت','Bulk card action')+(actions[action]?` · ${t(...actions[action])}`:'');
-  if(kind==='package_action') return action==='del'?t('حذف باقة','Remove package'):actions[action]?t(...actions[action]):t('إجراء على باقة','Package action');
+  if(kind==='card_bulk') return t('إجراء جماعي على الكروت','Bulk card action')+(actions[action]?` · ${t(...actions[action])}`:'');
+  if(kind==='package') return action==='del'?t('حذف باقة','Remove package'):actions[action]?t(...actions[action]):t('إجراء على باقة','Package action');
   return t('إجراء على الراوتر','Router action');
 }

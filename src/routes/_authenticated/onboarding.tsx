@@ -37,6 +37,8 @@ function Onboarding() {
   const createRouter = useServerFn(createPushRouter);
   const saveProfile = useServerFn(saveAccountProfile);
   const [ready, setReady] = useState(false);
+  const [bootstrapError,setBootstrapError]=useState(false);
+  const [retry,setRetry]=useState(0);
   const [firstTime, setFirstTime] = useState(true);
   const [step, setStep] = useState<Step>('type');
   const [type, setType] = useState<'owner' | 'engineer' | null>(null);
@@ -55,15 +57,17 @@ function Onboarding() {
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
-      const { data } = await supabase.from('profiles').select('account_type, network_name, city').eq('id', u.user?.id ?? '').maybeSingle();
+      const { data, error: profileError } = await supabase.from('profiles').select('account_type, network_name, city').eq('id', u.user?.id ?? '').maybeSingle();
+      if(profileError || !u.user){setBootstrapError(true);return;}
       if (data?.account_type) {
         setFirstTime(false); setType(data.account_type as 'owner' | 'engineer'); setNetworkName(data.network_name ?? ''); setCity(data.city ?? '');
-        const { count } = await supabase.from('routers').select('id', { count: 'exact', head: true });
+        const { count, error: routersError } = await supabase.from('routers').select('id', { count: 'exact', head: true });
+        if(routersError){setBootstrapError(true);return;}
         setFirstTime(!count); setStep('router');
       }
       setReady(true);
     })();
-  }, []);
+  }, [retry]);
 
   useEffect(() => {
     if (step !== 'push' || !routerId) return;
@@ -116,9 +120,9 @@ function Onboarding() {
     <main className="app-shell min-h-screen py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
       <PageLanguage titles={['أضف شبكتك', 'Add your network']} />
       <div aria-hidden className="landing-pattern" />
-      <div className="flex items-center justify-between">
-        <span className="text-lg font-extrabold">Mikro</span>
-        <div className="flex gap-1">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <span className="brand-word text-lg font-extrabold">Mikro</span>
+        <div className="flex shrink-0 gap-1">
           <Button variant="ghost" size="icon" aria-label={ar ? 'English' : 'العربية'} onClick={toggleLanguage}><Globe2 /></Button>
           {canLeave && step !== 'done' && <Button variant="ghost" onClick={() => navigate({ to: '/dashboard' })}>{t('رجوع للوحة', 'Back to dashboard')}</Button>}
         </div>
@@ -134,8 +138,9 @@ function Onboarding() {
           ))}
         </ol>
 
-        <section className="app-panel space-y-5 p-5 sm:p-6">
-          {!ready && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{t('لحظة...', 'One moment...')}</p>}
+        <section className="space-y-5 border-t border-border py-6">
+          {bootstrapError && <div className="space-y-3"><p role="alert" className="text-sm text-destructive">{t('تعذر قراءة حسابك. لم نبدأ إعدادًا جديدًا.','Could not load your account. No new setup was started.')}</p><Button variant="outline" onClick={()=>{setBootstrapError(false);setRetry(r=>r+1);}}>{t('أعد المحاولة','Retry')}</Button></div>}
+          {!ready && !bootstrapError && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{t('لحظة...', 'One moment...')}</p>}
 
           {ready && step === 'type' && (
             <div className="space-y-5">
@@ -176,7 +181,7 @@ function Onboarding() {
 
           {ready && step === 'router' && (
             <form className="space-y-5" onSubmit={startRouter}>
-              <Head icon={<Router />} title={firstTime ? t('اربط راوتر الشبكة', 'Connect your network router') : t('أضف راوتر للشبكة', 'Add a router to your network')} sub={t('دقيقة تقريباً. لا نطلب كلمة مرور المدير أبداً.', 'About a minute. We never ask for the admin password.')} />
+              <Head icon={<Router />} title={firstTime ? t('اربط راوتر الشبكة', 'Connect your network router') : t('أضف راوتر للشبكة', 'Add a router to your network')} sub={t('لا نطلب كلمة مرور مدير الراوتر.', 'We do not ask for the router administrator password.')} />
               <div className="space-y-2"><Label htmlFor="rname">{t('اسم تعرفه به', 'A name you recognise')}</Label><Input id="rname" autoFocus required maxLength={60} className="h-12" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('مثلاً: راوتر الدمج، راوتر التوزيع', 'e.g. Load balancer, Distribution')} /></div>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('أمر واحد يشتغل على v6 وv7، ونعرف الإصدار تلقائياً.', 'One command for v6 and v7; we detect the version.')}</li>
@@ -192,7 +197,7 @@ function Onboarding() {
             <div className="space-y-4">
               <Head icon={<Terminal />} title={t('الصق هذا الأمر في الراوتر', 'Paste this into the router')} sub={t('انسخ ← الصق في Terminal، ويتنفذ لحاله', 'Copy → paste in Terminal; it runs by itself')} />
               <PasteCommandPanel command={command} full={fullCommand} ar={ar} />
-              <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" /><span className="flex-1">{t('ننتظر أول إشارة من راوترك... عادة أقل من دقيقة.', 'Waiting for the first signal... usually under a minute.')}</span><bdi dir="ltr" className="tabular-nums text-muted-foreground">{waited}s</bdi></div>
+              <div role="status" className="flex items-center gap-3 rounded-xl bg-muted p-4 text-sm"><Loader2 className="size-5 shrink-0 animate-spin text-primary" /><span className="flex-1">{t('ننتظر أول تقرير من الراوتر…', 'Waiting for the first router report…')}</span><bdi dir="ltr" className="tabular-nums text-muted-foreground">{waited}s</bdi></div>
               {waited >= 60 && (
                 <div className="space-y-2 rounded-xl border border-border p-4 text-sm">
                   <p className="font-semibold">{t('ما وصلت إشارة بعد؟ تأكد من هذه:', 'No signal yet? Check these:')}</p>
@@ -226,7 +231,7 @@ function Onboarding() {
 }
 
 function Head({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
-  return <div className="flex items-start gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary [&>svg]:size-5">{icon}</span><div><h1 className="text-xl font-bold">{title}</h1><p className="mt-0.5 text-sm text-muted-foreground">{sub}</p></div></div>;
+  return <div className="flex items-start gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary [&>svg]:size-5">{icon}</span><div className="min-w-0"><h1 className="text-xl font-bold">{title}</h1><p className="mt-0.5 text-sm text-muted-foreground">{sub}</p></div></div>;
 }
 function Err({ e }: { e: string | null }) {
   return e ? <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{e}</p> : null;

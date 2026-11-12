@@ -51,6 +51,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [explained, setExplained] = useState(false);
   const [pkgHelp, setPkgHelp] = useState(false);
   const [showPackages, setShowPackages] = useState(false);
+  const [moreFilters,setMoreFilters]=useState(false);
   const [sending, setSending] = useState(false);
   const [bulkTargets, setBulkTargets] = useState<Record<string, { routerId: string; source: Source; action: 'off' | 'on' | 'del'; names: string[] }>>({});
   const [form, setForm] = useState<{ edit?: ProfileRow | undefined } | null>(null);
@@ -162,12 +163,12 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
 
   return (
     <div className="mt-6 space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <div className="seg" role="group" aria-label={t('نوع الكروت', 'Card system')}>
           <button type="button" aria-pressed={source === 'hotspot'} onClick={() => { setSource('hotspot'); setPkg(null); resetPage(); setSel(new Set()); }}>Hotspot</button>
           <button type="button" aria-pressed={source === 'usermanager'} onClick={() => { setSource('usermanager'); setPkg(null); resetPage(); setSel(new Set()); }}>User Manager</button>
         </div>
-        <button type="button" onClick={() => setExplained(!explained)} aria-expanded={explained} className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground"><Info className="size-4" />{t('ما الفرق؟', "What's the difference?")}</button>
+        <Button variant="ghost" type="button" onClick={() => setExplained(!explained)} aria-expanded={explained} className="inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground"><Info className="size-4" />{t('ما الفرق؟', "What's the difference?")}</Button>
       </div>
       {explained && (
         <p className="app-panel p-4 text-sm leading-relaxed">
@@ -187,18 +188,19 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
         <>
           <div className="relative">
             <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input aria-label={t('البحث عن كرت', 'Search cards')} value={q} onChange={(e) => { setQ(e.target.value); resetPage(); }} placeholder={t('ابحث برقم الكرت أو الملاحظة', 'Search by card number or note')} className="h-12 ps-10" dir="auto" />
+            <Input aria-label={t('البحث عن كرت', 'Search cards')} value={q} onChange={(e) => { setQ(e.target.value); resetPage(); }} placeholder={t('ابحث برقم الكرت أو الملاحظة', 'Search by card number or note')} className="h-12 ps-10 pe-12" dir="auto" />
+            {q && <Button variant="ghost" size="icon" className="absolute end-1 top-1 size-10" aria-label={t('مسح البحث','Clear search')} onClick={()=>{setQ('');resetPage();}}><X /></Button>}
           </div>
           <section aria-label={t('الباقات', 'Packages')}>
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="flex items-center gap-2 font-bold"><Button variant="ghost" className="h-11" aria-expanded={showPackages} onClick={() => setShowPackages(!showPackages)}><Layers />{t(`الباقات (${packages.length})`, `Packages (${packages.length})`)}</Button>
-                <button type="button" onClick={() => setPkgHelp(!pkgHelp)} aria-expanded={pkgHelp} aria-label={t('وش الفرق بين الوقت والصلاحية؟', 'Time vs validity?')} className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"><Info className="size-4" /></button>
+            <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+              <h2 className="flex min-w-0 items-center gap-1 font-bold"><Button variant="ghost" className="h-11" aria-expanded={showPackages} onClick={() => setShowPackages(!showPackages)}><Layers />{t(`الباقات (${packages.length})`, `Packages (${packages.length})`)}</Button>
+                <button type="button" onClick={() => setPkgHelp(!pkgHelp)} aria-expanded={pkgHelp} aria-label={t('وش الفرق بين الوقت والصلاحية؟', 'Time vs validity?')} className="flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"><Info className="size-4" /></button>
               </h2>
-              {canAdd && <Button variant="outline" className="h-10" onClick={() => setForm({})}><Plus />{t('باقة جديدة', 'New package')}</Button>}
+              {canAdd && <Button variant="outline" className="h-11 shrink-0" onClick={() => setForm({})}><Plus />{t('باقة جديدة', 'New package')}</Button>}
             </div>
             {pkgHelp && <div className="mb-3"><PackageHelp ar={ar} /></div>}
             {showPackages && (packages.length === 0 ? <p className="app-panel p-4 text-sm text-muted-foreground">{t('ما وصلت باقات بعد. تظهر بعد اكتمال قراءة الراوتر، أو أضف باقة جديدة.', 'No packages yet. They appear after the router completes a read, or add a new one.')}</p> : (
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {packages.map((e) => <PackageCard key={e.id} e={e} ar={ar} selected={pkg === e.id} onClick={() => { setPkg(pkg === e.id ? null : e.id); resetPage(); }} />)}
               </div>
             ))}
@@ -210,20 +212,21 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             </div>
           )}
 
-          <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t('الحالة', 'Status')}>
-            {filterChips.map((f) => (
-              <button key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">
+          <div className="card-filters" role="group" aria-label={t('الحالة', 'Status')}>
+            {filterChips.filter((f)=>moreFilters || ['all','online','unused'].includes(f) || filter===f).map((f) => (
+              <Button variant="ghost" key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">
                 {f === 'online' && <span className={`size-2 rounded-full ${counts['online'] ? 'bg-primary' : 'bg-muted-foreground/40'}`} />}
                 {chipLabel(f)}{f !== 'all' && (!readError || mine.length > 0) && <span className="chip-count" dir="ltr">{counts[f] ?? 0}</span>}
-              </button>
+              </Button>
             ))}
+            <Button variant="outline" className="h-11" aria-expanded={moreFilters} onClick={()=>setMoreFilters(!moreFilters)}>{moreFilters?t('فلاتر أقل','Fewer filters'):t('كل الحالات','All statuses')}</Button>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>{list.length ? t(`${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} من ${list.length.toLocaleString('en')} كرت`, `${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} of ${list.length.toLocaleString('en')} cards`) : readError ? t('تعذرت القراءة', 'Read failed') : t('0 كرت', '0 cards')}{selectedPkg ? ` · ${selectedPkg.name} · ${selectedPkg.routerName}` : ''} · {t('أقدم قراءة', 'Oldest reading')}: {syncLabel}</span>
             {mine.length > 0 && (selecting
-              ? <span className="flex gap-2"><Button variant="ghost" className="h-9" onClick={selectPage}>{t('حدد الصفحة', 'Select page')}</Button><Button variant="ghost" className="h-9" onClick={() => { setSelecting(false); setSel(new Set()); }}><X />{t('إلغاء', 'Cancel')}</Button></span>
-              : <Button variant="ghost" className="h-9" onClick={() => setSelecting(true)}><CheckSquare />{t('تحديد', 'Select')}</Button>)}
+              ? <span className="flex gap-2"><Button variant="ghost" className="h-11" onClick={selectPage}>{t('حدد الصفحة', 'Select page')}</Button><Button variant="ghost" className="h-11" onClick={() => { setSelecting(false); setSel(new Set()); }}><X />{t('إلغاء', 'Cancel')}</Button></span>
+              : <Button variant="ghost" className="h-11" onClick={() => setSelecting(true)}><CheckSquare />{t('تحديد', 'Select')}</Button>)}
           </div>
 
           {source === 'hotspot' && filter === 'finished' && finishedHs.length > 0 && (
@@ -251,7 +254,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             </ul>
           )}
 
-          {pages > 1 && <Pager page={pg} pages={pages} onPage={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} ar={ar} />}
+          {pages > 1 && <Pager page={pg} pages={pages} onPage={(p) => { setPage(p); window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }} ar={ar} />}
           {selecting && (
             <div className="sticky bottom-24 z-20 app-panel flex flex-wrap items-center gap-2 p-3 sm:bottom-4">
               <b className="flex-1 text-sm">{t(`${sel.size} محدد`, `${sel.size} selected`)}{sel.size >= SELECT_MAX ? t(` (الحد ${SELECT_MAX})`, ` (max ${SELECT_MAX})`) : ''}</b>
@@ -309,7 +312,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
       </Dialog>
 
       <Dialog open={!!open} onOpenChange={(o) => !o && setOpenKey(null)}>
-        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
+        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90dvh] overflow-y-auto bg-card">
           {open && <CardDetail card={open} pkg={profiles.find((p) => p.router_id === open.router_id && p.source === open.source && p.name === open.profile)} router={routers.find((r) => r.id === open.router_id)} routers={routers} live={live} ar={ar} onRenamed={(name) => setOpenKey(key({ ...open, name }))} />}
         </DialogContent>
       </Dialog>
@@ -348,9 +351,9 @@ function UmEmpty({ states, ar, v7 }: { states: { r: RouterRow; st: UmState }[]; 
   const off = states.filter((s) => s.st === 'off');
   if (noReader.length) return (
     <div className="app-panel space-y-3 p-5">
-      <p className="flex items-center gap-2 font-bold"><span className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-primary"><Wifi className="size-3.5" /></span>{t(`User Manager شغال على ${names(noReader)}`, `User Manager is on at ${names(noReader)}`)}</p>
+      <p className="flex min-w-0 items-center gap-1 font-bold"><span className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-primary"><Wifi className="size-3.5" /></span>{t(`User Manager شغال على ${names(noReader)}`, `User Manager is on at ${names(noReader)}`)}</p>
       <p className="text-sm text-muted-foreground">{t('بس ربط هذا الراوتر قديم وما يقرأ كروته. حدّثه مرة وحدة: «إعادة الربط» ثم الصق الأمر القصير، وتوصل الكروت والباقات خلال دقائق.', 'But this router was linked before we could read it. Update it once: tap Reconnect and paste the short command; cards and packages arrive within minutes.')}</p>
-      <Button asChild className="h-11"><Link to="/dashboard" search={{ tab: 'more' }}><Wrench />{t('افتح الراوترات', 'Open routers')}</Link></Button>
+      <Button asChild className="h-11"><Link to="/routers"><Wrench />{t('افتح الراوترات', 'Open routers')}</Link></Button>
     </div>
   );
   if (reading.length) return <p className="app-panel p-5 text-sm">{t(`User Manager شغال على ${names(reading)}. ننتظر أول قائمة كروت (بعد اكتمال قراءة الكروت). لو ما فيه كروت أصلاً، تظهر هنا أول ما تضيفها.`, `User Manager is on at ${names(reading)}. Waiting for the first card list (after a completed card read). If it has no cards yet, they appear here once added.`)}</p>;
