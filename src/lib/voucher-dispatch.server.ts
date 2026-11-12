@@ -1,0 +1,5 @@
+import {unseal} from './voucher-crypto.server';
+import {voucherCommands} from './voucher-router';
+import {packageFacts} from './packages';
+import type {ProfileRow} from '@/components/dashboard/types';
+export async function dispatchVoucher(routerId:string,version:string,secret:string){const {supabaseAdmin:sb}=await import('@/integrations/supabase/client.server');const {data,error}=await sb.rpc('claim_voucher_item',{rid:routerId});if(error||!data)return null;const claim=data as unknown as {item:{id:string;name:string;batch_id:string};batch:{source:string;package_name:string;package_snapshot:ProfileRow}};const {data:row}=await sb.from('voucher_secrets').select('ciphertext').eq('item_id',claim.item.id).maybeSingle();if(!row)return null;const facts=packageFacts(claim.batch.package_snapshot,[]);const password=await unseal(row.ciphertext,secret,claim.item.id);return `issue|${claim.item.id}|${voucherCommands(claim.batch.source,version,claim.item.name,password,claim.batch.package_name,'vc-'+claim.item.id,facts.dataBytes??0,facts.uptimeS??0)}`;}

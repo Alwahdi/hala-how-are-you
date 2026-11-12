@@ -1,3 +1,4 @@
+import { voucherDispatcher } from './voucher-router';
 // Builds the RouterOS paste commands that make a router push its status to Mikro.
 export const REPORT_URL = 'https://mikro.alwahdi.com/api/public/router-report';
 export const OFFLINE_AFTER_MS = 90_000;
@@ -61,7 +62,8 @@ export function reportScriptSource(token: string, url = REPORT_URL): string {
     // The reply may carry one task. Only the tasks written here can run: restart, or remove used-up Hotspot cards
     // (each card is checked on the router itself before removal). Nothing else in the reply is ever executed.
     ':local job ""',
-    `:do {:local res [/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=$json output=user as-value]; :set job ($res->"data")} on-error={}`,
+    `:do {:local res [/tool fetch url="${url}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" check-certificate=yes http-data=$json output=user as-value]; :set job ($res->"data")} on-error={}`,
+    voucherDispatcher(token, url),
     ':if ([:pick $job 0 7] = "reboot|") do={:delay 2s; /system reboot}',
     `:if ([:pick $job 0 3] = "rm|") do={:local rest [:pick $job 3 [:len $job]]; :local jid [:pick $rest 0 [:find $rest "|"]]; :local c 0; :foreach n in=[:toarray [:pick $rest ([:find $rest "|"] + 1) [:len $rest]]] do={:local u [/ip hotspot user find name=$n]; :if ([:len $u] > 0) do={:local r [/ip hotspot user get $u]; :local done false; :do {:if (($r->"uptime") >= ($r->"limit-uptime")) do={:set done true}} on-error={}; :do {:if ((($r->"bytes-in") + ($r->"bytes-out")) >= ($r->"limit-bytes-total")) do={:set done true}} on-error={}; :if ($done) do={/ip hotspot user remove $u; :set c ($c + 1)}}}; :do {/tool fetch url="${url.replace('router-report', 'router-job')}" http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\"job\\":\\"" . $jid . "\\",\\"removed\\":" . $c . "}") output=none} on-error={}}`,
     // card|job|source|action|name|value: one fixed action on one card. Values were checked on our server (letters, digits . _ @ - only).
