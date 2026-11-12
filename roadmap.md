@@ -2,9 +2,11 @@
 
 ## Independent sign-in methods (requested 2026-11-12)
 - [x] Review current phone verification and resolve email/password preference
-- [ ] Approve plan for phone-only sign-in, independent email/password and settings linking
-- [ ] Confirm supported phone-session and message-delivery setup before implementation
-- [ ] Implement and verify independent sign-in and secure linking without duplicate accounts
+- [x] Approve plan for phone-only sign-in, independent email/password and settings linking
+- [x] Inspect hosted settings: email enabled with confirmation; phone disabled; no accessible WhatsApp connection
+- [x] Independent email UI, recovery route and email-change confirmation request; public browser checks
+- [ ] Phone signup/login and phone linking — blocked on approved supported verification channel and provider setup
+- [ ] Verify real signup, recovery and linking read-back — needs approved test recipient/account
 
 ## CPU load and direct API (plan approved 2026-11-11)
 - [x] 1. No overlap: scripts exit when a previous run is still going
