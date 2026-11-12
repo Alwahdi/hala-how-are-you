@@ -1,3 +1,4 @@
+import { SignInMethods } from '@/components/account/sign-in-methods';
 import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -127,6 +128,7 @@ function SettingsPage() {
         )}
       </section>
 
+      <SignInMethods ar={ar} />
       <div className="mt-6"><EnableAlerts ar={ar} /></div>
       <AlertPrefs ar={ar} />
 
