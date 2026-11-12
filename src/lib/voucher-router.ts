@@ -44,8 +44,8 @@ export function voucherChunkScript(tasks: VoucherTask[], version: string, lease:
   if (!tasks.length || tasks.length > 100 || !/^[a-f0-9-]{36}$/.test(lease) || !/^[a-f0-9]{48}$/.test(token)) throw Error('invalid_chunk');
   if (tasks.some(t=>t.source !== tasks[0]?.source || !/^[a-f0-9-]{36}$/.test(t.id))) throw Error('invalid_chunk');
   return [voucherIndexes(tasks[0]?.source ?? '', version), ':local results ""',
-    ...tasks.map(t=>`:if ([/system resource get cpu-load] >= 80) do={:delay 1s}; :local res "ok"; :do {${voucherCommands(t.source,version,t.name,t.password,t.profile,'vc-'+t.id,t.bytes,t.time,true)}} on-error={:set res "error"}; :if ([:len $results]>0) do={:set results ($results . ",")}; :set results ($results . "{\"item\":\"${t.id}\",\"result\":\"" . $res . "\"}"); :delay 10ms`),
-    `/tool fetch url="${resultUrl}" check-certificate=yes http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\"lease\":\"${lease}\",\"results\":[" . $results . "]}") output=none`,
+    ...tasks.map(t=>`:if ([/system resource get cpu-load] >= 80) do={:delay 1s}; :local res "ok"; :do {${voucherCommands(t.source,version,t.name,t.password,t.profile,'vc-'+t.id,t.bytes,t.time,true)}} on-error={:set res "error"}; :if ([:len $results]>0) do={:set results ($results . ",")}; :set results ($results . "{\\\"item\\\":\\\"${t.id}\\\",\\\"result\\\":\\\"" . $res . "\\\"}"); :delay 10ms`),
+    `/tool fetch url="${resultUrl}" check-certificate=yes http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\\"lease\\\":\\\"${lease}\\\",\\\"results\\\":[" . $results . "]}") output=none`,
   ].join('; ');
 }
 export function voucherDispatcher(token: string, url: string, chained = false) {
