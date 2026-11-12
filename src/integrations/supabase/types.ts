@@ -688,6 +688,160 @@ export type Database = {
         }
         Relationships: []
       }
+      voucher_batches: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          mode: string
+          owner_id: string
+          package_name: string
+          package_snapshot: Json
+          request_key: string
+          requested: number
+          router_id: string
+          source: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          mode: string
+          owner_id: string
+          package_name: string
+          package_snapshot: Json
+          request_key: string
+          requested: number
+          router_id: string
+          source: string
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          mode?: string
+          owner_id?: string
+          package_name?: string
+          package_snapshot?: Json
+          request_key?: string
+          requested?: number
+          router_id?: string
+          source?: string
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_batches_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voucher_items: {
+        Row: {
+          batch_id: string
+          id: string
+          name: string
+          ordinal: number
+          owner_id: string
+          result: string | null
+          router_id: string
+          secret_valid: boolean
+          source: string
+          state: string
+        }
+        Insert: {
+          batch_id: string
+          id?: string
+          name: string
+          ordinal: number
+          owner_id: string
+          result?: string | null
+          router_id: string
+          secret_valid?: boolean
+          source: string
+          state?: string
+        }
+        Update: {
+          batch_id?: string
+          id?: string
+          name?: string
+          ordinal?: number
+          owner_id?: string
+          result?: string | null
+          router_id?: string
+          secret_valid?: boolean
+          source?: string
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "voucher_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voucher_items_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voucher_secrets: {
+        Row: {
+          ciphertext: string
+          item_id: string
+        }
+        Insert: {
+          ciphertext: string
+          item_id: string
+        }
+        Update: {
+          ciphertext?: string
+          item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voucher_secrets_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "voucher_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voucher_templates: {
+        Row: {
+          config: Json
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          config: Json
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
