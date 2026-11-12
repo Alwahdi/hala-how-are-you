@@ -2,6 +2,7 @@ import { AlertTriangle, ChevronRight, CreditCard, Palette, Radio, Ticket, Trendi
 import { Link } from '@tanstack/react-router';
 import { CARD_STATES, type CardState } from '@/lib/card-status';
 import { buckets, yesterdayAt, type LogPoint } from '@/lib/active-history';
+import { Button } from '@/components/ui/button';
 import { STATE_LABEL } from './cards-tab';
 
 type Props = {
@@ -24,7 +25,7 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
         </Link>
       )}
 
-      <button type="button" onClick={() => go('active')} className="app-panel tap-card block w-full p-5 text-start">
+      <Button variant="ghost" type="button" onClick={() => go('active')} className="app-panel tap-card block h-auto w-full whitespace-normal p-5 text-start">
         <span className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-sm text-muted-foreground"><Wifi className="size-4 text-primary" />{activeNow == null ? t('الحالة الحالية غير معروفة', 'Current status unknown') : t('متصلون الآن', 'Connected now')}</span><ChevronRight className="tap-chevron" /></span>
         <span className="mt-1 flex items-end gap-3">
           <b className="text-5xl" dir="ltr">{activeNow ?? '—'}</b>
@@ -33,7 +34,7 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
         <span className="text-xs text-muted-foreground">{diff == null ? t('المقارنة مع أمس تظهر بعد 24 ساعة من التسجيل.', 'The comparison with yesterday appears after 24 hours of history.') : t(`مقارنة بنفس الوقت أمس (${y})`, `vs. same time yesterday (${y})`)}</span>
         <span className="spark mt-4" aria-hidden>{series.map((b) => <span key={b.at} data-empty={b.value == null ? '' : undefined} style={{ height: `${b.value == null ? 4 : Math.max(4, (b.value / max) * 100)}%` }} />)}</span>
         <span className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>{t('قبل 24 ساعة', '24h ago')}</span><span>{t('الآن', 'now')}</span></span>
-      </button>
+      </Button>
 
       {alerts.length > 0 && <ul className="space-y-2">{alerts.map((a) => <li key={a} role="alert" className="flex items-start gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive"><AlertTriangle className="mt-0.5 size-4 shrink-0" />{a}</li>)}</ul>}
       {lowPackages.map((p) => <p key={p.name} role="alert" className="flex items-start gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive"><Ticket className="mt-0.5 size-4 shrink-0" />{t(`باقي ${p.ready} كرت جاهز في باقة «${p.name}»`, `Only ${p.ready} ready cards left in "${p.name}"`)}</p>)}
@@ -51,8 +52,8 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
           <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-muted" aria-hidden>
             {CARD_STATES.map((s) => counts[s] ? <span key={s} className={`state-bar-${s}`} style={{ width: `${(counts[s] / total) * 100}%` }} /> : null)}
           </div>
-          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {CARD_STATES.map((s) => <li key={s}><button type="button" onClick={() => go('cards', s)} className="stat-tile tap-card w-full text-start"><span className="text-xs text-muted-foreground">{t(...STATE_LABEL[s])}</span><b className="block text-lg" dir="ltr">{counts[s]}</b></button></li>)}
+          <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {CARD_STATES.map((s) => <li key={s}><button type="button" onClick={() => go('cards', s)} className="tap-card w-full min-h-16 border-b border-border py-3 text-start"><span className="text-xs text-muted-foreground">{t(...STATE_LABEL[s])}</span><b className="block text-lg" dir="ltr">{counts[s]}</b></button></li>)}
           </ul>
         </section>
       )}
@@ -62,9 +63,9 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
 
 function Kpi({ icon, label, value, onClick }: { icon: React.ReactNode; label: string; value: number | string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="app-panel tap-card p-4 text-start">
+    <Button variant="ghost" type="button" onClick={onClick} className="app-panel tap-card block h-auto whitespace-normal p-4 text-start">
       <span className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs text-muted-foreground [&>svg]:size-4">{icon}{label}</span><ChevronRight className="tap-chevron" /></span>
       <b className="mt-1 block text-3xl" dir="ltr">{value}</b>
-    </button>
+    </Button>
   );
 }

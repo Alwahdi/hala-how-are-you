@@ -1,4 +1,5 @@
 import { AlertTriangle, CalendarClock, ChevronRight, Clock, Database, Gauge, Smartphone, Wrench } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { humanDevices, humanRate, humanValidity } from '@/lib/card-actions';
 import { humanData, type PkgFacts } from '@/lib/packages';
 import { formatDuration } from '@/lib/card-status';
@@ -22,14 +23,14 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
   ];
   const low = e.p && e.total > 0 && (e.ready === 0 || (e.total >= 30 && e.ready < LOW_READY));
   return (
-    <button type="button" aria-pressed={selected} onClick={onClick} className={`app-panel tap-card flex flex-col p-4 text-start ${selected ? 'border-primary' : ''}`}>
+    <Button variant="ghost" type="button" aria-pressed={selected} onClick={onClick} className={`app-panel tap-card h-auto items-stretch whitespace-normal flex flex-col p-4 text-start ${selected ? 'border-primary' : ''}`}>
       <span className="flex items-center justify-between gap-1"><b className="truncate" dir="auto">{e.name === '-' ? t('بدون باقة', 'No package') : e.name}</b><ChevronRight className="tap-chevron" /></span>
       <span className="mt-1 text-xs text-muted-foreground">{e.routerName}</span>
       <span className="mt-1 block text-lg font-bold" dir="auto">
         {f.price ? <span className="text-primary">{f.price}</span> : <span className="text-sm font-normal text-muted-foreground">{t('بدون سعر', 'No price')}</span>}
         {f.sell ? <span className="ms-1 text-xs font-normal text-muted-foreground">{t(`(بيع ${f.sell})`, `(sells ${f.sell})`)}</span> : null}
       </span>
-      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
         {rows.map((r) => (
           <div key={r.label} className="contents">
             <dt className="flex items-center gap-1 text-muted-foreground [&>svg]:size-3.5">{r.icon}{r.label}</dt>
@@ -46,7 +47,7 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
         </span>
       </span>
       {low && <span className="mt-2 flex items-center gap-1 rounded-lg bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive"><AlertTriangle className="size-3.5" />{e.ready === 0 ? t('خلص الجاهز', 'None left') : t('الجاهز قليل', 'Running low')}</span>}
-    </button>
+    </Button>
   );
 }
 
@@ -54,7 +55,7 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
 export function PackageHelp({ ar }: { ar: boolean }) {
   const t = (a: string, b: string) => (ar ? a : b);
   return (
-    <div className="app-panel space-y-2 p-4 text-sm leading-relaxed">
+    <div className="space-y-2 border-y border-border py-4 text-sm leading-relaxed">
       <p><b>{t('وقت الاستخدام', 'Usage time')}</b>: {t('يُحسب بس وقت ما الزبون متصل. مثال: 5 ساعات = يقدر يتصل ساعة كل يوم لخمسة أيام.', 'Counts only while the customer is connected. Example: 5 hours = one hour a day for five days.')}</p>
       <p><b>{t('الصلاحية', 'Validity')}</b>: {t('أيام تقويم تبدأ من أول دخول، وتخلص حتى لو ما استخدمه. مثال: أسبوع = يخلص بعد 7 أيام من أول دخول مهما كان الباقي.', 'Calendar days from the first login; it ends even if unused. Example: a week = ends 7 days after first login, whatever is left.')}</p>
       <p><b>{t('البيانات', 'Data')}</b>: {t('مجموع التنزيل والرفع. الكرت يوقف أول ما يخلص أي واحد من الثلاثة.', 'Download plus upload. The card stops as soon as any of the three runs out.')}</p>
@@ -73,9 +74,9 @@ export function EngineerDetails({ p, ar }: { p: ProfileRow; ar: boolean }) {
   const shown = rows.filter(([, v]) => !!v);
   if (!shown.length) return null;
   return (
-    <details className="app-panel p-4 text-sm">
+    <details className="border-b border-border py-4 text-sm">
       <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-semibold"><Wrench className="size-4 text-muted-foreground" />{t(`تفاصيل للمهندس: ${p.name}`, `Engineer details: ${p.name}`)}</summary>
-      <dl className="mt-3 grid grid-cols-2 gap-2">{shown.map(([k, v]) => <div key={k} className="stat-tile"><dt className="text-xs text-muted-foreground" dir="ltr">{k}</dt><dd className="mt-1 truncate font-mono" dir="ltr">{v}</dd></div>)}</dl>
+      <dl className="mt-3 grid grid-cols-2 gap-2">{shown.map(([k, v]) => <div key={k} className="stat-tile"><dt className="text-xs text-muted-foreground" dir="ltr">{k}</dt><dd className="mt-1 break-all font-mono" dir="ltr">{v}</dd></div>)}</dl>
     </details>
   );
 }

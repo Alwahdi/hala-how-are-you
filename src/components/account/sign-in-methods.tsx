@@ -12,7 +12,7 @@ export function SignInMethods({ ar }: { ar: boolean }) {
   const [email,setEmail] = useState(''); const [editing,setEditing] = useState(false); const [busy,setBusy] = useState(false);
   const [message,setMessage] = useState<{ error: boolean; text: string } | null>(null);
   const hasPhone = !!(user?.phone && user.phone_confirmed_at);
-  return <section className="mt-8 border-t border-border py-6" aria-labelledby="sign-in-methods-title">
+  return <section className="mt-4 py-6" aria-labelledby="sign-in-methods-title">
     <h2 id="sign-in-methods-title" className="mb-5 flex items-center gap-2 text-lg font-bold"><ShieldCheck className="size-5 text-primary" />{t('طرق الدخول','Sign-in methods')}</h2>
     {isPending ? <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{t('جارٍ قراءة طرق الدخول…','Loading sign-in methods…')}</p> : isError ? <div className="space-y-3"><p role="alert" className="text-sm text-destructive">{t('تعذر قراءة طرق الدخول.','Could not load sign-in methods.')}</p><Button variant="outline" className="h-11" onClick={()=>{void refetch();}}>{t('أعد المحاولة','Retry')}</Button></div> : user && <>
       <div className="flex items-start gap-3 border-b border-border pb-5">

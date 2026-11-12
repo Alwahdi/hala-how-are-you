@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] إعادة تصميم الشاشات والرحلات للهاتف والتحقق ضمن [D-043](../04-decisions/D-043-mobile-first-app-redesign.md). [confirmed]
 - [x] تحسين واجهة الدخول والاستعادة وطرق الدخول والتحقق ضمن حدود [D-042](../04-decisions/D-042-sign-in-ui-ux.md). [confirmed]
 - [x] فصل دخول البريد وإضافة الاستعادة وبيان طرق الدخول وفق [D-040](../04-decisions/D-040-independent-sign-in.md). [confirmed]
 - [ ] إكمال دخول الهاتف وربطه؛ ينتظر التكامل المعتمد وفق [D-041](../04-decisions/D-041-keep-whatsapp-verification.md). [confirmed]

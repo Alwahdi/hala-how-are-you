@@ -4,7 +4,7 @@
 - [x] Review NN/g references and map relevant principles to every current user journey
 - [x] Audit account/setup/operations; later dialog checks blocked automatic writes/probes; prior page side effects remain unverified
 - [x] Present phased redesign and acceptance matrix for founder approval
-- [ ] Implement approved scope and verify Arabic/English, phone and desktop behavior
+- [x] Implement approved scope and verify Arabic/English, phone and desktop behavior
 
 ## Sign-in UI, UX and interactions (requested 2026-11-12)
 - [x] Inspect current sign-in, recovery and linked-method presentation without account changes

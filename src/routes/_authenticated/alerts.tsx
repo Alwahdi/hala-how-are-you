@@ -5,6 +5,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ArrowLeft, Bell, CheckCircle2, ChevronRight, Info, ListChecks, OctagonAlert } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
+import { Button } from '@/components/ui/button';
+import { PageHeading } from '@/components/account/page-heading';
+import { QueryNotice } from '@/components/query-notice';
+import { actionHistoryLabel } from '@/lib/action-history';
 
 export const Route = createFileRoute('/_authenticated/alerts')({
   head: () => ({ meta: [
@@ -35,28 +39,30 @@ function AlertsPage() {
   const t = (a: string, b: string) => (ar ? a : b);
   const navigate = useNavigate(); const qc = useQueryClient();
   const [tab, setTab] = useState<'alerts' | 'log'>('alerts');
-  const { data: alerts = [] } = useQuery({ queryKey: ['alerts'], queryFn: async () => { const { data } = await supabase.from('alerts').select('id, title, body, path, severity, read_at, created_at').order('created_at', { ascending: false }).limit(200); return (data ?? []) as Alert[]; }, refetchInterval: 30_000 });
-  const { data: jobs = [], isError: jobsError, refetch: retryJobs } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data, error } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
+  const { data: alerts = [], isPending: alertsLoading, isError: alertsError, refetch: retryAlerts } = useQuery({ queryKey: ['alerts'], queryFn: async () => { const { data,error } = await supabase.from('alerts').select('id, title, body, path, severity, read_at, created_at').order('created_at', { ascending: false }).limit(200); if(error)throw error;return (data ?? []) as Alert[]; }, refetchInterval: 30_000 });
+  const { data: jobs = [], isPending: jobsLoading, isError: jobsError, refetch: retryJobs } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data, error } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); if(error)throw error;return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
+  const {data:routers=[]}=useQuery({queryKey:['history-router-names'],queryFn:async()=>{const {data,error}=await supabase.from('routers').select('id,name');if(error)throw error;return data??[];}});
   // Opening the page marks everything as read.
   useEffect(() => {
     const unread = alerts.filter((a) => !a.read_at).map((a) => a.id);
     if (unread.length) supabase.from('alerts').update({ read_at: new Date().toISOString() }).in('id', unread).then(() => qc.invalidateQueries({ queryKey: ['alerts-unread'] }));
   }, [alerts, qc]);
-  const jobLabel = (j: Job) => j.kind === 'reboot' ? t('إعادة تشغيل الراوتر', 'Router restart') : t(`إزالة ${j.payload.names?.length ?? 0} كرت منتهي${j.auto ? ' (صيانة الليل)' : ''}`, `Remove ${j.payload.names?.length ?? 0} used-up cards${j.auto ? ' (night maintenance)' : ''}`);
+  const jobLabel = (j: Job) => actionHistoryLabel(j.kind,j.payload,ar,j.auto);
   const jobStatus = (j: Job) => ({ pending: t('بانتظار الراوتر', 'Waiting for router'), sent: t('وصل للراوتر', 'Sent to router'), done: j.result?.startsWith('removed:') ? t(`تم — حُذف ${j.result.slice(8)}`, `Done — removed ${j.result.slice(8)}`) : t('تم', 'Done'), failed: t('فشل', 'Failed'), expired: t('انتهت المهلة (الراوتر غير متصل)', 'Timed out (router offline)') }[j.status] ?? j.status);
 
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
       <PageLanguage titles={['التنبيهات والإجراءات', 'Alerts and actions']} />
       <div aria-hidden className="landing-pattern" />
-      <Link to="/dashboard" className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
-      <h1 className="mt-2 text-2xl font-bold">{t('التنبيهات', 'Alerts')}</h1>
+      <PageHeading title={t('التنبيهات والسجل','Alerts & history')} back="/account" />
       <div className="seg mt-4" role="group">
-        <button type="button" aria-pressed={tab === 'alerts'} onClick={() => setTab('alerts')}><Bell className="me-1 inline size-4" />{t('التنبيهات', 'Alerts')}</button>
-        <button type="button" aria-pressed={tab === 'log'} onClick={() => setTab('log')}><ListChecks className="me-1 inline size-4" />{t('سجل الإجراءات', 'Action log')}</button>
+        <Button variant="ghost" aria-pressed={tab === 'alerts'} onClick={() => setTab('alerts')}><Bell className="me-1 inline size-4" />{t('التنبيهات', 'Alerts')}</Button>
+        <Button variant="ghost" aria-pressed={tab === 'log'} onClick={() => setTab('log')}><ListChecks className="me-1 inline size-4" />{t('سجل الإجراءات', 'Action log')}</Button>
       </div>
+      {(tab==='alerts'?alertsError:jobsError)&&<QueryNotice ar={ar} stale={tab==='alerts'?alerts.length>0:jobs.length>0} retry={()=>{void(tab==='alerts'?retryAlerts():retryJobs());}}/>}
+      {(tab==='alerts'?alertsLoading:jobsLoading)&&<p role="status" className="py-6 text-sm text-muted-foreground">{t('جارٍ قراءة السجل…','Loading history…')}</p>}
       {tab === 'alerts' ? (
-        alerts.length === 0 ? <p className="app-panel mt-4 p-6 text-center text-sm text-muted-foreground">{t('ما في تنبيهات. لما يصير شيء مهم في شبكتك تلقاه هنا وعلى جوالك.', 'No alerts. When something important happens you will find it here and on your phone.')}</p> : (
+        alerts.length === 0 ? (!alertsLoading&&!alertsError&&<p className="mt-4 border-b border-border py-8 text-sm text-muted-foreground">{t('لا توجد تنبيهات مسجّلة.','No recorded alerts.')}</p>) : (
           <ul className="mt-4 space-y-2">
             {alerts.map((a) => (
               <li key={a.id}>
@@ -70,12 +76,12 @@ function AlertsPage() {
           </ul>
         )
       ) : (
-        jobs.length === 0 ? <p className="app-panel mt-4 p-6 text-center text-sm text-muted-foreground">{t('ما في إجراءات بعد. إعادة التشغيل وإزالة الكروت تُسجّل هنا.', 'No actions yet. Restarts and card removals are recorded here.')}</p> : (
+        jobs.length === 0 ? (!jobsLoading&&!jobsError&&<p className="mt-4 border-b border-border py-8 text-sm text-muted-foreground">{t('لا توجد إجراءات مسجّلة.','No recorded actions.')}</p>) : (
           <ul className="mt-4 space-y-2">
             {jobs.map((j) => (
               <li key={j.id} className="app-panel flex items-center gap-3 p-4">
                 <span className={`size-2.5 shrink-0 rounded-full ${j.status === 'done' ? 'bg-primary' : j.status === 'expired' || j.status === 'failed' ? 'bg-destructive' : 'animate-pulse bg-primary/60'}`} aria-hidden />
-                <span className="min-w-0 flex-1"><b className="block">{jobLabel(j)}</b><span className="text-xs text-muted-foreground">{jobStatus(j)} · {when(j.requested_at, ar)}</span></span>
+                <span className="min-w-0 flex-1"><b className="block">{jobLabel(j)}</b><span className="mt-1 block text-sm text-muted-foreground">{routers.find(r=>r.id===j.router_id)?.name||t('راوتر','Router')}{j.payload.names?.length?` · ${j.payload.names.length} ${t('كرت','cards')}`:''}</span><span className="text-xs text-muted-foreground">{jobStatus(j)} · {when(j.requested_at, ar)}</span></span>
               </li>
             ))}
           </ul>

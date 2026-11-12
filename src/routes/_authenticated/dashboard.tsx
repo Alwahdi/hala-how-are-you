@@ -2,14 +2,13 @@ import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, Bell, ChevronRight, Globe2, HeartPulse, ListChecks, Home, LogOut, Menu, Plus, PlusCircle, Printer, Search, Settings, Ticket, Wifi } from 'lucide-react';
+import { Activity, Bell, Globe2, HeartPulse, Wifi } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/components/language-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Link } from '@tanstack/react-router';
-import { NetworkPanel, routerAlerts } from '@/components/dashboard/network-panel';
+import { routerAlerts } from '@/components/dashboard/network-panel';
 import { CARD_STATES, cardState, formatBytes, formatDuration, withPackage, type CardRow, type CardState } from '@/lib/card-status';
 import { CardsTab } from '@/components/dashboard/cards-tab';
 import { HomeTab } from '@/components/dashboard/home-tab';
@@ -19,6 +18,7 @@ import type { LogPoint } from '@/lib/active-history';
 import { QueryNotice } from '@/components/query-notice';
 import { activeTotal, freshSession, packageKey } from '@/lib/operations-ui';
 import { isOnline } from '@/lib/router-script';
+import { Navigate } from '@tanstack/react-router';
 
 type Tab = 'home' | 'cards' | 'active' | 'more';
 const TABS: Tab[] = ['home', 'cards', 'active', 'more'];
@@ -69,7 +69,6 @@ function Dashboard() {
   const search = Route.useSearch();
   const tab = search.tab ?? 'home';
   const go = (next: Tab | 'home', filter?: CardState) => navigate({ to: '/dashboard', search: { ...(next !== 'home' ? { tab: next } : {}), ...(filter ? { filter } : {}) } });
-  const [quick, setQuick] = useState(false);
 
   const { data: profile, isSuccess: profileReady, isError: profileError, refetch: retryProfile } = useQuery({
     queryKey: ['profile'],
@@ -128,23 +127,15 @@ function Dashboard() {
   const alerts = routers.flatMap((r) => routerAlerts(r as never, ar));
   const styleConfirmed = cards.length === 0 || styles.some((s) => s.confirmed);
 
-  const nav: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: 'home', icon: <Home />, label: t('الرئيسية', 'Home') },
-    { id: 'cards', icon: <Ticket />, label: t('الكروت', 'Cards') },
-    { id: 'active', icon: <Activity />, label: t('النشطون', 'Active') },
-    { id: 'more', icon: <Menu />, label: t('المزيد', 'More') },
-  ];
-  const navButton = (n: (typeof nav)[number]) => <button key={n.id} type="button" aria-current={tab === n.id ? 'page' : undefined} onClick={() => go(n.id)} className="dash-nav-item">{n.icon}<span>{n.label}</span></button>;
-
   return (
     <main className="app-shell min-h-screen pb-28 pt-6 sm:pb-10" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
       <PageLanguage titles={['لوحة الشبكة', 'Network dashboard']} />
       <div aria-hidden className="landing-pattern" />
-      <header className="flex items-start justify-between gap-3">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border-b border-border pb-5">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-primary">Mikro</p>
           <h1 className="truncate text-2xl font-bold">{profile?.network_name || t('شبكتي', 'My network')}</h1>
-          <button type="button" onClick={() => go('more')} className="flex min-h-8 items-center gap-2 text-sm text-muted-foreground">
+          <button type="button" onClick={() => navigate({to:'/routers'})} className="flex min-h-11 items-center gap-2 text-sm text-muted-foreground">
             <span className={`size-2 rounded-full ${onlineCount === routers.length && routers.length ? 'bg-primary' : 'bg-destructive'}`} aria-hidden />
             {routers.length ? (onlineCount === routers.length ? t('الشبكة شغالة', 'Network online') : t(`${routers.length - onlineCount} راوتر غير متصل`, `${routers.length - onlineCount} router offline`)) : t('جارٍ التحميل...', 'Loading...')}
             {profile?.city && <span>· {profile.city}</span>}
@@ -158,50 +149,19 @@ function Dashboard() {
         </div>
       </header>
 
-      <nav aria-label={t('أقسام اللوحة', 'Dashboard sections')} className="dash-nav items-center">
-        {nav.slice(0, 2).map(navButton)}
-        <button type="button" className="dash-nav-quick" aria-label={t('إجراءات سريعة', 'Quick actions')} onClick={() => setQuick(true)}><Plus /></button>
-        {nav.slice(2).map(navButton)}
-      </nav>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <Button asChild variant={tab === 'active' ? 'default' : 'outline'} className="h-11"><Link to="/dashboard" search={{tab:'active'}}><Activity />{t('النشطون','Active users')}</Link></Button>
+        <Button asChild variant="outline" className="h-11"><Link to="/health"><HeartPulse />{t('صحة الشبكة','Network health')}</Link></Button>
+      </div>
 
       {(profileError || routersError || cardsError || pkgsError || sessionsError) && <QueryNotice ar={ar} stale={cards.length > 0 || routers.length > 0} retry={() => { retryProfile(); retryRouters(); retryCards(); retryPkgs(); retrySessions(); }} />}
       {tab === 'home' && <div className="mt-6"><EnableAlerts ar={ar} compact /></div>}
-      {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => go(n, f)} />}
+      {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => n === 'more' ? navigate({to:'/routers'}) : go(n, f)} />}
       {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={currentSessions} ar={ar} initialFilter={search.filter} readError={cardsError} load={cardsError ? null : cardsLoad} />}
       {tab === 'active' && <ActiveTab sessions={currentSessions} reported={activeNow} staleCount={sessions.length - currentSessions.length} routers={routers} ar={ar} />}
-      {tab === 'more' && (
-        <div className="mt-6 space-y-6">
-          <section className="grid gap-2 sm:grid-cols-2">
-            <Link to="/settings" className="app-panel tap-card flex items-center gap-3 p-4"><Settings className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('إعدادات الحساب', 'Account settings')}</b><span className="text-xs text-muted-foreground">{t('شكل الكروت، اسم الشبكة', 'Card style, network name')}</span></span><ChevronRight className="tap-chevron" /></Link>
-            <Link to="/alerts" className="app-panel tap-card flex items-center gap-3 p-4"><ListChecks className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('التنبيهات وسجل الإجراءات', 'Alerts and action log')}</b><span className="text-xs text-muted-foreground">{t('كل ما حصل في شبكتك، محفوظ', 'Everything that happened, saved')}</span></span><ChevronRight className="tap-chevron" /></Link>
-            <Link to="/health" className="app-panel tap-card flex items-center gap-3 p-4"><HeartPulse className="size-5 text-primary" /><span className="flex-1"><b className="block">{t('صحة الراوتر', 'Router health')}</b><span className="text-xs text-muted-foreground">{t('فحص الأعطال الشائعة والأمان', 'Common faults and security check')}</span></span><ChevronRight className="tap-chevron" /></Link>
-            <button type="button" onClick={() => supabase.auth.signOut().then(() => location.assign('/auth'))} className="app-panel tap-card flex items-center gap-3 p-4 text-start"><LogOut className="size-5 text-destructive" /><b className="flex-1">{t('تسجيل الخروج', 'Sign out')}</b></button>
-          </section>
-          <NetworkPanel />
-        </div>
-      )}
+      {tab === 'more' && <Navigate to="/routers" replace />}
 
-      <Sheet open={quick} onOpenChange={setQuick}>
-        <SheetContent side="bottom" dir={ar ? 'rtl' : 'ltr'} className="rounded-t-2xl pb-8">
-          <SheetHeader><SheetTitle>{t('إجراءات سريعة', 'Quick actions')}</SheetTitle><SheetDescription>{t('أكثر ما يحتاجه صاحب الشبكة يومياً', 'What network owners do most')}</SheetDescription></SheetHeader>
-          <div className="mt-4 grid grid-cols-2 gap-3 px-4">
-            <QuickAction icon={<Search />} label={t('ابحث عن كرت', 'Look up a card')} onClick={() => { setQuick(false); go('cards'); }} />
-            <QuickAction icon={<Wifi />} label={t('من متصل الآن', "Who's online")} onClick={() => { setQuick(false); go('active'); }} />
-            <QuickAction icon={<PlusCircle />} label={t('إضافة كروت', 'Add cards')} soon={t('غير متاح', 'Unavailable')} />
-            <QuickAction icon={<Printer />} label={t('طباعة آخر دفعة', 'Print last batch')} soon={t('غير متاح', 'Unavailable')} />
-          </div>
-        </SheetContent>
-      </Sheet>
     </main>
-  );
-}
-
-function QuickAction({ icon, label, onClick, soon }: { icon: React.ReactNode; label: string; onClick?: () => void; soon?: string }) {
-  return (
-    <button type="button" disabled={!!soon} onClick={onClick} className="app-panel tap-card flex min-h-24 flex-col items-start justify-between gap-2 p-4 text-start disabled:cursor-not-allowed disabled:opacity-60">
-      <span className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary [&>svg]:size-5">{icon}</span>
-      <span className="font-semibold">{label}{soon && <span className="ms-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{soon}</span>}</span>
-    </button>
   );
 }
 
