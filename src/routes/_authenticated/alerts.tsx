@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useState } from 'react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -35,7 +36,7 @@ function AlertsPage() {
   const navigate = useNavigate(); const qc = useQueryClient();
   const [tab, setTab] = useState<'alerts' | 'log'>('alerts');
   const { data: alerts = [] } = useQuery({ queryKey: ['alerts'], queryFn: async () => { const { data } = await supabase.from('alerts').select('id, title, body, path, severity, read_at, created_at').order('created_at', { ascending: false }).limit(200); return (data ?? []) as Alert[]; }, refetchInterval: 30_000 });
-  const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
+  const { data: jobs = [], isError: jobsError, refetch: retryJobs } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data, error } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
   // Opening the page marks everything as read.
   useEffect(() => {
     const unread = alerts.filter((a) => !a.read_at).map((a) => a.id);
@@ -46,6 +47,7 @@ function AlertsPage() {
 
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['التنبيهات والإجراءات', 'Alerts and actions']} />
       <div aria-hidden className="landing-pattern" />
       <Link to="/dashboard" className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
       <h1 className="mt-2 text-2xl font-bold">{t('التنبيهات', 'Alerts')}</h1>

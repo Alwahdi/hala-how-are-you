@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ import { DEFAULT_STYLE, detectStyle, sampleCard, type CardStyle } from '@/lib/ca
 import { updateNetworkInfo } from '@/lib/profile.functions';
 import type { Source } from '@/components/dashboard/types';
 import { EnableAlerts } from '@/components/alerts/enable-alerts';
+import { confirmedWrite } from '@/lib/operations-ui';
 import { AlertPrefs } from '@/components/alerts/alert-prefs';
 
 export const Route = createFileRoute('/_authenticated/settings')({
@@ -43,6 +45,7 @@ function SettingsPage() {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   useEffect(() => {
     const base = current ?? guess ?? DEFAULT_STYLE;
     setStyle({ mode: base.mode, length: base.length, charset: base.charset, prefix: base.prefix });
@@ -51,15 +54,20 @@ function SettingsPage() {
   const preview = useMemo(() => [0, 1, 2].map(() => sampleCard(style)), [style]);
 
   async function save() {
-    setBusy(true);
-    const { data: u } = await supabase.auth.getUser();
-    await supabase.from('network_settings').upsert({ owner_id: u.user!.id, source, ...style, confirmed: true, updated_at: new Date().toISOString() });
-    setBusy(false); setEditing(false); setDone(true);
-    qc.invalidateQueries({ queryKey: ['card-style-full'] }); qc.invalidateQueries({ queryKey: ['card-style'] });
+    setBusy(true); setSaveError(false); setDone(false);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error('signed_out');
+      await confirmedWrite(() => supabase.from('network_settings').upsert({ owner_id: u.user.id, source, ...style, confirmed: true, updated_at: new Date().toISOString() }));
+      setEditing(false); setDone(true);
+      qc.invalidateQueries({ queryKey: ['card-style-full'] }); qc.invalidateQueries({ queryKey: ['card-style'] });
+    } catch { setSaveError(true); setEditing(true); }
+    finally { setBusy(false); }
   }
 
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['إعدادات الحساب', 'Account settings']} />
       <div aria-hidden className="landing-pattern" />
       <Link to="/dashboard" search={{ tab: 'more' }} className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
       <h1 className="mt-2 text-2xl font-bold">{t('إعدادات الحساب', 'Account settings')}</h1>
@@ -87,6 +95,7 @@ function SettingsPage() {
           ))}
         </div>
 
+        {saveError && <p role="alert" className="mt-4 text-sm text-destructive">{t('ما انحفظ التعديل. بقيت اختياراتك هنا؛ حاول مرة أخرى.', 'Not saved. Your choices are still here; please retry.')}</p>}
         {editing ? (
           <div className="mt-5 space-y-4">
             <fieldset>
@@ -147,7 +156,7 @@ function NetworkInfo({ ar, name, city }: { ar: boolean; name: string; city: stri
       <h2 className="text-lg font-bold">{t('بيانات الشبكة', 'Network details')}</h2>
       <div><Label htmlFor="nn">{t('اسم الشبكة', 'Network name')}</Label><Input id="nn" value={n} onChange={(e) => { setN(e.target.value); setState('idle'); }} className="mt-1 h-11" dir="auto" /></div>
       <div><Label htmlFor="cc">{t('المدينة', 'City')}</Label><Input id="cc" value={c} onChange={(e) => { setC(e.target.value); setState('idle'); }} className="mt-1 h-11" dir="auto" /></div>
-      {state === 'err' && <p role="alert" className="text-sm text-destructive">{t('الاسم والمدينة حرفين على الأقل.', 'Name and city need at least 2 letters.')}</p>}
+      {state === 'err' && <p role="alert" className="text-sm text-destructive">{t('ما انحفظت البيانات. تأكد أن الاسم والمدينة حرفان على الأقل، ثم حاول مرة أخرى.', 'Not saved. Check name and city have at least 2 characters, then retry.')}</p>}
       <Button variant="outline" className="h-11 w-full" disabled={state === 'busy'} onClick={async () => { setState('busy'); const r = await save({ data: { networkName: n, city: c } }).catch(() => ({ ok: false })); setState(r.ok ? 'ok' : 'err'); qc.invalidateQueries({ queryKey: ['profile'] }); }}>{state === 'busy' ? <Loader2 className="animate-spin" /> : state === 'ok' ? <Check /> : null}{state === 'ok' ? t('تم الحفظ', 'Saved') : t('حفظ', 'Save')}</Button>
     </section>
   );

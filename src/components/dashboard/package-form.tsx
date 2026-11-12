@@ -67,7 +67,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
   const [err, setErr] = useState<string | null>(null);
   const [job, setJob] = useState<{ id: string; action: 'add' | 'edit' | 'del' } | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
-  const { data: jr } = useRouterJob(job?.id, () => { qc.invalidateQueries({ queryKey: ['profiles-pkg'] }); });
+  const { data: jr, isError: jobReadError, refetch: retryJobRead } = useRouterJob(job?.id, () => { qc.invalidateQueries({ queryKey: ['profiles-pkg'] }); });
   const set = (k: keyof typeof d, v: number | string | undefined) => setD((x) => ({ ...x, [k]: v }));
   const action = edit ? 'edit' : 'add';
   const problem = checkPackage({ ...d, action });
@@ -123,13 +123,15 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
           <DialogDescription>{t('اختر من الجاهز أو «مخصص». نرسلها للراوتر ونأكد لك النتيجة.', 'Pick a ready choice or Custom. We send it to the router and confirm the result.')}</DialogDescription>
         </DialogHeader>
 
+        <p className="text-sm font-semibold">{t('الراوتر', 'Router')}: {router?.name ?? t('غير محدد', 'Not selected')}</p>
+        {jobReadError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{t('تعذر قراءة نتيجة الأمر. لا نعرف هل اكتمل؛ لا تعِد إرساله قبل التحقق.', 'Could not read the outcome. Completion is unknown; check before resending.')}</p><Button variant="outline" onClick={() => { retryJobRead(); }}>{t('إعادة قراءة النتيجة', 'Retry outcome')}</Button></div>}
         {phase ? (
           <div className="space-y-3">
             <div role="status" className={`flex items-start gap-2 rounded-xl p-3 text-sm ${phase.tone === 'ok' ? 'bg-primary/10' : phase.tone === 'bad' ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>
               {phase.tone === 'wait' ? <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin" /> : phase.tone === 'ok' ? <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> : <XCircle className="mt-0.5 size-4 shrink-0" />}
               <span>{phase.tone === 'ok' ? doneText : phase.text}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="dialog-actions grid grid-cols-2 gap-2">
               {phase.tone === 'bad' && <Button variant="outline" className="h-11" onClick={() => setJob(null)}>{t('رجوع للنموذج', 'Back to form')}</Button>}
               <Button className={`h-11 ${phase.tone === 'bad' ? '' : 'col-span-2'}`} onClick={onClose}>{t('تم', 'Done')}</Button>
             </div>
@@ -167,10 +169,10 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
             {!um && <p className="rounded-xl bg-muted p-3 text-xs leading-relaxed text-muted-foreground">{t('في Hotspot الوقت والبيانات تنحفظ على كل كرت وقت إنشائه، مش في الباقة. الصلاحية والسعر نكتبهم بطريقة Mikhmon، فتشتغل مع Mikhmon لو تستخدمه.', 'In Hotspot, time and data live on each card when it is made, not on the package. Validity and price are written the Mikhmon way, so Mikhmon keeps working.')}</p>}
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"><p className="text-xs text-muted-foreground">{t('هكذا يفهمها الزبون', 'What the customer gets')}</p><p className="mt-1 font-semibold">{preview}</p></div>
-            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{t(...ERR[problem]!)}</p>}
-            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ نرسلها لما يرجع.', 'The router is offline now.')}</p>}
+            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{(ERR[problem]?.[ar ? 0 : 1] ?? t('راجع القيم وأعد المحاولة.', 'Check the values and retry.'))}</p>}
+            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ انتظر عودته ثم أرسل. اختياراتك باقية ما دامت النافذة مفتوحة.', 'The router is offline. Wait for it to return, then send. Your choices stay while this window is open.')}</p>}
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="dialog-actions grid grid-cols-2 gap-2">
               <Button type="button" variant="outline" className="h-11" onClick={onClose}>{t('إلغاء', 'Cancel')}</Button>
               <Button type="submit" className="h-11" disabled={busy || !!problem || !online || !routerId}>{busy ? <Loader2 className="animate-spin" /> : null}{edit ? t('احفظ على الراوتر', 'Save to router') : t('أضف للراوتر', 'Add to router')}</Button>
             </div>

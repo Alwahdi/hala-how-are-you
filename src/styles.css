@@ -470,3 +470,7 @@ body { font-family: 'Cairo Variable', sans-serif; letter-spacing: 0; }
 .seg { display:inline-flex; padding:4px; gap:4px; border-radius:14px; border:1px solid var(--border); background:color-mix(in oklab,var(--card) 80%,transparent); }
 .seg > button { min-height:40px; padding-inline:16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted-foreground); }
 .seg > button[aria-pressed=true] { background:var(--primary); color:var(--primary-foreground); }
+
+/* Modal actions remain within reach while the form scrolls. */
+.dialog-surface { overscroll-behavior: contain; scrollbar-gutter: stable; }
+.dialog-actions { position: sticky; bottom: -1.5rem; z-index: 1; background: var(--background); padding-block: 0.75rem; border-top: 1px solid var(--border); }

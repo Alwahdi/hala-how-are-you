@@ -2,7 +2,7 @@
 type: index
 status: approved
 owner: founder
-updated: 2026-11-10
+updated: 2026-11-12
 related: [../templates/decision.md]
 ---
 # سجل القرارات
@@ -49,3 +49,4 @@ related: [../templates/decision.md]
 - [D-035](D-035-card-control-um-v6-packages.md) — التحكم بالكروت، إصلاح User Manager v6، وقراءة الباقات (approved)
 - [D-036](D-036-packages-card-quick-actions-expiry.md) — الباقات وإضافتها، إجراءات الكرت السريعة، الكروت المنتهية والصفحات (approved)
 - [D-037](D-037-router-cpu-load-and-light-direct-api.md) — تخفيف ضغط المعالج على الراوتر واتصال API خفيف (approved)
+- [D-038](D-038-ui-outcomes-and-freshness.md) — نتائج الواجهة والحداثة وفصل الباقات والتحقق (approved)

@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useRef, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
@@ -42,6 +43,7 @@ function AuthPage() {
   const [code, setCode] = useState('');
   const [resendIn, setResendIn] = useState(0);
   const [verified, setVerified] = useState(false);
+  const [pendingLink, setPendingLink] = useState(false);
   const [mode, setMode] = useState<'in' | 'up'>('up');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,12 +60,13 @@ function AuthPage() {
       if (!data.user || done) return;
       done = true;
       const proof = sessionStorage.getItem(PROOF_KEY);
-      if (proof) { await link({ data: { proof, language: ar ? 'ar' : 'en' } }).catch(() => null); sessionStorage.removeItem(PROOF_KEY); }
-      const { data: prof } = await supabase.from('profiles').select('account_type').eq('id', data.user.id).maybeSingle();
+      if (proof) { const result = await link({ data: { proof, language: ar ? 'ar' : 'en' } }).catch(() => ({ ok: false as const })); if (!result.ok) { done = false; setPendingLink(true); setMessage({ tone: 'error', text: t('تم الدخول، لكن تعذر ربط الهاتف. بقي إثباتك؛ أعد المحاولة.', 'Signed in, but phone linking failed. Your proof is retained; retry.') }); return; } sessionStorage.removeItem(PROOF_KEY); }
+      const { data: prof, error: profileError } = await supabase.from('profiles').select('account_type').eq('id', data.user.id).maybeSingle();
+      if (profileError) { done = false; setPendingLink(true); setMessage({ tone: 'error', text: t('تعذر قراءة حسابك. أعد المحاولة.', 'Could not read your account. Retry.') }); return; }
       if (prof?.account_type) navigate({ to: '/dashboard', replace: true }); else navigate({ to: '/onboarding', replace: true });
     }
     finish();
-    const { data: sub } = supabase.auth.onAuthStateChange((e) => { if (e === 'SIGNED_IN') finish(); });
+    const { data: sub } = supabase.auth.onAuthStateChange((e) => { if (e === 'SIGNED_IN') setTimeout(finish, 0); });
     return () => sub.subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -77,6 +80,21 @@ function AuthPage() {
     not_configured: t('خدمة الرمز عبر WhatsApp قيد التفعيل. يمكنك المتابعة بدون رمز الآن.', 'WhatsApp code service is being activated. You can continue without a code for now.'),
     send_failed: t('ما قدرنا نرسل الرسالة. تأكد أن الرقم عليه WhatsApp وحاول مرة ثانية.', 'We could not send it. Make sure the number has WhatsApp and try again.'),
   };
+
+  async function retryLink() {
+    setBusy(true); setMessage(null);
+    const proof = sessionStorage.getItem(PROOF_KEY);
+    if (proof) {
+      const result = await link({ data: { proof, language: ar ? 'ar' : 'en' } }).catch(() => ({ ok: false as const }));
+      if (!result.ok) { setBusy(false); setMessage({ tone: 'error', text: t('تعذر ربط الهاتف. أعد المحاولة أو أكّد الرقم من جديد.', 'Phone linking failed. Retry or verify again.') }); return; }
+      sessionStorage.removeItem(PROOF_KEY);
+    }
+    const { data: u } = await supabase.auth.getUser();
+    const { data, error } = await supabase.from('profiles').select('account_type').eq('id', u.user?.id ?? '').maybeSingle();
+    setBusy(false);
+    if (error) { setMessage({ tone: 'error', text: t('تعذر قراءة حسابك. أعد المحاولة.', 'Could not read your account. Retry.') }); return; }
+    navigate({ to: data?.account_type ? '/dashboard' : '/onboarding', replace: true });
+  }
 
   async function sendCode(e?: React.FormEvent) {
     e?.preventDefault(); setMessage(null);
@@ -124,6 +142,7 @@ function AuthPage() {
 
   return (
     <main className="app-shell flex min-h-screen flex-col py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['تسجيل الدخول', 'Sign in']} />
       <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <a href="/" className="text-lg font-extrabold">Mikro</a>
@@ -141,7 +160,8 @@ function AuthPage() {
         </ol>}
 
         <section className="space-y-5 app-panel p-5 sm:p-6">
-          {step === 'phone' && (
+          {pendingLink && <div className="space-y-3"><Header icon={<ShieldCheck />} title={t('أكمل ربط حسابك', 'Finish linking your account')} sub={t('ما أكدنا الربط بعد.', 'Linking is not confirmed yet.')} /><Msg m={message} /><Button className="h-12 w-full" disabled={busy} onClick={retryLink}>{busy && <Loader2 className="animate-spin" />}{t('إعادة المحاولة', 'Retry')}</Button><Button variant="outline" className="h-12 w-full" onClick={() => { sessionStorage.removeItem(PROOF_KEY); setPendingLink(false); setStep('phone'); setMessage(null); }}>{t('أكّد الرقم من جديد', 'Verify phone again')}</Button></div>}
+          {!pendingLink && step === 'phone' && (
             <form className="space-y-5" onSubmit={sendCode} noValidate>
               <Header icon={<Phone />} title={t('رقم جوالك', 'Your mobile number')} sub={t('نرسل لك رمزاً من 6 أرقام على WhatsApp.', 'We will send a 6-digit code on WhatsApp.')} />
               <div className="space-y-2">
@@ -163,7 +183,7 @@ function AuthPage() {
             </form>
           )}
 
-          {step === 'code' && (
+          {!pendingLink && step === 'code' && (
             <div className="space-y-5">
               <Header icon={<ShieldCheck />} title={t('أدخل الرمز', 'Enter the code')} sub={<>{t('أرسلناه على WhatsApp إلى', 'Sent on WhatsApp to')} <bdi dir="ltr" className="font-semibold text-foreground">{e164}</bdi></>} />
               <div className="relative" dir="ltr">
@@ -186,7 +206,7 @@ function AuthPage() {
             </div>
           )}
 
-          {step === 'account' && (
+          {!pendingLink && step === 'account' && (
             <div className="space-y-5">
               <div className="flex items-start gap-2">
                 <button type="button" aria-label={t('رجوع', 'Back')} onClick={() => { setMessage(null); setStep('phone'); }} className="mt-1 rounded-lg p-2 hover:bg-muted"><Back className="size-4" /></button>

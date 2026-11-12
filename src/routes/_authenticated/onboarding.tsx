@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
@@ -113,6 +114,7 @@ function Onboarding() {
 
   return (
     <main className="app-shell min-h-screen py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['أضف شبكتك', 'Add your network']} />
       <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <span className="text-lg font-extrabold">Mikro</span>
@@ -178,7 +180,7 @@ function Onboarding() {
               <div className="space-y-2"><Label htmlFor="rname">{t('اسم تعرفه به', 'A name you recognise')}</Label><Input id="rname" autoFocus required maxLength={60} className="h-12" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('مثلاً: راوتر الدمج، راوتر التوزيع', 'e.g. Load balancer, Distribution')} /></div>
               <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('أمر واحد يشتغل على v6 وv7، ونعرف الإصدار تلقائياً.', 'One command for v6 and v7; we detect the version.')}</li>
-                <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('يشتغل حتى لو الإنترنت خلف CGNAT، ويرسل الكروت كل 5 دقائق.', 'Works behind CGNAT and sends cards every 5 minutes.')}</li>
+                <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('يشتغل حتى لو الإنترنت خلف CGNAT، وتُقرأ الكروت حسب حجم القائمة لتخفيف الضغط.', 'Works behind CGNAT with card reads paced by list size to reduce load.')}</li>
                 <li className="flex gap-2"><CheckCircle2 className="size-4 shrink-0 text-primary" />{t('لو عليه IP عام وIP Cloud، نتصل مباشرة تلقائياً.', 'With a public IP and IP Cloud, we connect directly on our own.')}</li>
               </ul>
               <Err e={error} />
@@ -213,7 +215,7 @@ function Onboarding() {
                 <h1 className="text-2xl font-bold">{t('شبكتك متصلة!', 'Your network is connected!')}</h1>
                 <p className="text-muted-foreground">{status?.identity ?? name} · <bdi dir="ltr">{status?.board} {status?.version}</bdi></p>
               </div>
-              <p role="status" className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm"><Cloud className="mt-0.5 size-4 shrink-0 text-primary" />{status?.cloudName && status.behindNat === 'no' ? t('راوترك عليه IP عام وIP Cloud. نتصل فيه مباشرة تلقائياً.', 'Your router has a public IP and IP Cloud. We connect directly on our own.') : t('الحالة تتحدث كل 30 ثانية، وقائمة الكروت تصل خلال 5 دقائق.', 'Status updates every 30 seconds; the card list arrives within 5 minutes.')}</p>
+              <p role="status" className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm"><Cloud className="mt-0.5 size-4 shrink-0 text-primary" />{status?.cloudName && status.behindNat === 'no' ? t('راوترك عليه IP عام وIP Cloud. نتصل فيه مباشرة تلقائياً.', 'Your router has a public IP and IP Cloud. We connect directly on our own.') : t('الحالة تتحدث كل 30 ثانية، وتصل الكروت بعد اكتمال القراءة حسب حجم القائمة.', 'Status updates every 30 seconds; cards arrive after a complete read, paced by list size.')}</p>
               <Button className="h-12 w-full text-base" onClick={() => navigate({ to: '/dashboard' })}>{t('افتح لوحة الشبكة', 'Open the network dashboard')}</Button>
             </div>
           )}
