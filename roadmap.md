@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
+- [ ] Complete single-card and batch issuance requested at 03:13 UTC — approve focused plan, repair readiness/limits/idempotency and verify on isolated routers before activation
 - [ ] Study quick single-card issuance and complete available session details including NAS-Port — implementation awaits a separate scope because current approval permits visual samples only
 - [x] Prepare reference-faithful single-card visual sample; inspected full-size with synthetic data
 - [ ] Apply corrected templates — blocked on founder's acceptance of the visual sample
