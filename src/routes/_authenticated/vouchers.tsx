@@ -69,6 +69,7 @@ function Studio() {
   const [single,setSingle]=useState(true);
   const [manual,setManual]=useState(false);
   const [issueError,setIssueError]=useState("");
+  const [credentials,setCredentials]=useState<{name:string;password:string}[]|null>(null);
   const t = (a: string, b: string) => (ar ? a : b);
   const qc = useQueryClient();
   const issue = useServerFn(issueVouchers),
@@ -351,6 +352,7 @@ function Studio() {
                   </p>
                   <progress className="w-full accent-primary" max={b.requested} value={confirmed} />
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {b.requested===1&&<Button variant="outline" disabled={busy||confirmed!==1} onClick={async()=>{setBusy(true);try{const r=await getPrint({data:{batchId:b.id}});setCredentials(r.cards);}catch{setMessage(t('تعذرت قراءة بيانات الدخول؛ قد تغيرت أو حُذفت.','Credentials unavailable; they may have changed or been erased.'));}finally{setBusy(false);}}}>{t('بيانات الدخول','Credentials')}</Button>}
                     <Button
                       variant="outline"
                       disabled={busy || !confirmed}
@@ -909,6 +911,7 @@ function Studio() {
           </div>
         </section>
       )}
+      <Dialog open={credentials!==null} onOpenChange={v=>{if(!v)setCredentials(null);}}><DialogContent dir={ar?'rtl':'ltr'}><DialogHeader><DialogTitle>{t('بيانات الكرت المؤكد','Confirmed card credentials')}</DialogTitle><DialogDescription>{t('للصاحب فقط؛ أغلق النافذة بعد تسليمها للزبون.','Owner only; close after handing to the customer.')}</DialogDescription></DialogHeader>{credentials?.map(c=><div key={c.name} className="space-y-4"><p dir="ltr" className="break-all font-mono text-xl">{c.name}</p><p dir="ltr" className="break-all font-mono">{c.password||t('بدون كلمة مرور','No password')}</p><Button onClick={async()=>{try{await navigator.clipboard.writeText(c.password?`${c.name}\n${c.password}`:c.name);setMessage(t('نُسخت بيانات الدخول.','Credentials copied.'));}catch{setMessage(t('تعذر النسخ؛ يمكنك تحديد النص.','Copy unavailable; select the text.'));}}}>{t('نسخ بيانات الدخول','Copy credentials')}</Button></div>)}</DialogContent></Dialog>
       <Dialog
         open={open}
         onOpenChange={(v) => {
