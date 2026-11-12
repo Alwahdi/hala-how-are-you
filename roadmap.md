@@ -2,7 +2,8 @@
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
 - [x] Implement approved single/manual-card and batch forms, explicit Hotspot limits, serialized requests, receipt-based retries and confirmed-card snapshots; test forms and individual commands on isolated v6/v7
-- [ ] Complete batch/platform confirmation/archive/owner-isolation end-to-end — founder requested continuation before publishing; isolated RouterOS lab restored, public issuance remains disabled until acceptance
+- [x] Verify four five-card platform-to-RouterOS batches, confirmation read-back, lease retry and owner PDF download; remove isolated fixtures
+- [ ] Complete second-owner isolation, partial failure/pause/resume and single different-password end-to-end — blocked on an approved second test account and retained lab; temporary lab was lost again, public issuance remains disabled
 - [x] Study single-card and NAS-Port availability; findings reported
 - [ ] Extend session details/NAS-Port — blocked on separate collection scope approval; excluded from current issuance plan
 - [x] Prepare reference-faithful single-card visual sample; inspected full-size with synthetic data
