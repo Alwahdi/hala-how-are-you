@@ -692,6 +692,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          issue_config: Json | null
           label: string
           mode: string
           owner_id: string
@@ -706,6 +707,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          issue_config?: Json | null
           label: string
           mode: string
           owner_id: string
@@ -720,6 +722,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          issue_config?: Json | null
           label?: string
           mode?: string
           owner_id?: string
@@ -743,6 +746,7 @@ export type Database = {
       }
       voucher_items: {
         Row: {
+          attempts: number
           batch_id: string
           id: string
           lease_at: string | null
@@ -756,6 +760,7 @@ export type Database = {
           state: string
         }
         Insert: {
+          attempts?: number
           batch_id: string
           id?: string
           lease_at?: string | null
@@ -769,6 +774,7 @@ export type Database = {
           state?: string
         }
         Update: {
+          attempts?: number
           batch_id?: string
           id?: string
           lease_at?: string | null
@@ -850,6 +856,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      append_voucher_chunk: {
+        Args: { bid: string; items: Json; start_at: number; uid: string }
+        Returns: number
+      }
+      begin_voucher_batch: { Args: { b: Json }; Returns: string }
       card_run_step: {
         Args: {
           _done: boolean
@@ -875,6 +886,18 @@ export type Database = {
       mark_finished_cards: { Args: never; Returns: undefined }
       purge_voucher_secrets: { Args: { bid: string }; Returns: undefined }
       retry_voucher_batch: { Args: { bid: string }; Returns: undefined }
+      voucher_batch_summary: {
+        Args: { bids: string[] }
+        Returns: {
+          batch_id: string
+          confirmed: number
+          failed: number
+          pending: number
+          prepared: number
+          sent: number
+          uncertain: number
+        }[]
+      }
     }
     Enums: {
       app_role: "owner" | "engineer" | "admin"
