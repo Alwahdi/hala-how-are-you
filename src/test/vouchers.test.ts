@@ -62,6 +62,9 @@ describe("voucher printing and issuance", () => {
     expect(hs).toContain("limit-bytes-total=629145600");
     expect(hs).toContain("limit-uptime=18000s");
     expect(hs).toContain(':error "exists"');
+    expect(hs).toContain('mikro-issued-vc-test');
+    expect(hs).toContain('credentials_changed');
+    expect(hs).not.toContain('get $u comment');
     expect(voucherCommands("usermanager", "6", "001", "test", "basic", "vc-test", 0, 0)).toContain(
       "/tool user-manager user",
     );
