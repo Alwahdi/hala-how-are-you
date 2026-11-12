@@ -12,11 +12,21 @@ export const issuanceSchema = z
     charset: z.enum(["digits", "mixed"]),
     mode: z.enum(["empty", "same", "different"]),
     requestKey: z.string().uuid(),
-    manualName: z.string().regex(/^[A-Za-z0-9._-]{1,32}$/).optional(),
-    hotspotLimits: z.object({bytes: z.number().int().min(0).max(10485760000000), time: z.number().int().min(0).max(31622400)}).optional(),
+    manualName: z
+      .string()
+      .regex(/^[A-Za-z0-9._-]{1,32}$/)
+      .optional(),
+    hotspotLimits: z
+      .object({
+        bytes: z.number().int().min(0).max(10485760000000),
+        time: z.number().int().min(0).max(31622400),
+      })
+      .optional(),
   })
-  .refine((v) => !v.manualName || v.count === 1, {message: "A manual number requires one card."})
-  .refine((v) => v.source !== "hotspot" || !!v.hotspotLimits, {message: "Explicit Hotspot limits are required."})
+  .refine((v) => !v.manualName || v.count === 1, { message: "A manual number requires one card." })
+  .refine((v) => v.source !== "hotspot" || !!v.hotspotLimits, {
+    message: "Explicit Hotspot limits are required.",
+  })
   .refine((v) => !!v.manualName || v.length - v.prefix.length - v.suffix.length >= 4, {
     message: "Keep at least four random characters.",
   });
