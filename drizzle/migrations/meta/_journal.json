@@ -141,6 +141,13 @@
       "when": 1794452636882,
       "tag": "0019_voucher_confirmed_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794453492972,
+      "tag": "0020_voucher_serialized_request",
+      "breakpoints": true
     }
   ]
 }
