@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_authenticated/vouchers")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({add: s["add"] === true || s["add"] === "true"}),
+  validateSearch: (s: Record<string, unknown>): {add?: boolean} => ({add: s["add"] === true || s["add"] === "true"}),
   component: Studio,
 });
 function Studio() {
@@ -360,13 +360,14 @@ function Studio() {
                           const r = await getPrint({ data: { batchId: b.id } });
                           const snap = r.batch.package_snapshot as unknown as ProfileRow;
                           const f = packageFacts(snap, []);
+                          const limits=(r.batch.package_snapshot as unknown as {issue_limits?:{bytes:number;time:number}}).issue_limits;
                           const cards = r.cards.map((c) => ({
                             ...c,
                             price: snap.price ?? "",
                             facts: [
                               snap.name,
-                              humanData(f.dataBytes, ar),
-                              f.uptimeS ? `${f.uptimeS / 3600} h` : null,
+                              humanData(limits?.bytes ?? f.dataBytes, ar),
+                              (limits?.time ?? f.uptimeS) ? `${(limits?.time ?? f.uptimeS ?? 0) / 3600} h` : null,
                               f.validityS ? `${f.validityS / 86400} d` : null,
                             ]
                               .filter(Boolean)
