@@ -71,7 +71,7 @@ export function NetworkPanel() {
     const r = await rotate({ data: { id } }).catch(() => ({ ok: false as const }));
     setBusyId(null);
     if (!r.ok) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
-    { const full = buildPasteCommand(r.token, r.password); setConfirmReconnect(null); setReconnect({ id, name: routerName, main: r.code ? buildShortCommand(r.code) : full, full: r.code ? full : undefined, issuedAt: r.issuedAt }); }
+    { const full = buildPasteCommand(r.token, r.password); setConfirmReconnect(null); setReconnect({ id, name: routerName, main: r.code ? buildShortCommand(r.code) : full, full: r.code ? full : undefined, issuedAt: new Date().toISOString() }); }
   }
 
   async function checkCloudNow(id: string) {
@@ -246,6 +246,7 @@ export function NetworkPanel() {
             <DialogTitle>{t('إعادة تشغيل', 'Restart')} {confirmReboot?.name}؟</DialogTitle>
             <DialogDescription>{t('كل المتصلين ينقطعون حوالي دقيقة ثم يرجعون تلقائياً. يصلك تنبيه لما يرجع الراوتر.', 'Everyone is disconnected for about a minute, then reconnects. You get an alert when the router is back.')}</DialogDescription>
           </DialogHeader>
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" className="h-11" onClick={() => setConfirmReboot(null)}>{t('إلغاء', 'Cancel')}</Button>
             <Button variant="destructive" className="h-11" disabled={!!busyId} onClick={async () => { if (!confirmReboot) return; const id = confirmReboot.id; setBusyId(id); setError(null); try { const result = await reboot({ data: { id } }); if (!result.ok) throw new Error('failed'); setConfirmReboot(null); qc.invalidateQueries({ queryKey: ['reboot-jobs'] }); } catch { setError(t('تعذر إرسال إعادة التشغيل؛ حاول مرة أخرى.', 'Restart request failed; retry.')); } finally { setBusyId(null); } }}><Power />{t('أعد التشغيل', 'Restart now')}</Button>

@@ -37,7 +37,7 @@ const REQ_ERR: Record<string, [string, string]> = {
   no_package: ['ما نعرف باقة هذا الكرت، فما نقدر نجدده.', "We don't know this card's package."],
 };
 
-export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter, load }: Props) {
+export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter, load, readError = false }: Props) {
   const t = (a: string, b: string) => (ar ? a : b);
   const hasUm = cards.some((c) => c.source === 'usermanager') || profiles.some((p) => p.source === 'usermanager');
   const hasHs = cards.some((c) => c.source === 'hotspot') || profiles.some((p) => p.source === 'hotspot') || !hasUm;
@@ -69,7 +69,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const qc = useQueryClient();
   const refresh = () => { qc.invalidateQueries({ queryKey: ['cards'] }); qc.invalidateQueries({ queryKey: ['sessions'] }); };
   const { data: pendingClean = 0 } = useQuery({ queryKey: ['clean-jobs'], queryFn: async () => { const { count } = await supabase.from('router_jobs').select('id', { count: 'exact', head: true }).eq('kind', 'remove_cards').in('status', ['pending', 'sent']); return count ?? 0; }, refetchInterval: 10_000 });
-  const { data: bulkState = [] } = useQuery({
+  const { data: bulkState = [], isError: bulkReadError, refetch: retryBulkRead } = useQuery({
     queryKey: ['bulk-jobs', bulkJobs], enabled: bulkJobs.length > 0,
     queryFn: async () => { const { data, error } = await supabase.from('router_jobs').select('id, status, result, payload').in('id', bulkJobs); if (error) throw error; const rows = data ?? []; if (rows.every((r) => ['done', 'failed', 'expired'].includes(r.status))) refresh(); return rows; },
     refetchInterval: (qq) => ((qq.state.data as { status: string }[] | undefined)?.every((r) => ['done', 'failed', 'expired'].includes(r.status)) ? false : 3000),
@@ -214,13 +214,13 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             {filterChips.map((f) => (
               <button key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">
                 {f === 'online' && <span className={`size-2 rounded-full ${counts['online'] ? 'bg-primary' : 'bg-muted-foreground/40'}`} />}
-                {chipLabel(f)}{f !== 'all' && <span className="chip-count" dir="ltr">{counts[f] ?? 0}</span>}
+                {chipLabel(f)}{f !== 'all' && (!readError || mine.length > 0) && <span className="chip-count" dir="ltr">{counts[f] ?? 0}</span>}
               </button>
             ))}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>{list.length ? t(`${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} من ${list.length.toLocaleString('en')} كرت`, `${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} of ${list.length.toLocaleString('en')} cards`) : t('0 كرت', '0 cards')}{selectedPkg ? ` · ${selectedPkg.name} · ${selectedPkg.routerName}` : ''} · {t('أقدم قراءة', 'Oldest reading')}: {syncLabel}</span>
+            <span>{list.length ? t(`${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} من ${list.length.toLocaleString('en')} كرت`, `${pg * PAGE + 1}–${Math.min(list.length, pg * PAGE + PAGE)} of ${list.length.toLocaleString('en')} cards`) : readError ? t('تعذرت القراءة', 'Read failed') : t('0 كرت', '0 cards')}{selectedPkg ? ` · ${selectedPkg.name} · ${selectedPkg.routerName}` : ''} · {t('أقدم قراءة', 'Oldest reading')}: {syncLabel}</span>
             {mine.length > 0 && (selecting
               ? <span className="flex gap-2"><Button variant="ghost" className="h-9" onClick={selectPage}>{t('حدد الصفحة', 'Select page')}</Button><Button variant="ghost" className="h-9" onClick={() => { setSelecting(false); setSel(new Set()); }}><X />{t('إلغاء', 'Cancel')}</Button></span>
               : <Button variant="ghost" className="h-9" onClick={() => setSelecting(true)}><CheckSquare />{t('تحديد', 'Select')}</Button>)}
@@ -232,15 +232,15 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
               <Button variant="destructive" className="h-11" disabled={pendingClean > 0} onClick={() => setConfirmClean(true)}><Trash2 />{t(`احذف الكل (${finishedHs.length})`, `Remove all (${finishedHs.length})`)}</Button>
             </div>
           )}
-          {cleanMsg && <p role="status" className="rounded-xl bg-primary/10 p-3 text-sm">{cleanMsg}</p>}
+          {cleanMsg && <p role="status" className="rounded-lg bg-muted p-3 text-sm">{cleanMsg}</p>}
           {msg && <p role="status" className="rounded-xl bg-muted p-3 text-sm">{msg}</p>}
           {bulkJobs.length > 0 && (
             <p role="status" className="flex flex-wrap items-center gap-2 rounded-lg bg-muted p-3 text-sm">
-              {bulkSummary.over ? <>{t(`تم على ${bulkSummary.succeeded} كرت؛ لم يُنفذ ${bulkSummary.failed}.`, `${bulkSummary.succeeded} cards completed; ${bulkSummary.failed} not completed.`)}{bulkSummary.retryIds.length > 0 && <Button variant="outline" className="h-11" disabled={sending} onClick={retryBulk}>{t('أعد محاولة الفاشل', 'Retry failed')}</Button>}<button type="button" className="ms-auto text-xs underline" onClick={() => setBulkJobs([])}>{t('إخفاء', 'Hide')}</button></> : <><Loader2 className="size-4 animate-spin" />{t('الراوتر ينفذ على الكروت المحددة...', 'The router is working through the selected cards...')}</>}
+              {bulkReadError ? <>{t('تعذر قراءة نتيجة الأوامر؛ لا نعرف هل اكتملت.', 'Could not read command outcomes; completion is unknown.')}<Button variant="outline" onClick={() => { retryBulkRead(); }}>{t('إعادة المحاولة', 'Retry')}</Button></> : bulkSummary.over ? <>{t(`تم على ${bulkSummary.succeeded} كرت؛ لم يُنفذ ${bulkSummary.failed}.`, `${bulkSummary.succeeded} cards completed; ${bulkSummary.failed} not completed.`)}{bulkSummary.retryIds.length > 0 && <Button variant="outline" className="h-11" disabled={sending} onClick={retryBulk}>{t('أعد محاولة الفاشل', 'Retry failed')}</Button>}<button type="button" className="ms-auto text-xs underline" onClick={() => setBulkJobs([])}>{t('إخفاء', 'Hide')}</button></> : <><Loader2 className="size-4 animate-spin" />{t('الراوتر ينفذ على الكروت المحددة...', 'The router is working through the selected cards...')}</>}
             </p>
           )}
 
-          {mine.length === 0 && !load ? <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما وصلت قائمة الكروت بعد.', 'No card list yet.')}</p> : list.length === 0 && !load ? (
+          {readError && mine.length === 0 ? null : mine.length === 0 && !load ? <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما وصلت قائمة الكروت بعد.', 'No card list yet.')}</p> : list.length === 0 && !load ? (
             <p className="app-panel p-6 text-center text-sm text-muted-foreground">{t('ما في كروت بهذا البحث أو الفلتر.', 'No cards match this search or filter.')}</p>
           ) : (
             <ul className="space-y-2">

@@ -10,7 +10,9 @@ export function useRouterJob(id: string | null | undefined, onOver?: (j: RouterJ
     queryKey: ['router-job', id],
     enabled: !!id,
     queryFn: async () => {
-      const { data } = await supabase.from('router_jobs').select('status, result, requested_at, sent_at').eq('id', id!).maybeSingle();
+      if (!id) return null;
+      const { data, error } = await supabase.from('router_jobs').select('status, result, requested_at, sent_at').eq('id', id).maybeSingle();
+      if (error) throw error;
       const j = data as RouterJob | null;
       if (j && jobOver(j)) onOver?.(j);
       return j;

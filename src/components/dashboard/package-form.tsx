@@ -123,6 +123,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
           <DialogDescription>{t('اختر من الجاهز أو «مخصص». نرسلها للراوتر ونأكد لك النتيجة.', 'Pick a ready choice or Custom. We send it to the router and confirm the result.')}</DialogDescription>
         </DialogHeader>
 
+        {jobReadError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{t('تعذر قراءة نتيجة الأمر. لا نعرف هل اكتمل؛ لا تعِد إرساله قبل التحقق.', 'Could not read the outcome. Completion is unknown; check before resending.')}</p><Button variant="outline" onClick={() => { retryJobRead(); }}>{t('إعادة قراءة النتيجة', 'Retry outcome')}</Button></div>}
         {phase ? (
           <div className="space-y-3">
             <div role="status" className={`flex items-start gap-2 rounded-xl p-3 text-sm ${phase.tone === 'ok' ? 'bg-primary/10' : phase.tone === 'bad' ? 'bg-destructive/10 text-destructive' : 'bg-muted'}`}>
@@ -167,8 +168,8 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
             {!um && <p className="rounded-xl bg-muted p-3 text-xs leading-relaxed text-muted-foreground">{t('في Hotspot الوقت والبيانات تنحفظ على كل كرت وقت إنشائه، مش في الباقة. الصلاحية والسعر نكتبهم بطريقة Mikhmon، فتشتغل مع Mikhmon لو تستخدمه.', 'In Hotspot, time and data live on each card when it is made, not on the package. Validity and price are written the Mikhmon way, so Mikhmon keeps working.')}</p>}
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"><p className="text-xs text-muted-foreground">{t('هكذا يفهمها الزبون', 'What the customer gets')}</p><p className="mt-1 font-semibold">{preview}</p></div>
-            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{t(...ERR[problem]!)}</p>}
-            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ انتظر عودته ثم أرسل. اختياراتك باقية ما دامت النافذة مفتوحة.', 'The router is offline now.')}</p>}
+            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{t(...(ERR[problem] ?? ERR.bad_name))}</p>}
+            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ انتظر عودته ثم أرسل. اختياراتك باقية ما دامت النافذة مفتوحة.', 'The router is offline. Wait for it to return, then send. Your choices stay while this window is open.')}</p>}
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             <div className="dialog-actions grid grid-cols-2 gap-2">
               <Button type="button" variant="outline" className="h-11" onClick={onClose}>{t('إلغاء', 'Cancel')}</Button>

@@ -165,7 +165,7 @@ function Dashboard() {
       {(profileError || routersError || cardsError || pkgsError || sessionsError) && <QueryNotice ar={ar} stale={cards.length > 0 || routers.length > 0} retry={() => { retryProfile(); retryRouters(); retryCards(); retryPkgs(); retrySessions(); }} />}
       {tab === 'home' && <div className="mt-6"><EnableAlerts ar={ar} compact /></div>}
       {tab === 'home' && <HomeTab ar={ar} activeNow={activeNow} log={log} counts={counts} total={cards.length} inUse={counts.active + counts.almost} lowPackages={lowPackages} onlineCount={onlineCount} routerCount={routers.length} alerts={alerts} styleConfirmed={styleConfirmed} go={(n, f) => go(n, f)} />}
-      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={currentSessions} ar={ar} initialFilter={search.filter} load={cardsError ? null : cardsLoad} />}
+      {tab === 'cards' && <CardsTab key={search.filter ?? 'all'} cards={cards} profiles={pkgs} routers={routers} sessions={currentSessions} ar={ar} initialFilter={search.filter} readError={cardsError} load={cardsError ? null : cardsLoad} />}
       {tab === 'active' && <ActiveTab sessions={currentSessions} reported={activeNow} staleCount={sessions.length - currentSessions.length} routers={routers} ar={ar} />}
       {tab === 'more' && (
         <div className="mt-6 space-y-6">
