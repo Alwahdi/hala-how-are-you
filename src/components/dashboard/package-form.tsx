@@ -123,6 +123,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
           <DialogDescription>{t('اختر من الجاهز أو «مخصص». نرسلها للراوتر ونأكد لك النتيجة.', 'Pick a ready choice or Custom. We send it to the router and confirm the result.')}</DialogDescription>
         </DialogHeader>
 
+        {edit&&<p className="text-sm text-warning">{t('قد تؤثر تغييرات الباقة على الكروت المرتبطة بها؛ الورق المطبوع لا يتغير.','Package changes may affect linked cards; previously printed cards do not change.')}</p>}
         <p className="text-sm font-semibold">{t('الراوتر', 'Router')}: {router?.name ?? t('غير محدد', 'Not selected')}</p>
         {jobReadError && <div role="alert" className="space-y-2 text-sm text-destructive"><p>{t('تعذر قراءة نتيجة الأمر. لا نعرف هل اكتمل؛ لا تعِد إرساله قبل التحقق.', 'Could not read the outcome. Completion is unknown; check before resending.')}</p><Button variant="outline" onClick={() => { retryJobRead(); }}>{t('إعادة قراءة النتيجة', 'Retry outcome')}</Button></div>}
         {phase ? (

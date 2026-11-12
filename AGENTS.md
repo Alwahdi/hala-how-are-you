@@ -79,7 +79,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Legacy phone verification proofs are not login sessions; keep phone login unavailable until supported identity verification is configured, so email sign-in never depends on a profile-only proof.
 - Routers link via a ~130-char fetch+import of a one-hour setup code (payload sealed by the code); the full one-line paste is the fallback.
 - Direct access: RouterOS API over TCP (8729 TLS, then 8728) to IP Cloud, tried automatically (throttled retries) only when the router owns its public IP; no manual form, push stays the fallback.
-- Cards/sessions/profiles are owner-readable snapshots written only by server code; card passwords are never stored.
+- Cards/sessions/profiles are server-written snapshots without passwords; new issuance uses a separate encrypted owner-authorized print archive, invalidated on credential changes, so reprinting cannot expose stale secrets.
 - Router and card actions are fixed tasks returned in the report reply and run by the router script, with server-validated safe values; no write credentials are stored. Alerts use Web Push with a seed-derived VAPID key.
 - User Manager is read by a per-version router script (v6 under /tool, v7 with user-profile); the report says whether it is installed/enabled so the UI never guesses from an empty card list.
 - Card snapshots are removed only when a complete card run (every batch confirmed, tracked atomically by a database function) misses them; fixed windows and concurrent uploads deleted healthy cards.

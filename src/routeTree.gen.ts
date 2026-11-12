@@ -22,10 +22,12 @@ import { Route as AuthenticatedHealthRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedVouchersRouteImport } from './routes/_authenticated/vouchers'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
 import { Route as ApiPublicRouterJobRouteImport } from './routes/api/public/router-job'
 import { Route as ApiPublicRouterReportRouteImport } from './routes/api/public/router-report'
+import { Route as ApiPublicVoucherResultRouteImport } from './routes/api/public/voucher-result'
 import { Route as ApiPublicJobsWatchRouteImport } from './routes/api/public/jobs/watch'
 import { Route as ApiPublicSCodeRouteImport } from './routes/api/public/s/$code'
 
@@ -93,6 +95,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVouchersRoute = AuthenticatedVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -111,6 +118,11 @@ const ApiPublicRouterJobRoute = ApiPublicRouterJobRouteImport.update({
 const ApiPublicRouterReportRoute = ApiPublicRouterReportRouteImport.update({
   id: '/api/public/router-report',
   path: '/api/public/router-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicVoucherResultRoute = ApiPublicVoucherResultRouteImport.update({
+  id: '/api/public/voucher-result',
+  path: '/api/public/voucher-result',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicJobsWatchRoute = ApiPublicJobsWatchRouteImport.update({
@@ -137,10 +149,12 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/voucher-result': typeof ApiPublicVoucherResultRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
   '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
@@ -157,10 +171,12 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/voucher-result': typeof ApiPublicVoucherResultRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
   '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
@@ -179,10 +195,12 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/vouchers': typeof AuthenticatedVouchersRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
   '/api/public/router-report': typeof ApiPublicRouterReportRoute
+  '/api/public/voucher-result': typeof ApiPublicVoucherResultRoute
   '/api/public/jobs/watch': typeof ApiPublicJobsWatchRoute
   '/api/public/s/$code': typeof ApiPublicSCodeRoute
 }
@@ -201,10 +219,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/settings'
+    | '/vouchers'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/voucher-result'
     | '/api/public/jobs/watch'
     | '/api/public/s/$code'
   fileRoutesByTo: FileRoutesByTo
@@ -221,10 +241,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/settings'
+    | '/vouchers'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/voucher-result'
     | '/api/public/jobs/watch'
     | '/api/public/s/$code'
   id:
@@ -242,10 +264,12 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/_authenticated/settings'
+    | '/_authenticated/vouchers'
     | '/_authenticated/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
     | '/api/public/router-report'
+    | '/api/public/voucher-result'
     | '/api/public/jobs/watch'
     | '/api/public/s/$code'
   fileRoutesById: FileRoutesById
@@ -260,6 +284,7 @@ export interface RootRouteChildren {
   ApiPublicRouterCardsRoute: typeof ApiPublicRouterCardsRoute
   ApiPublicRouterJobRoute: typeof ApiPublicRouterJobRoute
   ApiPublicRouterReportRoute: typeof ApiPublicRouterReportRoute
+  ApiPublicVoucherResultRoute: typeof ApiPublicVoucherResultRoute
   ApiPublicJobsWatchRoute: typeof ApiPublicJobsWatchRoute
   ApiPublicSCodeRoute: typeof ApiPublicSCodeRoute
 }
@@ -357,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/vouchers': {
+      id: '/_authenticated/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof AuthenticatedVouchersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/welcome': {
       id: '/_authenticated/welcome'
       path: '/welcome'
@@ -385,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRouterReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/voucher-result': {
+      id: '/api/public/voucher-result'
+      path: '/api/public/voucher-result'
+      fullPath: '/api/public/voucher-result'
+      preLoaderRoute: typeof ApiPublicVoucherResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/watch': {
       id: '/api/public/jobs/watch'
       path: '/api/public/jobs/watch'
@@ -410,6 +449,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedVouchersRoute: typeof AuthenticatedVouchersRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
@@ -421,6 +461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedVouchersRoute: AuthenticatedVouchersRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
 }
 
@@ -437,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRouterCardsRoute: ApiPublicRouterCardsRoute,
   ApiPublicRouterJobRoute: ApiPublicRouterJobRoute,
   ApiPublicRouterReportRoute: ApiPublicRouterReportRoute,
+  ApiPublicVoucherResultRoute: ApiPublicVoucherResultRoute,
   ApiPublicJobsWatchRoute: ApiPublicJobsWatchRoute,
   ApiPublicSCodeRoute: ApiPublicSCodeRoute,
 }

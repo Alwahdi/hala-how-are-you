@@ -113,6 +113,34 @@
       "when": 1794384307275,
       "tag": "0015_card_run_step_atomic",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794452113726,
+      "tag": "0016_voucher_batches_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794452155720,
+      "tag": "0017_voucher_atomic_archive",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794452219929,
+      "tag": "0018_voucher_issue_leases",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794452636882,
+      "tag": "0019_voucher_confirmed_lifecycle",
+      "breakpoints": true
     }
   ]
 }

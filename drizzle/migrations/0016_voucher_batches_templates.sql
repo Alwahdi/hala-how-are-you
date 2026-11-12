@@ -1,0 +1,18 @@
+CREATE TABLE public.voucher_batches (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL, router_id uuid NOT NULL REFERENCES public.routers(id), source text NOT NULL CHECK(source IN ('hotspot','usermanager')), package_name text NOT NULL, package_snapshot jsonb NOT NULL, label text NOT NULL, requested integer NOT NULL CHECK(requested BETWEEN 1 AND 500), mode text NOT NULL, state text NOT NULL DEFAULT 'pending', created_at timestamptz NOT NULL DEFAULT now(), request_key uuid NOT NULL UNIQUE);
+GRANT SELECT ON public.voucher_batches TO authenticated; GRANT ALL ON public.voucher_batches TO service_role;
+ALTER TABLE public.voucher_batches ENABLE ROW LEVEL SECURITY;
+CREATE POLICY owner_read ON public.voucher_batches FOR SELECT TO authenticated USING(owner_id=auth.uid());
+CREATE TABLE public.voucher_items (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), batch_id uuid NOT NULL REFERENCES public.voucher_batches(id), owner_id uuid NOT NULL, router_id uuid NOT NULL REFERENCES public.routers(id), source text NOT NULL, name text NOT NULL, ordinal integer NOT NULL, state text NOT NULL DEFAULT 'pending', result text, secret_valid boolean NOT NULL DEFAULT true, UNIQUE(batch_id,ordinal), UNIQUE(router_id,source,name));
+GRANT SELECT ON public.voucher_items TO authenticated; GRANT ALL ON public.voucher_items TO service_role;
+ALTER TABLE public.voucher_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY owner_read ON public.voucher_items FOR SELECT TO authenticated USING(owner_id=auth.uid());
+CREATE TABLE public.voucher_secrets (item_id uuid PRIMARY KEY REFERENCES public.voucher_items(id), ciphertext text NOT NULL);
+GRANT ALL ON public.voucher_secrets TO service_role;
+ALTER TABLE public.voucher_secrets ENABLE ROW LEVEL SECURITY;
+CREATE TABLE public.voucher_templates (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),owner_id uuid NOT NULL,name text NOT NULL,config jsonb NOT NULL,updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT,INSERT,UPDATE,DELETE ON public.voucher_templates TO authenticated; GRANT ALL ON public.voucher_templates TO service_role;
+ALTER TABLE public.voucher_templates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY owner_templates ON public.voucher_templates FOR ALL TO authenticated USING(owner_id=auth.uid()) WITH CHECK(owner_id=auth.uid());
+CREATE OR REPLACE FUNCTION public.invalidate_voucher_secret() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN UPDATE public.voucher_items SET secret_valid=false WHERE router_id=OLD.router_id AND source=OLD.source AND name=OLD.name; RETURN COALESCE(NEW,OLD); END $$;
+CREATE TRIGGER invalidate_voucher_change AFTER UPDATE OF name,pw_mode OR DELETE ON public.router_cards FOR EACH ROW EXECUTE FUNCTION public.invalidate_voucher_secret();
+REVOKE ALL ON FUNCTION public.invalidate_voucher_secret() FROM PUBLIC;

@@ -55,3 +55,4 @@ related: [../templates/decision.md]
 - [D-041](D-041-keep-whatsapp-verification.md) — الإبقاء على WhatsApp للتحقق (approved)
 - [D-042](D-042-sign-in-ui-ux.md) — تحسين واجهة الدخول والاستعادة وطرق الدخول (approved)
 - [D-043](D-043-mobile-first-app-redesign.md) — إعادة تصميم الرحلات والشاشات بأولوية الهاتف (approved)
+- [D-044](D-044-voucher-issuance-and-printing.md) — قوالب A4 وأرشيف الطباعة وتهيئة الإصدار وحدود التحقق (approved)
