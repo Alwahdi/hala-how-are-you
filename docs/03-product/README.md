@@ -11,6 +11,7 @@ related: [../05-operations/roadmap.md, ../templates/feature-spec.md]
 ممنوع نبني أي ميزة ما لها ملف مواصفات معتمد هنا.
 
 ## الدراسات الحالية
+- [confirmed] [دراسة إصدار الكروت والطباعة والقوالب](voucher-issuance-printing-review.md)؛ بحث فقط دون اعتماد تنفيذ.
 - [confirmed] [مراجعة إعادة التصميم للهاتف](mobile-first-redesign-review.md)، والدراسة السابقة المرتبطة بها.
 
 ## الملفات المتوقعة
