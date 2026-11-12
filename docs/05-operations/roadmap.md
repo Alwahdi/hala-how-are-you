@@ -15,6 +15,8 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] فصل دخول البريد وإضافة الاستعادة وبيان طرق الدخول وفق [D-040](../04-decisions/D-040-independent-sign-in.md). [confirmed]
+- [ ] إكمال دخول الهاتف وربطه؛ ينتظر التكامل المعتمد وفق [D-041](../04-decisions/D-041-keep-whatsapp-verification.md). [confirmed]
 - [x] إصلاح الواجهات وفق الدراسة المعتمدة؛ [نتائج وحدود التحقق](../04-decisions/D-038-ui-outcomes-and-freshness.md). [confirmed]
 - [x] تنفيذ تحسين نافذة التسجيل والمسافات والكروت والخلفية والأيقونة وفق [D-020](../04-decisions/D-020-landing-dialog-and-detail-refinement.md) والتحقق؛ لا نشر. [confirmed]
 - [x] تحسين تصور الجوال وإشارات فتح الكروت وفق [D-019](../04-decisions/D-019-readable-demo-card-preview.md) والتحقق باللغتين؛ لا تشغيل شبكة أو نشر. [confirmed]

@@ -50,3 +50,6 @@ related: [../templates/decision.md]
 - [D-036](D-036-packages-card-quick-actions-expiry.md) — الباقات وإضافتها، إجراءات الكرت السريعة، الكروت المنتهية والصفحات (approved)
 - [D-037](D-037-router-cpu-load-and-light-direct-api.md) — تخفيف ضغط المعالج على الراوتر واتصال API خفيف (approved)
 - [D-038](D-038-ui-outcomes-and-freshness.md) — نتائج الواجهة والحداثة وفصل الباقات والتحقق (approved)
+- [D-039](D-039-disabled-service-wording.md) — صياغة الخدمات غير المفعّلة (approved)
+- [D-040](D-040-independent-sign-in.md) — طريقتا دخول مستقلتان وحدود التنفيذ (approved)
+- [D-041](D-041-keep-whatsapp-verification.md) — الإبقاء على WhatsApp للتحقق (approved)
