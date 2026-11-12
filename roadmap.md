@@ -5,7 +5,7 @@
 - [x] Approve plan for phone-only sign-in, independent email/password and settings linking
 - [x] Inspect hosted settings: email enabled with confirmation; phone disabled; no accessible WhatsApp connection
 - [x] Independent email UI, recovery route and email-change confirmation request; public browser checks
-- [ ] Phone signup/login and phone linking — blocked on approved supported verification channel and provider setup
+- [ ] Phone signup/login and phone linking — WhatsApp retained; blocked on supported WhatsApp-to-Auth session integration, not SMS
 - [ ] Verify real signup, recovery and linking read-back — needs approved test recipient/account
 
 ## CPU load and direct API (plan approved 2026-11-11)

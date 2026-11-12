@@ -74,7 +74,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - Load Arabic Cairo and the proposed Latin font through installed Fontsource CSS, and define glass/color roles in global semantic tokens; this makes actual font use and readable fallback surfaces verifiable.
 - Company knowledge is plain Markdown in `docs/`, never only in chat or tool memory — keeps it portable across workspaces and tools.
 - Tool memory holds only founder preferences and pointers to `docs/` — avoids two sources of truth.
-- Sign-in verifies the phone first via a signed short-lived proof kept only in session storage, then links it server-side after Google/email sign-in; this survives the OAuth redirect without storing the raw code or trusting the client.
+- Legacy phone verification proofs are not login sessions; keep phone login unavailable until supported identity verification is configured, so email sign-in never depends on a profile-only proof.
 - Routers link via a ~130-char fetch+import of a one-hour setup code (payload sealed by the code); the full one-line paste is the fallback.
 - Direct access: RouterOS API over TCP (8729 TLS, then 8728) to IP Cloud, tried automatically (throttled retries) only when the router owns its public IP; no manual form, push stays the fallback.
 - Cards/sessions/profiles are owner-readable snapshots written only by server code; card passwords are never stored.
