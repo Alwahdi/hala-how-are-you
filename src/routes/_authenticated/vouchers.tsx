@@ -352,7 +352,7 @@ function Studio() {
           <div className="space-y-4">
             {data?.batches.map((b) => {
               const summary = data.summaries.find(i=>i.batch_id===b.id);
-              const confirmed=Number(summary?.confirmed??0), failed=Number(summary?.failed??0)+Number(summary?.uncertain??0);
+              const confirmed=Number(summary?.confirmed??0), failed=Number(summary?.failed??0);
               return (
                 <article key={b.id} className="rounded-md border border-border p-4">
                   <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
@@ -374,7 +374,7 @@ function Studio() {
                   <p className="my-3 text-sm">
                     {t("مؤكد", "Confirmed")} {confirmed}/{b.requested} · {t("فاشل", "Failed")}{" "}
                     {failed} · {t("غير محسوم", "Unconfirmed")}{" "}
-                    {Number(summary?.sent??0)+Number(summary?.uncertain??0)} · {t("المتبقي","Remaining")} {b.requested-confirmed-failed-Number(summary?.sent??0)}
+                    {Number(summary?.sent??0)+Number(summary?.uncertain??0)} · {t("المتبقي","Remaining")} {b.requested-confirmed-failed-Number(summary?.sent??0)-Number(summary?.uncertain??0)}
                   </p>
                   {b.state === "preparing" && <Button variant="outline" disabled={busy} onClick={async()=>{setBusy(true);try{await finishPreparation(b.id);await refetch();}catch{setMessage(t("تعذر إكمال التجهيز؛ يمكن إعادة المحاولة.","Preparation incomplete; retry safely."));}finally{setBusy(false);setProgress(null);}}}>{t("إكمال التجهيز","Continue preparation")} · {Number(summary?.prepared??0)}/{b.requested}</Button>}
                   <progress className="w-full accent-primary" max={b.requested} value={confirmed} />

@@ -68,7 +68,7 @@ export function voucherDispatcher(token: string, url: string, chained = false) {
     String.raw`" check-certificate=yes http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ` +
     token +
     String.raw`" http-data=("{\"item\":\"" . $jid . "\",\"result\":\"" . $vr . "\"}") output=none} on-error={:return}` +
-    (chained ? `; :delay 500ms; :set job ""; :do {:local nx [/tool fetch url="${url.replace("router-report", "voucher-next")}" check-certificate=yes http-method=post http-header-field="X-Mikro-Token: ${token}" output=user as-value]; :set job ($nx->"data")} on-error={:return}` : "") + "}"
+    (chained ? '; :delay 500ms; :set job ""' : "") + "}"
   );
 }
 

@@ -9,9 +9,8 @@ describe("large voucher safety", () => {
     expect(issuanceSchema.safeParse({ ...input, count: 1501 }).success).toBe(false);
   });
   it("generates 1500 unique leading-zero numbers", () => {
-    let n = 0;
     const v = issuanceSchema.parse({ ...input, prefix: "0", length: 9 });
-    const names = generateNames(v, k => { const a = new Uint32Array(k); a[0] = n++; return a; });
+    const names = generateNames(v);
     expect(new Set(names).size).toBe(1500);
     expect(names.every(s => s.startsWith("0"))).toBe(true);
   });
