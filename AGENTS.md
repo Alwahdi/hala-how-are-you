@@ -60,6 +60,7 @@ customers) for Yemen, Egypt, Syria and beyond. Company knowledge lives in
 - `docs/05-operations/roadmap.md` checkbox updated if a task closed.
 
 ## Architecture rules
+- Authenticated navigation shares one responsive shell with dedicated account and router routes; keep network settings separate from sign-in methods so destinations stay predictable without changing account or router behavior.
 - Auth and recovery share a presentation-only layout and password field; keep account requests in their existing screens so visual refinements do not change identity or session rules.
 - Email/password sign-in is independent of phone verification; use native Auth identities for login/linking, never profile phone fields or custom verification proofs as sessions, because only Auth establishes account ownership.
 - Operational UI derives live state from recent router/session reports, scopes packages by router/source/name, and confirms writes before success; this prevents stale, cross-router and rejected-write outcomes from looking valid.
