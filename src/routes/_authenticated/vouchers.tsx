@@ -38,7 +38,7 @@ import {
   type IssueInput,
   type PrintVoucher,
 } from "@/lib/vouchers";
-import { issueVouchers, printableVouchers, controlVoucherBatch } from "@/lib/vouchers.functions";
+import { issueVouchers, printableVouchers, controlVoucherBatch, voucherReadiness } from "@/lib/vouchers.functions";
 import { humanData, packageFacts } from "@/lib/packages";
 import type { ProfileRow } from "@/components/dashboard/types";
 export const Route = createFileRoute("/_authenticated/vouchers")({
@@ -58,10 +58,17 @@ export const Route = createFileRoute("/_authenticated/vouchers")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => ({add: s["add"] === true || s["add"] === "true"}),
   component: Studio,
 });
 function Studio() {
   const { ar } = useLanguage();
+  const search = Route.useSearch();
+  const readinessFn = useServerFn(voucherReadiness);
+  const readiness = useQuery({queryKey:["voucher-readiness"],queryFn:()=>readinessFn()});
+  const [single,setSingle]=useState(true);
+  const [manual,setManual]=useState(false);
+  const [issueError,setIssueError]=useState("");
   const t = (a: string, b: string) => (ar ? a : b);
   const qc = useQueryClient();
   const issue = useServerFn(issueVouchers),
@@ -73,7 +80,7 @@ function Studio() {
     [dirty, setDirty] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
-    [open, setOpen] = useState(false),
+    [open, setOpen] = useState(search.add),
     [review, setReview] = useState(false),
     [field, setField] = useState("number"),
     [art, setArt] = useState(""),
@@ -82,14 +89,15 @@ function Studio() {
     routerId: "",
     source: "hotspot",
     packageName: "",
-    label: "",
-    count: 20,
+    label: ar ? "كرت جديد" : "New card",
+    count: 1,
     length: 8,
     prefix: "",
     suffix: "",
     charset: "digits",
     mode: "same",
     requestKey: "",
+    hotspotLimits: {bytes:0,time:0},
   });
   const [pageNumber, setPageNumber] = useState(0);
   const [print, setPrint] = useState<{
@@ -141,7 +149,8 @@ function Studio() {
       .join(" · "),
   };
   const router = data?.routers.find((r) => r.id === form.routerId);
-  const capable = false;
+  const status=router?.last_status as Record<string,unknown>|null;
+  const capable = readiness.data?.verified === true && status?.["voucherProtocol"] === 1 && !!router?.last_seen_at && Date.now()-Date.parse(router.last_seen_at)<90000;
   const selected = print?.cards.filter((c) => print.selected.has(c.name)) ?? [];
   let paperError = false,
     pages = 0;
@@ -295,11 +304,12 @@ function Studio() {
               onClick={() => {
                 setOpen(true);
                 setReview(false);
+                setIssueError("");
                 setForm({ ...form, requestKey: crypto.randomUUID() });
               }}
             >
               <Plus />
-              {t("إصدار كروت", "Issue cards")}
+              {t("إضافة كروت", "Add cards")}
             </Button>
           </div>
           {data && !data.batches.length && (
@@ -926,16 +936,14 @@ function Studio() {
             onSubmit={async (e) => {
               e.preventDefault();
               if (!review) {
-                const p = issuanceSchema.safeParse(form);
+                const candidate={...form,requestKey:form.requestKey || crypto.randomUUID(),count:single?1:form.count,manualName:single&&manual?form.manualName:undefined};
+                const p = issuanceSchema.safeParse(candidate);
                 if (!p.success) {
-                  setMessage(
-                    t(
-                      "راجع الحقول؛ يجب ترك أربعة رموز عشوائية على الأقل.",
-                      "Check fields; keep at least four random characters.",
-                    ),
-                  );
+                  setIssueError(t("اختر الراوتر والباقة وراجع الرقم والحدود؛ الرقم اليدوي لكرت واحد فقط.","Select a router and package; check number and limits. Manual numbers require one card."));
                   return;
                 }
+                setForm(p.data);
+                setIssueError("");
                 setReview(true);
                 return;
               }
@@ -951,13 +959,9 @@ function Studio() {
                   ),
                 );
                 void refetch();
-              } catch {
-                setMessage(
-                  t(
-                    "تعذر طلب الإصدار؛ تحقق من اتصال الراوتر وتجهيزه والباقة.",
-                    "Issuance unavailable. Check router readiness and package.",
-                  ),
-                );
+              } catch (error) {
+                const exists=error instanceof Error && error.message.includes("number_exists");
+                setIssueError(exists?t("الرقم موجود؛ لم نستبدل الحساب. اختر رقمًا آخر.","Number exists; no account replaced. Choose another number."):t("تعذر الإصدار؛ مدخلاتك محفوظة هنا. تحقق من اتصال الراوتر وتجهيزه.","Issuance unavailable; inputs remain here. Check router readiness."));
               } finally {
                 setBusy(false);
               }
@@ -965,6 +969,10 @@ function Studio() {
           >
             {!review ? (
               <>
+                <div className="flex gap-2" role="group" aria-label={t('عدد الكروت','Issuance size')}>
+                  <Button type="button" variant={single?'default':'outline'} onClick={()=>{setSingle(true);setForm({...form,count:1,label:t('كرت جديد','New card')});}}>{t('كرت واحد','One card')}</Button>
+                  <Button type="button" variant={!single?'default':'outline'} onClick={()=>{setSingle(false);setManual(false);setForm({...form,count:20,manualName:undefined,label:t('دفعة جديدة','New batch')});}}>{t('عدة كروت','Multiple cards')}</Button>
+                </div>
                 <Label htmlFor="issue-router">{t("الراوتر", "Router")}</Label>
                 <select
                   id="issue-router"
@@ -1007,16 +1015,20 @@ function Studio() {
                       </option>
                     ))}
                 </select>
-                <p className="text-sm text-muted-foreground">{sample.facts}</p>
-                <Label htmlFor="issue-label">{t("اسم الدفعة", "Batch name")}</Label>
+                <dl className="grid grid-cols-2 gap-3 border-y border-border py-3 text-sm">
+                  {[[t('السعر','Price'),facts.price],[t('الصلاحية','Validity'),profile?.validity],[t('السرعة','Rate'),facts.rate],[t('الأجهزة المتزامنة','Shared devices'),facts.devices]].map(([label,value])=><div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="font-semibold">{value||t('غير مقروءة','Not reported')}</dd></div>)}
+                </dl>
+                {form.source==='hotspot'&&<fieldset className="space-y-3"><legend className="font-semibold">{t('حدود هذا الإصدار','Limits for this issuance')}</legend><div className="grid grid-cols-2 gap-3"><div><Label htmlFor="issue-data">{t('البيانات MB','Data MB')}</Label><Input id="issue-data" type="number" min="0" step="1" value={(form.hotspotLimits?.bytes??0)/1048576} onChange={e=>setForm({...form,hotspotLimits:{bytes:Number(e.target.value)*1048576,time:form.hotspotLimits?.time??0}})}/></div><div><Label htmlFor="issue-time">{t('وقت الاستخدام بالدقائق','Usage minutes')}</Label><Input id="issue-time" type="number" min="0" step="1" value={(form.hotspotLimits?.time??0)/60} onChange={e=>setForm({...form,hotspotLimits:{time:Number(e.target.value)*60,bytes:form.hotspotLimits?.bytes??0}})}/></div></div><p className="text-sm text-muted-foreground">{t('0 = بلا حد. هذه حدود الكروت الجديدة فقط؛ لا نأخذها من كروت قديمة. الصلاحية تتبع إعداد الباقة على الراوتر.','0 = unlimited. These limits apply only to new cards, not inferred from old cards. Validity follows the router package.')}</p></fieldset>}
+                {single&&<><Label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={manual} onChange={e=>setManual(e.target.checked)}/>{t('تحديد رقم الكرت','Set card number')}</Label>{manual&&<><Label htmlFor="issue-number">{t('رقم الكرت','Card number')}</Label><Input id="issue-number" dir="ltr" maxLength={32} value={form.manualName??''} onChange={e=>setForm({...form,manualName:e.target.value})}/></>}</>}
+                <Label htmlFor="issue-label">{single?t("اسم العملية","Request name"):t("اسم الدفعة", "Batch name")}</Label>
                 <Input
                   id="issue-label"
                   required
                   value={form.label}
                   onChange={(e) => setForm({ ...form, label: e.target.value })}
                 />
-                <div className="grid grid-cols-2 gap-3">
-                  {(["count", "length"] as const).map((k) => (
+                <details open={!single}><summary className="cursor-pointer py-2 font-semibold">{t("خيارات الرموز","Number options")}</summary><div className="grid grid-cols-2 gap-3">
+                  {(["count", "length"] as const).filter(k=>k!=="count"||!single).map((k) => (
                     <div key={k}>
                       <Label htmlFor={"issue-" + k}>
                         {k === "count"
@@ -1047,6 +1059,7 @@ function Studio() {
                     </div>
                   ))}
                 </div>
+                </details>
                 <Label htmlFor="issue-mode">{t("طريقة الدخول", "Credential mode")}</Label>
                 <select
                   id="issue-mode"
@@ -1082,10 +1095,9 @@ function Studio() {
                   {form.label} · {form.count} {t("كرت", "cards")}
                 </p>
                 <p>{sample.facts}</p>
+                {form.source==="hotspot"&&<p>{t("البيانات","Data")}: {form.hotspotLimits?.bytes?humanData(form.hotspotLimits.bytes,ar):t("بلا حد","Unlimited")} · {t("وقت الاستخدام","Usage time")}: {form.hotspotLimits?.time?`${form.hotspotLimits.time/60} ${t("دقيقة","minutes")}`:t("بلا حد","Unlimited")}</p>}
                 <p dir="ltr">
-                  {form.prefix}
-                  {"0".repeat(Math.max(0, form.length - form.prefix.length - form.suffix.length))}
-                  {form.suffix}
+                  {form.manualName || (form.prefix+"0".repeat(Math.max(0,form.length-form.prefix.length-form.suffix.length))+form.suffix)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t(
@@ -1098,6 +1110,7 @@ function Studio() {
                 </Button>
               </div>
             )}
+            {issueError&&<p role="alert" className="text-sm text-destructive">{issueError}</p>}
             {!capable && form.routerId && (
               <p role="alert" className="text-sm text-warning">
                 {t(
@@ -1115,7 +1128,7 @@ function Studio() {
               >
                 {t("إلغاء", "Cancel")}
               </Button>
-              <Button type="submit" disabled={busy || !capable}>
+              <Button type="submit" disabled={busy || (review && !capable)}>
                 {review ? t("تأكيد الإصدار", "Confirm issuance") : t("مراجعة", "Review")}
               </Button>
             </div>

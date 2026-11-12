@@ -163,7 +163,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
 
   return (
     <div className="mt-6 space-y-5">
-      <Button asChild variant="outline" className="h-11"><Link to="/vouchers">{t('إصدار الكروت والقوالب والطباعة','Issue cards, templates & print')}</Link></Button>
+      <div className="flex flex-wrap gap-2"><Button asChild className="h-11"><Link to="/vouchers" search={{add:true}}><Plus/>{t("إضافة كروت","Add cards")}</Link></Button><Button asChild variant="outline" className="h-11"><Link to="/vouchers">{t('إصدار الكروت والقوالب والطباعة','Issue cards, templates & print')}</Link></Button></div>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <div className="seg" role="group" aria-label={t('نوع الكروت', 'Card system')}>
           <button type="button" aria-pressed={source === 'hotspot'} onClick={() => { setSource('hotspot'); setPkg(null); resetPage(); setSel(new Set()); }}>Hotspot</button>
