@@ -35,7 +35,7 @@ function AlertsPage() {
   const navigate = useNavigate(); const qc = useQueryClient();
   const [tab, setTab] = useState<'alerts' | 'log'>('alerts');
   const { data: alerts = [] } = useQuery({ queryKey: ['alerts'], queryFn: async () => { const { data } = await supabase.from('alerts').select('id, title, body, path, severity, read_at, created_at').order('created_at', { ascending: false }).limit(200); return (data ?? []) as Alert[]; }, refetchInterval: 30_000 });
-  const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
+  const { data: jobs = [], isError: jobsError, refetch: retryJobs } = useQuery({ queryKey: ['jobs'], queryFn: async () => { const { data, error } = await supabase.from('router_jobs').select('id, kind, status, auto, result, requested_at, payload, router_id').order('requested_at', { ascending: false }).limit(200); return (data ?? []) as Job[]; }, refetchInterval: 15_000 });
   // Opening the page marks everything as read.
   useEffect(() => {
     const unread = alerts.filter((a) => !a.read_at).map((a) => a.id);
