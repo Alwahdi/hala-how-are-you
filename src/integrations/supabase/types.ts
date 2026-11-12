@@ -856,6 +856,7 @@ export type Database = {
         }
         Returns: string
       }
+      create_voucher_batch: { Args: { b: Json; items: Json }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -864,6 +865,7 @@ export type Database = {
         Returns: boolean
       }
       mark_finished_cards: { Args: never; Returns: undefined }
+      purge_voucher_secrets: { Args: { bid: string }; Returns: undefined }
     }
     Enums: {
       app_role: "owner" | "engineer" | "admin"
