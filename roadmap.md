@@ -8,3 +8,9 @@
 - [x] 5. Record card read duration, show in router health, alert when too long
 - [x] 6. Verify on CHR v6 (3,000 UM cards) and v7, tests
 - [x] 7. D-037, status, AGENTS.md
+
+## Read-only UI/UX study (requested 2026-11-12)
+- [x] Inspect public and authenticated screens, Arabic/English and desktop/mobile
+- [x] Reproduce stale-status, failed-load and rejected-save cases without router actions
+- [x] Write prioritized findings and proposed acceptance checks in docs/03-product/ui-ux-audit-2026-11-12.md
+- [ ] Implement changes and update approved status/index documents — blocked on founder approval
