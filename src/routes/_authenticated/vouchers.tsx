@@ -80,7 +80,7 @@ function Studio() {
     [dirty, setDirty] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
-    [open, setOpen] = useState(search.add),
+    [open, setOpen] = useState(search.add === true),
     [review, setReview] = useState(false),
     [field, setField] = useState("number"),
     [art, setArt] = useState(""),
