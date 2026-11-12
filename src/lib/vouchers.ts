@@ -17,7 +17,7 @@ export const issuanceSchema = z
   })
   .refine((v) => !v.manualName || v.count === 1, {message: "A manual number requires one card."})
   .refine((v) => v.source !== "hotspot" || !!v.hotspotLimits, {message: "Explicit Hotspot limits are required."})
-  .refine((v) => v.length - v.prefix.length - v.suffix.length >= 4, {
+  .refine((v) => !!v.manualName || v.length - v.prefix.length - v.suffix.length >= 4, {
     message: "Keep at least four random characters.",
   });
 export type IssueInput = z.infer<typeof issuanceSchema>;

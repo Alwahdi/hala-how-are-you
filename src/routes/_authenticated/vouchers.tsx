@@ -1095,17 +1095,18 @@ function Studio() {
                 <p>
                   {form.label} · {form.count} {t("كرت", "cards")}
                 </p>
-                <p>{sample.facts}</p>
+                <dl className="grid grid-cols-2 gap-3 border-y border-border py-3 text-sm">
+                  {[[t('السعر','Price'),facts.price],[t('الصلاحية','Validity'),profile?.validity],[t('السرعة','Rate'),facts.rate],[t('الأجهزة المتزامنة','Shared devices'),facts.devices],[t('بداية الصلاحية','Validity starts'),t('حسب إعداد الباقة على الراوتر؛ لم يُقرأ بدء مستقل','Router package setting; separate start not reported')]].map(([label,value])=><div key={label}><dt className="text-muted-foreground">{label}</dt><dd>{value||t('غير مقروءة','Not reported')}</dd></div>)}
                 {form.source==="hotspot"&&<p>{t("البيانات","Data")}: {form.hotspotLimits?.bytes?humanData(form.hotspotLimits.bytes,ar):t("بلا حد","Unlimited")} · {t("وقت الاستخدام","Usage time")}: {form.hotspotLimits?.time?`${form.hotspotLimits.time/60} ${t("دقيقة","minutes")}`:t("بلا حد","Unlimited")}</p>}
                 <p dir="ltr">
                   {form.manualName || (form.prefix+"0".repeat(Math.max(0,form.length-form.prefix.length-form.suffix.length))+form.suffix)}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                {!form.manualName&&<p className="text-sm text-muted-foreground">
                   {t(
                     "مثال شكل فقط، وليس رمز دخول.",
                     "Format example only, not a login credential.",
                   )}
-                </p>
+                </p>}
                 <Button type="button" variant="outline" onClick={() => setReview(false)}>
                   {t("تعديل", "Edit")}
                 </Button>
