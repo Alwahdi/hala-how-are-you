@@ -1,4 +1,3 @@
-import {escapeRos} from './router-script';
 export function voucherCommands(source:string,version:string,name:string,password:string,profile:string,marker:string,bytes:number,time:number){
  for(const v of [name,password,profile,marker])if(!/^[\w.@-]*$/.test(v))throw Error('unsafe_value');
  const hs=source==='hotspot',v6=version.startsWith('6');const base=hs?'/ip hotspot user':v6?'/tool user-manager user':'/user-manager user';const field=hs||!v6?'name':'username';
