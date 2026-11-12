@@ -874,6 +874,7 @@ export type Database = {
       }
       mark_finished_cards: { Args: never; Returns: undefined }
       purge_voucher_secrets: { Args: { bid: string }; Returns: undefined }
+      retry_voucher_batch: { Args: { bid: string }; Returns: undefined }
     }
     Enums: {
       app_role: "owner" | "engineer" | "admin"

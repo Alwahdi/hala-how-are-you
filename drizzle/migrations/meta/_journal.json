@@ -134,6 +134,13 @@
       "when": 1794452219929,
       "tag": "0018_voucher_issue_leases",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794452636882,
+      "tag": "0019_voucher_confirmed_lifecycle",
+      "breakpoints": true
     }
   ]
 }
