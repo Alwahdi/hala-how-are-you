@@ -1,5 +1,11 @@
 # Roadmap
 
+## Sign-in UI, UX and interactions (requested 2026-11-12)
+- [x] Inspect current sign-in, recovery and linked-method presentation without account changes
+- [ ] Approve focused visual and interaction improvement plan
+- [ ] Implement approved presentation changes without changing verification or account rules
+- [ ] Verify Arabic/English, keyboard, mobile and desktop states; update company status after approval
+
 ## Independent sign-in methods (requested 2026-11-12)
 - [x] Review current phone verification and resolve email/password preference
 - [x] Approve plan for phone-only sign-in, independent email/password and settings linking
