@@ -117,7 +117,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[92vh] overflow-y-auto">
+      <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[92dvh] bg-card overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{edit ? t(`تعديل الباقة ${edit.name}`, `Edit package ${edit.name}`) : t(`باقة ${um ? 'User Manager' : 'Hotspot'} جديدة`, `New ${um ? 'User Manager' : 'Hotspot'} package`)}</DialogTitle>
           <DialogDescription>{t('اختر من الجاهز أو «مخصص». نرسلها للراوتر ونأكد لك النتيجة.', 'Pick a ready choice or Custom. We send it to the router and confirm the result.')}</DialogDescription>

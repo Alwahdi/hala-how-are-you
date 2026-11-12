@@ -103,7 +103,7 @@ export function NetworkPanel() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <h2 className="text-lg font-bold">{t('الراوترات', 'Routers')}</h2>
         <Button variant="outline" className="h-11" onClick={() => navigate({ to: '/onboarding' })}><Plus />{t('أضف راوتر', 'Add router')}</Button>
       </div>
@@ -129,9 +129,9 @@ export function NetworkPanel() {
               const access = directAccessState(s);
               return (
                 <article key={r.id} className="app-panel p-5">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                     <div className="min-w-0">
-                      <h2 className="text-lg font-bold">{r.name}</h2>
+                      <h2 className="break-words text-lg font-bold">{r.name}</h2>
                       <p className="text-xs text-muted-foreground" dir="ltr">{[s.board, s.version && `RouterOS ${s.version}`].filter(Boolean).join(' · ') || t('الإصدار يظهر بعد أول إشارة', 'Version shows after the first signal')}</p>
                     </div>
                     <StatusChip state={online ? 'online' : r.last_seen_at ? 'offline' : 'waiting'} ar={ar} />
@@ -141,7 +141,7 @@ export function NetworkPanel() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">{direct ? <><Cloud className="size-3 text-primary" />{t(`مباشر عبر IP Cloud (${r.direct_port}${r.direct_tls ? ' مشفّر' : ''})`, `Direct via IP Cloud (${r.direct_port}${r.direct_tls ? ' encrypted' : ''})`)}</> : t('عبر الإشارات كل 30 ثانية', 'Via reports every 30s')}</span>
                     <label className="inline-flex items-center gap-1">
                       <span className="sr-only">{t('دور الراوتر', 'Router role')}</span>
-                      <select value={r.role} onChange={(e) => changeRole(r.id, e.target.value as 'general')} className="h-8 rounded-full border border-border bg-background px-2 text-xs">
+                      <select value={r.role} onChange={(e) => changeRole(r.id, e.target.value as 'general')} className="h-11 rounded-md border border-border bg-background px-2 text-xs">
                         <option value="general">{t('عام', 'General')}</option>
                         <option value="balancer">{t('دمج خطوط', 'Load balancing')}</option>
                         <option value="distribution">{t('توزيع', 'Distribution')}</option>
@@ -160,7 +160,7 @@ export function NetworkPanel() {
                       <Stat label={t('المعالج', 'CPU')} value={s.cpu == null ? '-' : `${s.cpu}%`} meter={s.cpu} />
                       <Stat label={t('الذاكرة', 'Memory')} value={mem == null ? '-' : `${mem}%`} meter={mem} />
                       <Stat label={t('المساحة', 'Storage')} value={hdd == null ? '-' : `${hdd}%`} meter={hdd} />
-                      <Stat label={t('متصلون بالهوتسبوت', 'Hotspot users')} value={String(s.hotspotActive ?? 0)} />
+                      <Stat label={t('متصلون بالهوتسبوت', 'Hotspot users')} value={s.hotspotActive == null ? '—' : String(s.hotspotActive)} />
                       <Stat label={t('مدة التشغيل', 'Uptime')} value={s.uptime ?? '-'} />
                       <Stat label={t('الحرارة', 'Temperature')} value={s.temperature ? `${s.temperature}°C` : '-'} />
                     </dl>
@@ -192,7 +192,7 @@ export function NetworkPanel() {
                         : t('ما وصلت أول إشارة بعد. اضغط «إعادة الربط» لعرض أمر اللصق.', 'No first signal yet. Tap Reconnect to show the paste command.')}
                     </p>
                   )}
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
                     {direct && <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحديث الآن', 'Refresh now')}</Button>}
                     <Button variant="outline" className="h-11" disabled={!online} onClick={() => setConfirmReboot({ id: r.id, name: r.name })}><Power />{t('إعادة تشغيل', 'Restart')}</Button>
                     <Button variant="ghost" className="h-11" asChild><Link to="/health"><HeartPulse />{t('الصحة', 'Health')}</Link></Button>
@@ -217,7 +217,7 @@ export function NetworkPanel() {
       </Dialog>
 
       <Dialog open={!!reconnect} onOpenChange={(o) => !o && setReconnect(null)}>
-        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
+        <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('إعادة ربط', 'Reconnect')} {reconnect?.name}</DialogTitle>
             <DialogDescription>{t('الصق هذا الأمر في Terminal. الأمر القديم توقف عن العمل، وهذا يستبدله.', 'Paste this into Terminal. The old command no longer works; this replaces it.')}</DialogDescription>
@@ -291,7 +291,8 @@ function cloudError(code: string, ar: boolean) {
     timeout: ['منفذ API مفتوح، لكن الراوتر ما رد في الوقت. يحصل غالباً لما يكون المعالج مضغوطاً. لو تكرر بعد ما يهدأ، تأكد أن الجدار الناري يسمح بالمنفذ من الإنترنت.', 'The API port is open but the router did not answer in time. This usually happens when its CPU is busy. If it repeats once it calms down, check the firewall allows the port from the internet.'],
     unreachable: ['ما قدرنا نوصل لمنفذ API عبر IP Cloud. تأكد أن خدمة api شغالة وغير مقيدة بعناوين محددة. الإشارات شغالة كاحتياط.', 'Could not reach the API via IP Cloud. Check the api service is on and not limited to certain addresses. Reports keep working as backup.'],
   };
-  const v = m[code] ?? m['unreachable']!;
+  const v = m[code] ?? m['unreachable'];
+  if (!v) return ar ? 'تعذر الاتصال المباشر.' : 'Direct connection failed.';
   return ar ? v[0] : v[1];
 }
 
