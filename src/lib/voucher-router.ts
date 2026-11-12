@@ -10,7 +10,7 @@ export function voucherCommands(
 ) {
   for (const v of [name, password, profile, marker])
     if (!/^[\w.@-]*$/.test(v)) throw Error("unsafe_value");
-  if (![bytes,time].every(n=>Number.isSafeInteger(n)&&n>=0)) throw Error("unsafe_value");
+  if (![bytes, time].every((n) => Number.isSafeInteger(n) && n >= 0)) throw Error("unsafe_value");
   const hs = source === "hotspot",
     v6 = version.startsWith("6");
   const base = hs ? "/ip hotspot user" : v6 ? "/tool user-manager user" : "/user-manager user";
@@ -24,8 +24,8 @@ export function voucherCommands(
     ? ""
     : v6
       ? `:if ([${base} get $u actual-profile] != "${profile}") do={${base} create-and-activate-profile $u customer=[${base} get $u customer] profile="${profile}"}; :if ([${base} get $u actual-profile] != "${profile}") do={:error "profile_not_assigned"}`
-      : `:if ([:len [/user-manager user-profile find user="${name}" profile="${profile}"]] = 0) do={/user-manager user-profile add user="${name}" profile="${profile}"}`;
-  const receipt=`mikro-issued-${marker}`;
+      : `:if ([:len [/user-manager user-profile find user="${name}" profile="${profile}"]] = 0) do={/user-manager user-profile add user="${name}" profile="${profile}"}; :if ([:len [/user-manager user-profile find user="${name}" profile="${profile}"]] != 1) do={:error "profile_not_assigned"}`;
+  const receipt = `mikro-issued-${marker}`;
   return `:local u [${base} find ${field}="${name}"]; :local receipt [/system script find name="${receipt}"]; :if ([:len $u] > 0) do={:if ([:len $receipt] != 1) do={:error "exists"}; :if ([/system script get $receipt source] != [:tostr $u]) do={:error "exists"}; :if ([${base} get $u password] != "${password}") do={:error "credentials_changed"}} else={:if ([:len $receipt] > 0) do={:error "previous_account_removed"}; ${add}; :set u [${base} find ${field}="${name}"]; /system script add name="${receipt}" source=[:tostr $u] comment="Mikro issuance receipt"}; ${assign}; ${base} set $u disabled=no`;
 }
 export function voucherDispatcher(token: string, url: string) {

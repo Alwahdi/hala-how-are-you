@@ -1,15 +1,16 @@
 # Roadmap
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
-- [ ] Complete single-card and batch issuance requested at 03:13 UTC — approve focused plan, repair readiness/limits/idempotency and verify on isolated routers before activation
-- [ ] Study quick single-card issuance and complete available session details including NAS-Port — implementation awaits a separate scope because current approval permits visual samples only
+- [x] Implement approved single/manual-card and batch forms, explicit Hotspot limits, serialized requests, receipt-based retries and confirmed-card snapshots; test forms and individual commands on isolated v6/v7
+- [ ] Complete batch/platform confirmation/archive/owner-isolation end-to-end — blocked by loss of temporary RouterOS lab before full-flow tests; public issuance remains disabled
+- [x] Study single-card and NAS-Port availability; findings reported
+- [ ] Extend session details/NAS-Port — blocked on separate collection scope approval; excluded from current issuance plan
 - [x] Prepare reference-faithful single-card visual sample; inspected full-size with synthetic data
 - [ ] Apply corrected templates — blocked on founder's acceptance of the visual sample
 - [x] Study current functionality and inspect founder's uploaded visual references
 - [x] Resolve A4 and requirement for later reprinting; retain credential encryption as a safety requirement
 - [x] Approve implementation plan and private credential archive policy
 - [x] Implement templates, private images, A4 PDF and batch/archive scaffolding; verify template save/read-back and sample PDF
-- [ ] Complete issuance integration and test confirmed batch printing/owner isolation — blocked on v6/v7 test-router environment; issuance disabled
 - [ ] Validate physical A4 output — blocked on founder printer/physical test sheet
 
 ## Whole-app mobile-first UX redesign (requested 2026-11-12)
