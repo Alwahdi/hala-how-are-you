@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -37,13 +37,18 @@ import {
   type VoucherTemplate,
   type IssueInput,
   type PrintVoucher,
+  MAX_VOUCHERS,
+  issuanceHold,
 } from "@/lib/vouchers";
 import {
   issueVouchers,
   printableVouchers,
   controlVoucherBatch,
   voucherReadiness,
+  prepareVoucherChunk,
 } from "@/lib/vouchers.functions";
+import { collectPages } from "@/lib/voucher-pages";
+import { downloadVoucherBlob } from "@/lib/voucher-download";
 import { humanData, packageFacts } from "@/lib/packages";
 import type { ProfileRow } from "@/components/dashboard/types";
 export const Route = createFileRoute("/_authenticated/vouchers")({
@@ -108,33 +113,55 @@ function Studio() {
     hotspotLimits: { bytes: 0, time: 0 },
   });
   const [pageNumber, setPageNumber] = useState(0);
+  const [batchPage, setBatchPage] = useState(0);
+  const [selectionPage, setSelectionPage] = useState(0);
+  const [progress, setProgress] = useState<{n:number,total:number}|null>(null);
+  const [preparedPdf, setPreparedPdf] = useState<Blob|null>(null);
+  const exportAbort = useRef<AbortController|null>(null);
+  const prepare = useServerFn(prepareVoucherChunk);
+  async function finishPreparation(batchId: string) {
+    for (let step=0;step<16;step++) {
+      const r = await prepare({data:{batchId}});
+      setProgress({n:r.prepared,total:r.total});
+      if(r.done) { setProgress(null); return; }
+    }
+    throw Error("preparation_incomplete");
+  }
+  async function readPrintable(batchId: string) {
+    let batch: Awaited<ReturnType<typeof getPrint>>["batch"]|undefined;
+    const cards=await collectPages(async offset=>{
+      const r=await getPrint({data:{batchId,offset}}); batch=r.batch;
+      setProgress({n:offset+r.cards.length,total:r.total});
+      return {rows:r.cards,total:r.total};
+    });
+    setProgress(null);
+    if(!batch) throw Error("archive_missing");
+    return {batch,cards};
+  }
   const [print, setPrint] = useState<{
     cards: PrintVoucher[];
     selected: Set<string>;
     batch: string;
   } | null>(null);
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ["voucher-studio"],
+    queryKey: ["voucher-studio",batchPage],
     queryFn: async () => {
       const results = await Promise.all([
         supabase.from("routers").select("id,name,last_status,last_seen_at"),
         supabase.from("router_profiles").select("*"),
-        supabase.from("voucher_batches").select("*").order("created_at", { ascending: false }),
-        supabase.from("voucher_items").select("batch_id,name,state,secret_valid").limit(10000),
+        supabase.from("voucher_batches").select("*",{count:"exact"}).order("created_at", { ascending: false }).range(batchPage*20,batchPage*20+19),
         supabase.from("voucher_templates").select("*"),
       ]);
       for (const r of results) if (r.error) throw r.error;
-      return {
-        routers: results[0].data ?? [],
-        profiles: results[1].data ?? [],
-        batches: results[2].data ?? [],
-        items: results[3].data ?? [],
-        templates: results[4].data ?? [],
-      };
+      const batches=results[2].data??[];
+      const {data:summaries,error}=await supabase.rpc("voucher_batch_summary",{bids:batches.map(b=>b.id)});
+      if(error)throw error;
+      return { routers:results[0].data??[], profiles:results[1].data??[], batches, summaries:summaries??[], templates:results[3].data??[], total:results[2].count??0 };
     },
     refetchInterval: 15000,
   });
   function update(next: VoucherTemplate) {
+    setPreparedPdf(null);
     setTemplate(next);
     setDirty(true);
     setMessage("");
@@ -158,11 +185,7 @@ function Studio() {
   };
   const router = data?.routers.find((r) => r.id === form.routerId);
   const status = router?.last_status as Record<string, unknown> | null;
-  const capable =
-    (readiness.data?.verified === true || readiness.data?.testRouters.includes(form.routerId)) &&
-    status?.["voucherProtocol"] === 2 &&
-    !!router?.last_seen_at &&
-    Date.now() - Date.parse(router.last_seen_at) < 90000;
+  const capable = (readiness.data?.verified === true || readiness.data?.testRouters.includes(form.routerId)) && !issuanceHold(status??null,router?.last_seen_at??null);
   const selected = print?.cards.filter((c) => print.selected.has(c.name)) ?? [];
   let paperError = false,
     pages = 0;
@@ -253,22 +276,16 @@ function Studio() {
   }
   async function exportPdf() {
     if (!selected.length || paperError) return;
-    setBusy(true);
+    setBusy(true);setPreparedPdf(null);
+    const abort=new AbortController();exportAbort.current=abort;
     try {
       const { voucherPdf } = await import("@/lib/voucher-pdf");
-      const pdf = await voucherPdf(template, selected, art, logo);
-      pdf.save("mikro-vouchers.pdf");
-      setMessage(
-        t(
-          "تم تجهيز الملف، وليس تأكيد طباعة الورق.",
-          "File prepared; paper printing is not confirmed.",
-        ),
-      );
+      const pdf = await voucherPdf(template, selected, art, logo,{signal:abort.signal,progress:(n,total)=>setProgress({n,total})});
+      setPreparedPdf(pdf.output("blob"));
+      setMessage(t("الملف جاهز للتنزيل؛ طباعة الورق غير مؤكدة.","File ready to download; paper printing is not confirmed."));
     } catch {
-      setMessage(t("تعذر تجهيز PDF؛ حاول مرة أخرى.", "Could not prepare PDF. Retry."));
-    } finally {
-      setBusy(false);
-    }
+      setMessage(abort.signal.aborted?t("أُلغي تجهيز الملف.","File preparation cancelled."):t("تعذر تجهيز PDF؛ حاول مرة أخرى.","Could not prepare PDF. Retry."));
+    } finally {setBusy(false);setProgress(null);exportAbort.current=null;}
   }
   return (
     <main className="app-shell min-h-screen py-6">
@@ -286,6 +303,7 @@ function Studio() {
           {t("القوالب والطباعة", "Templates & print")}
         </Button>
       </div>
+      {progress&&<div role="status" className="my-4 space-y-2"><p>{t("جارٍ التجهيز","Preparing")} {progress.n}/{progress.total}</p><progress className="w-full accent-primary" max={progress.total} value={progress.n}/>{exportAbort.current&&<Button variant="outline" onClick={()=>exportAbort.current?.abort()}>{t("إلغاء تجهيز الملف","Cancel file preparation")}</Button>}</div>}
       {message && (
         <p role="status" className="my-4 border-s-2 border-primary ps-3 text-sm">
           {message}
@@ -333,9 +351,8 @@ function Studio() {
           )}
           <div className="space-y-4">
             {data?.batches.map((b) => {
-              const items = data.items.filter((i) => i.batch_id === b.id),
-                confirmed = items.filter((i) => i.state === "confirmed").length,
-                failed = items.filter((i) => i.state === "failed").length;
+              const summary = data.summaries.find(i=>i.batch_id===b.id);
+              const confirmed=Number(summary?.confirmed??0), failed=Number(summary?.failed??0)+Number(summary?.uncertain??0);
               return (
                 <article key={b.id} className="rounded-md border border-border p-4">
                   <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
@@ -347,7 +364,7 @@ function Studio() {
                       </p>
                     </div>
                     <span className="text-xs">
-                      {b.state === "complete"
+                      {b.state === "preparing" ? t("تجهيز الأرقام", "Preparing numbers") : b.state === "complete"
                         ? t("اكتمل", "Complete")
                         : b.state === "paused"
                           ? t("متوقف مؤقتًا", "Paused")
@@ -357,8 +374,9 @@ function Studio() {
                   <p className="my-3 text-sm">
                     {t("مؤكد", "Confirmed")} {confirmed}/{b.requested} · {t("فاشل", "Failed")}{" "}
                     {failed} · {t("غير محسوم", "Unconfirmed")}{" "}
-                    {items.filter((i) => i.state === "sent").length}
+                    {Number(summary?.sent??0)+Number(summary?.uncertain??0)} · {t("المتبقي","Remaining")} {b.requested-confirmed-failed-Number(summary?.sent??0)}
                   </p>
+                  {b.state === "preparing" && <Button variant="outline" disabled={busy} onClick={async()=>{setBusy(true);try{await finishPreparation(b.id);await refetch();}catch{setMessage(t("تعذر إكمال التجهيز؛ يمكن إعادة المحاولة.","Preparation incomplete; retry safely."));}finally{setBusy(false);setProgress(null);}}}>{t("إكمال التجهيز","Continue preparation")} · {Number(summary?.prepared??0)}/{b.requested}</Button>}
                   <progress className="w-full accent-primary" max={b.requested} value={confirmed} />
                   <div className="mt-3 flex flex-wrap gap-2">
                     {b.requested === 1 && (
@@ -368,7 +386,7 @@ function Studio() {
                         onClick={async () => {
                           setBusy(true);
                           try {
-                            const r = await getPrint({ data: { batchId: b.id } });
+                            const r = await readPrintable(b.id);
                             setCredentials(r.cards);
                           } catch {
                             setMessage(
@@ -391,7 +409,7 @@ function Studio() {
                       onClick={async () => {
                         setBusy(true);
                         try {
-                          const r = await getPrint({ data: { batchId: b.id } });
+                          const r = await readPrintable(b.id);
                           const snap = r.batch.package_snapshot as unknown as ProfileRow;
                           const f = packageFacts(snap, []);
                           const limits = (
@@ -413,7 +431,7 @@ function Studio() {
                               .filter(Boolean)
                               .join(" · "),
                           }));
-                          setPageNumber(0);
+                          setPageNumber(0);setSelectionPage(0);setPreparedPdf(null);
                           setPrint({
                             cards,
                             selected: new Set(cards.map((c) => c.name)),
@@ -437,7 +455,7 @@ function Studio() {
                     </Button>
                     <Button
                       variant="outline"
-                      disabled={busy || b.state === "complete"}
+                      disabled={busy || !["pending","paused"].includes(b.state)}
                       onClick={async () => {
                         setBusy(true);
                         try {
@@ -522,6 +540,7 @@ function Studio() {
               );
             })}
           </div>
+          <div className="my-5 flex items-center justify-between"><Button variant="outline" disabled={!batchPage} onClick={()=>setBatchPage(n=>n-1)}>{t("السابق","Previous")}</Button><span>{batchPage+1}/{Math.max(1,Math.ceil((data?.total??0)/20))}</span><Button variant="outline" disabled={(batchPage+1)*20>=(data?.total??0)} onClick={()=>setBatchPage(n=>n+1)}>{t("التالي","Next")}</Button></div>
         </section>
       ) : (
         <section className="voucher-studio">
@@ -913,12 +932,12 @@ function Studio() {
                   >
                     {t("تحديد الكل", "Select all")}
                   </Button>
-                  <Button variant="ghost" onClick={() => setPrint(null)}>
+                  <Button variant="ghost" onClick={() => {setPrint(null);setPreparedPdf(null);}}>
                     {t("إغلاق الرموز", "Close credentials")}
                   </Button>
                 </div>
                 <div className="max-h-44 overflow-auto border-y border-border py-2">
-                  {print.cards.map((c) => (
+                  {print.cards.slice(selectionPage*50,selectionPage*50+50).map((c) => (
                     <label key={c.name} className="flex min-h-11 items-center gap-3">
                       <input
                         type="checkbox"
@@ -934,6 +953,7 @@ function Studio() {
                     </label>
                   ))}
                 </div>
+                <div className="flex justify-between"><Button variant="outline" disabled={!selectionPage} onClick={()=>setSelectionPage(n=>n-1)}>{t("السابق","Previous")}</Button><span>{selectionPage+1}/{Math.ceil(print.cards.length/50)}</span><Button variant="outline" disabled={(selectionPage+1)*50>=print.cards.length} onClick={()=>setSelectionPage(n=>n+1)}>{t("التالي","Next")}</Button></div>
                 <Button
                   className="h-12 w-full"
                   disabled={busy || paperError || !selected.length}
@@ -942,8 +962,9 @@ function Studio() {
                   }}
                 >
                   <Download />
-                  {t("تنزيل PDF", "Download PDF")} · {selected.length}
+                  {t("تجهيز PDF", "Prepare PDF")} · {selected.length}
                 </Button>
+                {preparedPdf&&<Button className="w-full" onClick={()=>downloadVoucherBlob(preparedPdf,"mikro-vouchers.pdf")}><Download/>{t("تنزيل PDF الجاهز","Download prepared PDF")}</Button>}
               </div>
             )}
           </div>
@@ -1044,7 +1065,8 @@ function Studio() {
               }
               setBusy(true);
               try {
-                await issue({ data: form });
+                const r=await issue({ data: form });
+                await finishPreparation(r.id);
                 setOpen(false);
                 setReview(false);
                 setMessage(
@@ -1260,14 +1282,14 @@ function Studio() {
                         <div key={k}>
                           <Label htmlFor={"issue-" + k}>
                             {k === "count"
-                              ? t("العدد (حتى 500)", "Count (up to 500)")
+                              ? t("العدد (حتى 1500)", "Count (up to 1500)")
                               : t("الطول الكامل", "Full length")}
                           </Label>
                           <Input
                             id={"issue-" + k}
                             type="number"
                             min={k === "count" ? 1 : 6}
-                            max={k === "count" ? 500 : 16}
+                            max={k === "count" ? MAX_VOUCHERS : 16}
                             value={form[k]}
                             onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) })}
                           />
