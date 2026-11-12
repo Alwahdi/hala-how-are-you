@@ -3,8 +3,10 @@
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
 - [x] Study current functionality and inspect founder's uploaded visual references
 - [x] Resolve A4 and requirement for later reprinting; retain credential encryption as a safety requirement
-- [ ] Approve implementation plan and private credential archive policy
-- [ ] Implement confirmed issuance, batch views, templates and printing; verify without production router operations
+- [x] Approve implementation plan and private credential archive policy
+- [x] Implement templates, private images, A4 PDF and batch/archive scaffolding; verify template save/read-back and sample PDF
+- [ ] Complete issuance integration and test confirmed batch printing/owner isolation — blocked on v6/v7 test-router environment; issuance disabled
+- [ ] Validate physical A4 output — blocked on founder printer/physical test sheet
 
 ## Whole-app mobile-first UX redesign (requested 2026-11-12)
 - [x] Review NN/g references and map relevant principles to every current user journey
