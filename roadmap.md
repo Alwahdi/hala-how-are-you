@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
+- [ ] Approve and implement 1000–1500-card issuance and print handling — current 500 limit, unpaged reads and one-card-per-report throughput require a new scoped plan
 - [x] Implement approved single/manual-card and batch forms, explicit Hotspot limits, serialized requests, receipt-based retries and confirmed-card snapshots; test forms and individual commands on isolated v6/v7
 - [x] Verify four five-card platform-to-RouterOS batches, confirmation read-back, lease retry and owner PDF download; remove isolated fixtures
 - [ ] Complete second-owner isolation, partial failure/pause/resume and single different-password end-to-end — blocked on an approved second test account and retained lab; temporary lab was lost again, public issuance remains disabled
