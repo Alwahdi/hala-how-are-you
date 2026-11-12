@@ -4,6 +4,7 @@
 - [x] Inspect 1000–1500-card limits and synthetic PDF output; document throughput, pagination and Arabic rendering risks
 - [x] Approve and implement bounded 1500-card preparation, independent worker, archive pagination and cancellable PDF; unit/browser checks passed
 - [ ] Validate 1000/1500 issuance on isolated RouterOS v6/v7 — lab runtime unavailable; public issuance remains disabled
+- [ ] Optimize local batch transport and receipt execution after founder approval — v7 lab recreated; simple 1500-account baseline passed, current receipt implementation stalled at 172 accounts in the bounded test
 - [x] Implement approved single/manual-card and batch forms, explicit Hotspot limits, serialized requests, receipt-based retries and confirmed-card snapshots; test forms and individual commands on isolated v6/v7
 - [x] Verify four five-card platform-to-RouterOS batches, confirmation read-back, lease retry and owner PDF download; remove isolated fixtures
 - [ ] Complete second-owner isolation, partial failure/pause/resume and single different-password end-to-end — approved scope, but a retained lab and isolated test sessions are not available; public issuance remains disabled
