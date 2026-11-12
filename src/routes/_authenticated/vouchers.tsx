@@ -926,9 +926,7 @@ function Studio() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      setPrint({ ...print, selected: new Set(print.cards.map((c) => c.name)) })
-                    }
+                    onClick={() => {setPreparedPdf(null);setPrint({ ...print, selected: new Set(print.cards.map((c) => c.name)) });}}
                   >
                     {t("تحديد الكل", "Select all")}
                   </Button>
@@ -946,7 +944,7 @@ function Studio() {
                           const s = new Set(print.selected);
                           if (e.target.checked) s.add(c.name);
                           else s.delete(c.name);
-                          setPrint({ ...print, selected: s });
+                          setPreparedPdf(null);setPrint({ ...print, selected: s });
                         }}
                       />
                       <span dir="ltr">{c.name}</span>

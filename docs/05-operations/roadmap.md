@@ -15,6 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [x] تنفيذ التوسعة المتدرجة وفق [D-046](../04-decisions/D-046-large-voucher-batches.md)؛ [نتائج الاختبار والمتبقي](../03-product/voucher-large-batch-review.md). [confirmed]
 - [x] نموذج الكرت الواحد والدفعات وتحسين قواعد الإصدار وفق [D-045](../04-decisions/D-045-single-and-batch-issuance.md). [confirmed]
 - [ ] إكمال اختبار دورة الإصدار والأرشيف ثم التفعيل وفق D-045. [confirmed]
 - [x] اختبار دفعات المنصة والمختبر وPDF ضمن [حدود التحقق](../03-product/voucher-release-verification.md). [confirmed]

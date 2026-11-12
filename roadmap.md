@@ -2,10 +2,11 @@
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
 - [x] Inspect 1000–1500-card limits and synthetic PDF output; document throughput, pagination and Arabic rendering risks
-- [ ] Approve and implement 1000–1500-card issuance and print handling — waiting for founder approval of the expanded plan
+- [x] Approve and implement bounded 1500-card preparation, independent worker, archive pagination and cancellable PDF; unit/browser checks passed
+- [ ] Validate 1000/1500 issuance on isolated RouterOS v6/v7 — lab runtime unavailable; public issuance remains disabled
 - [x] Implement approved single/manual-card and batch forms, explicit Hotspot limits, serialized requests, receipt-based retries and confirmed-card snapshots; test forms and individual commands on isolated v6/v7
 - [x] Verify four five-card platform-to-RouterOS batches, confirmation read-back, lease retry and owner PDF download; remove isolated fixtures
-- [ ] Complete second-owner isolation, partial failure/pause/resume and single different-password end-to-end — blocked on an approved second test account and retained lab; temporary lab was lost again, public issuance remains disabled
+- [ ] Complete second-owner isolation, partial failure/pause/resume and single different-password end-to-end — approved scope, but a retained lab and isolated test sessions are not available; public issuance remains disabled
 - [x] Study single-card and NAS-Port availability; findings reported
 - [ ] Extend session details/NAS-Port — blocked on separate collection scope approval; excluded from current issuance plan
 - [x] Prepare reference-faithful single-card visual sample; inspected full-size with synthetic data
