@@ -141,6 +141,27 @@
       "when": 1794452636882,
       "tag": "0019_voucher_confirmed_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794453492972,
+      "tag": "0020_voucher_serialized_request",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794453609675,
+      "tag": "0021_voucher_archive_explicit_privileges",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794453953010,
+      "tag": "0022_voucher_confirmed_card_snapshot",
+      "breakpoints": true
     }
   ]
 }

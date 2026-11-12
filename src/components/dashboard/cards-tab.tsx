@@ -46,6 +46,10 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<CardState | 'all' | 'online'>(initialFilter ?? 'all');
   const [pkg, setPkg] = useState<string | null>(null);
+  const [batch,setBatch]=useState('');
+  const {data: batchRows=[]}=useQuery({queryKey:['card-issuance-batches'],queryFn:async()=>{const {data,error}=await supabase.from('voucher_batches').select('id,label,source').order('created_at',{ascending:false});if(error)throw error;return data??[];}});
+  const {data: batchItems=[]}=useQuery({queryKey:['card-issuance-items',batch],enabled:!!batch,queryFn:async()=>{const {data,error}=await supabase.from('voucher_items').select('router_id,source,name').eq('batch_id',batch).eq('state','confirmed');if(error)throw error;return data??[];}});
+  const batchKeys=useMemo(()=>new Set(batchItems.map(key)),[batchItems]);
   const [page, setPage] = useState(0);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [explained, setExplained] = useState(false);
@@ -111,8 +115,8 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
   const selectedPkg = packages.find((e) => e.id === pkg);
   const list = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    return mine.filter((c) => (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || packageKey({ router_id: c.router_id, source: c.source, name: c.profile || '-' }) === pkg) && (!ql || c.name.toLowerCase().includes(ql) || (c.comment ?? '').toLowerCase().includes(ql)));
-  }, [mine, filter, pkg, q, onlineSet]);
+    return mine.filter((c) => (!batch || batchKeys.has(key(c))) && (filter === 'all' || (filter === 'online' ? onlineSet.has(`${c.router_id}|${c.name}`) : cardState(c) === filter)) && (!pkg || packageKey({ router_id: c.router_id, source: c.source, name: c.profile || '-' }) === pkg) && (!ql || c.name.toLowerCase().includes(ql) || (c.comment ?? '').toLowerCase().includes(ql)));
+  }, [mine, filter, pkg, q, onlineSet,batch,batchKeys]);
   const pages = Math.max(1, Math.ceil(list.length / PAGE));
   const pg = Math.min(page, pages - 1);
   const shown = list.slice(pg * PAGE, pg * PAGE + PAGE);
@@ -163,7 +167,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
 
   return (
     <div className="mt-6 space-y-5">
-      <Button asChild variant="outline" className="h-11"><Link to="/vouchers">{t('إصدار الكروت والقوالب والطباعة','Issue cards, templates & print')}</Link></Button>
+      <div className="flex flex-wrap gap-2"><Button asChild className="h-11"><Link to="/vouchers" search={{add:true}}><Plus/>{t("إضافة كروت","Add cards")}</Link></Button><Button asChild variant="outline" className="h-11"><Link to="/vouchers">{t('إصدار الكروت والقوالب والطباعة','Issue cards, templates & print')}</Link></Button></div>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <div className="seg" role="group" aria-label={t('نوع الكروت', 'Card system')}>
           <button type="button" aria-pressed={source === 'hotspot'} onClick={() => { setSource('hotspot'); setPkg(null); resetPage(); setSel(new Set()); }}>Hotspot</button>
@@ -213,6 +217,7 @@ export function CardsTab({ cards, profiles, routers, sessions, ar, initialFilter
             </div>
           )}
 
+          <label className="block text-sm"><span className="mb-2 block text-muted-foreground">{t('دفعة الإصدار','Issuance batch')}</span><select className="h-11 w-full rounded-md border border-input bg-card px-3" value={batch} onChange={e=>{setBatch(e.target.value);resetPage();}}><option value="">{t('كل الدفعات','All batches')}</option>{batchRows.filter(b=>b.source===source).map(b=><option key={b.id} value={b.id}>{b.label}</option>)}</select></label>
           <div className="card-filters" role="group" aria-label={t('الحالة', 'Status')}>
             {filterChips.filter((f)=>moreFilters || ['all','online','unused'].includes(f) || filter===f).map((f) => (
               <Button variant="ghost" key={f} type="button" aria-pressed={filter === f} onClick={() => { setFilter(f); resetPage(); }} className="chip">

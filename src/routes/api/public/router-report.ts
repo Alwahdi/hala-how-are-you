@@ -65,7 +65,7 @@ export const Route = createFileRoute('/api/public/router-report')({
         const host = normalizeCloudHost(status.cloudName);
         let job = await nextJob(supabaseAdmin, router.id);
         const archiveKey=process.env['VOUCHER_ARCHIVE_KEY'];
-        if(!job && status.voucherProtocol===1 && archiveKey && process.env['VOUCHER_ISSUANCE_VERIFIED']==='true'){const {dispatchVoucher}=await import('@/lib/voucher-dispatch.server');job=await dispatchVoucher(router.id,status.version,archiveKey);}
+        if(!job && status.voucherProtocol===2 && archiveKey && process.env['VOUCHER_ISSUANCE_VERIFIED']==='true'){const {dispatchVoucher}=await import('@/lib/voucher-dispatch.server');job=await dispatchVoucher(router.id,status.version,archiveKey);}
 
         if (host && directAccessState(status) === 'ready' && status.apiUser === 0) {
           // The router says our read-only user is missing: show that instead of trying a login that cannot work.
