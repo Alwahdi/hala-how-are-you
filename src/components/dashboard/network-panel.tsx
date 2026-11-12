@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { PasteCommandPanel } from '@/components/paste-command-panel';
 import { buildShortCommand } from '@/lib/setup-code';
 import { API_ENABLE_COMMAND, buildPasteCommand, buildRemoveCommand, directAccessState, isOnline } from '@/lib/router-script';
+import { QueryNotice } from '@/components/query-notice';
+import { confirmedWrite, relativeRead } from '@/lib/operations-ui';
 import { Globe2, Plus, Copy, Trash2, LogOut, RefreshCw, Loader2, Cloud, AlertTriangle, Power, HeartPulse } from 'lucide-react';
 
 type Status = { apiUser?: number; identity?: string; board?: string; version?: string; uptime?: string; cpu?: number; freeMemory?: number; totalMemory?: number; freeHdd?: number; totalHdd?: number; hotspotActive?: number; temperature?: string; cloudName?: string; sslPort?: string; sslDisabled?: string; behindNat?: string; publicAddress?: string; apiPort?: string; apiDisabled?: string; apiSslPort?: string; apiSslDisabled?: string };
@@ -31,8 +33,8 @@ export function NetworkPanel() {
   const { ar } = useLanguage();
   const t = (a: string, b: string) => (ar ? a : b);
   const qc = useQueryClient();
-  const { data: routers = [], isLoading } = useQuery({
-    queryKey: ['routers'],
+  const { data: routers = [], isLoading, isError: loadError, refetch } = useQuery({
+    queryKey: ['routers-panel'],
     queryFn: async () => {
       const { data, error } = await supabase.from('routers').select('id, name, role, ros_version, connection_method, cloud_host, direct_port, direct_tls, direct_checked_at, last_seen_at, last_status, last_check_error, created_at').order('created_at');
       if (error) throw error;
@@ -53,10 +55,11 @@ export function NetworkPanel() {
   const rotate = useServerFn(rotatePushRouter);
   // IP Cloud routers are pulled by us, only while this page is open.
   useEffect(() => {
-    const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers'] })).catch(() => null);
+    const run = () => refreshCloud().then(() => qc.invalidateQueries({ queryKey: ['routers-panel'] })).catch(() => null);
     run(); const id = setInterval(run, 30_000); return () => clearInterval(id);
   }, [refreshCloud, qc]);
-  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; full?: string | undefined } | null>(null);
+  const [reconnect, setReconnect] = useState<{ id: string; name: string; main: string; full?: string | undefined; issuedAt: string } | null>(null);
+  const [confirmReconnect, setConfirmReconnect] = useState<{ id: string; name: string } | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [removeCmd, setRemoveCmd] = useState<{ id: string; name: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -68,28 +71,30 @@ export function NetworkPanel() {
     const r = await rotate({ data: { id } }).catch(() => ({ ok: false as const }));
     setBusyId(null);
     if (!r.ok) return setError(t('ما قدرنا نجهز أمر الربط. حاول مرة ثانية.', 'Could not prepare the command. Try again.'));
-    { const full = buildPasteCommand(r.token, r.password); setReconnect({ id, name: routerName, main: r.code ? buildShortCommand(r.code) : full, full: r.code ? full : undefined }); }
+    { const full = buildPasteCommand(r.token, r.password); setConfirmReconnect(null); setReconnect({ id, name: routerName, main: r.code ? buildShortCommand(r.code) : full, full: r.code ? full : undefined, issuedAt: r.issuedAt }); }
   }
 
   async function checkCloudNow(id: string) {
     setBusyId(id);
     await refreshCloud({ data: { id } }).catch(() => null);
-    await qc.invalidateQueries({ queryKey: ['routers'] });
+    await qc.invalidateQueries({ queryKey: ['routers-panel'] });
     setBusyId(null);
   }
 
-  async function copy(text: string) { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+  async function copy(text: string) { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setError(t('تعذر النسخ. حدد الأمر وانسخه يدويًا.', 'Copy failed. Select the command and copy it manually.')); } }
 
   async function deleteRouter(id: string) {
-    await supabase.from('routers').delete().eq('id', id);
-    setRemoveCmd(null);
-    qc.invalidateQueries({ queryKey: ['routers'] });
+    setBusyId(id); setError(null);
+    try { await confirmedWrite(() => supabase.from('routers').delete().eq('id', id)); setRemoveCmd(null); qc.invalidateQueries({ queryKey: ['routers-panel'] }); qc.invalidateQueries({ queryKey: ['routers'] }); }
+    catch { setError(t('ما انحذف الراوتر؛ حاول مرة أخرى.', 'Router not removed; please retry.')); }
+    finally { setBusyId(null); }
   }
 
 
   async function changeRole(id: string, role: 'general' | 'balancer' | 'distribution') {
-    await saveRole({ data: { id, role } }).catch(() => null);
-    qc.invalidateQueries({ queryKey: ['routers'] });
+    const result = await saveRole({ data: { id, role } }).catch(() => ({ ok: false }));
+    if (!result.ok) setError(t('ما انحفظ دور الراوتر؛ حاول مرة أخرى.', 'Router role not saved; retry.'));
+    qc.invalidateQueries({ queryKey: ['routers-panel'] });
   }
 
   const list = routers as Row[];
@@ -102,7 +107,8 @@ export function NetworkPanel() {
         <h2 className="text-lg font-bold">{t('الراوترات', 'Routers')}</h2>
         <Button variant="outline" className="h-11" onClick={() => navigate({ to: '/onboarding' })}><Plus />{t('أضف راوتر', 'Add router')}</Button>
       </div>
-      {isLoading ? <p className="mt-10 text-muted-foreground">{t('جارٍ التحميل...', 'Loading...')}</p> : list.length === 0 ? (
+      {loadError && <QueryNotice ar={ar} stale={list.length > 0} retry={() => { refetch(); }} />}
+      {isLoading ? <p className="mt-10 text-muted-foreground">{t('جارٍ التحميل...', 'Loading...')}</p> : list.length === 0 && !loadError ? (
         <div className="app-panel mt-8 p-8 text-center">
           <p className="font-semibold">{t('ما أضفت أي راوتر بعد', 'No routers yet')}</p>
           <p className="mt-1 text-sm text-muted-foreground">{t('أضف راوتر، انسخ الأمر، والصقه في Terminal.', 'Add a router, copy the command, paste it in Terminal.')}</p>
@@ -119,7 +125,7 @@ export function NetworkPanel() {
               const s = (r.last_status ?? {}) as Status;
               const online = isOnline(r.last_seen_at);
               const mem = pct(s.freeMemory, s.totalMemory); const hdd = pct(s.freeHdd, s.totalHdd);
-              const direct = !!r.cloud_host && !r.last_check_error && !!r.direct_port;
+              const direct = online && !!r.cloud_host && !r.last_check_error && !!r.direct_port;
               const access = directAccessState(s);
               return (
                 <article key={r.id} className="app-panel p-5">
@@ -176,7 +182,7 @@ export function NetworkPanel() {
                       <p className="text-xs text-muted-foreground">{cloudError(r.last_check_error, ar)}</p>
                       <p className="text-xs text-muted-foreground">{t('نعيد المحاولة تلقائياً كل 30 دقيقة حتى ما نشغل الراوتر. الإشارات شغالة كاحتياط.', 'We retry on our own every 30 minutes so the router is not kept busy. Reports keep working as backup.')}</p>
                       {(r.last_check_error === 'auth' || r.last_check_error === 'no_user')
-                        ? <Button className="h-11 w-full" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط (مرة واحدة)', 'Reconnect (once)')}</Button>
+                        ? <Button className="h-11 w-full" disabled={busyId === r.id} onClick={() => { setError(null); setConfirmReconnect({ id: r.id, name: r.name }); }}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط (مرة واحدة)', 'Reconnect (once)')}</Button>
                         : <Button variant="outline" className="h-11 w-full" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('جرّب الآن', 'Try now')}</Button>}
                     </div>
                   )}
@@ -190,7 +196,7 @@ export function NetworkPanel() {
                     {direct && <Button variant="outline" className="h-11" disabled={busyId === r.id} onClick={() => checkCloudNow(r.id)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('تحديث الآن', 'Refresh now')}</Button>}
                     <Button variant="outline" className="h-11" disabled={!online} onClick={() => setConfirmReboot({ id: r.id, name: r.name })}><Power />{t('إعادة تشغيل', 'Restart')}</Button>
                     <Button variant="ghost" className="h-11" asChild><Link to="/health"><HeartPulse />{t('الصحة', 'Health')}</Link></Button>
-                    <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => startReconnect(r.id, r.name)}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
+                    <Button variant={online ? 'outline' : 'default'} className="h-11" disabled={busyId === r.id} onClick={() => { setError(null); setConfirmReconnect({ id: r.id, name: r.name }); }}>{busyId === r.id ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('إعادة الربط', 'Reconnect')}</Button>
                     <Button variant="ghost" className="h-11 text-destructive" onClick={() => setRemoveCmd({ id: r.id, name: r.name })}><Trash2 />{t('إزالة', 'Remove')}</Button>
                   </div>
                 </article>
@@ -202,6 +208,14 @@ export function NetworkPanel() {
 
       {error && <p role="alert" className="mt-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
 
+      <Dialog open={!!confirmReconnect} onOpenChange={(o) => { if (!o && !busyId) setConfirmReconnect(null); }}>
+        <DialogContent dir={ar ? 'rtl' : 'ltr'}>
+          <DialogHeader><DialogTitle>{t('إعادة ربط', 'Reconnect')} {confirmReconnect?.name}؟</DialogTitle><DialogDescription>{t('إصدار الأمر الجديد يوقف بيانات الربط القديمة فورًا. لن تعود الإشارات حتى تلصقه في الراوتر. جهّز الوصول إلى Terminal أولًا؛ الإلغاء هنا لا يغيّر شيئًا.', 'Issuing a new command immediately replaces the old link credentials. Reports resume after you paste it into the router. Have Terminal access ready; cancelling here changes nothing.')}</DialogDescription></DialogHeader>
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          <div className="dialog-actions grid grid-cols-2 gap-2"><Button variant="outline" disabled={!!busyId} onClick={() => setConfirmReconnect(null)}>{t('إلغاء', 'Cancel')}</Button><Button disabled={!!busyId} onClick={() => { if (confirmReconnect) startReconnect(confirmReconnect.id, confirmReconnect.name); }}>{busyId ? <Loader2 className="animate-spin" /> : <RefreshCw />}{t('أصدر الأمر الجديد', 'Issue new command')}</Button></div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!reconnect} onOpenChange={(o) => !o && setReconnect(null)}>
         <DialogContent dir={ar ? 'rtl' : 'ltr'} className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -211,7 +225,7 @@ export function NetworkPanel() {
           {reconnect && <PasteCommandPanel command={reconnect.main} full={reconnect.full} ar={ar} />}
           {reconnect && (() => {
             const r = routers.find((x) => x.id === reconnect.id);
-            const on = r ? isOnline(r.last_seen_at) && Date.now() - new Date(r.last_seen_at!).getTime() < 60_000 : false;
+            const on = !!r?.last_seen_at && isOnline(r.last_seen_at) && Date.parse(r.last_seen_at) > Date.parse(reconnect.issuedAt);
             const rs = (r?.last_status ?? {}) as Status;
             const linked = !!r?.direct_port && !r?.last_check_error;
             return (
@@ -234,7 +248,7 @@ export function NetworkPanel() {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" className="h-11" onClick={() => setConfirmReboot(null)}>{t('إلغاء', 'Cancel')}</Button>
-            <Button variant="destructive" className="h-11" onClick={async () => { const id = confirmReboot!.id; setConfirmReboot(null); await reboot({ data: { id } }).catch(() => null); qc.invalidateQueries({ queryKey: ['reboot-jobs'] }); }}><Power />{t('أعد التشغيل', 'Restart now')}</Button>
+            <Button variant="destructive" className="h-11" disabled={!!busyId} onClick={async () => { if (!confirmReboot) return; const id = confirmReboot.id; setBusyId(id); setError(null); try { const result = await reboot({ data: { id } }); if (!result.ok) throw new Error('failed'); setConfirmReboot(null); qc.invalidateQueries({ queryKey: ['reboot-jobs'] }); } catch { setError(t('تعذر إرسال إعادة التشغيل؛ حاول مرة أخرى.', 'Restart request failed; retry.')); } finally { setBusyId(null); } }}><Power />{t('أعد التشغيل', 'Restart now')}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -246,9 +260,10 @@ export function NetworkPanel() {
             <DialogDescription>{t('الصق هذا في الراوتر لإيقاف الإرسال، ثم احذفه من Mikro.', 'Paste this into the router to stop reporting, then remove it from Mikro.')}</DialogDescription>
           </DialogHeader>
           <pre dir="ltr" className="rounded-lg bg-muted p-3 text-xs whitespace-pre-wrap">{buildRemoveCommand()}</pre>
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => copy(buildRemoveCommand())}><Copy />{copied ? t('تم النسخ', 'Copied') : t('نسخ', 'Copy')}</Button>
-            <Button variant="destructive" onClick={() => removeCmd && deleteRouter(removeCmd.id)}><Trash2 />{t('احذف من Mikro', 'Remove from Mikro')}</Button>
+            <Button variant="destructive" disabled={!!busyId} onClick={() => removeCmd && deleteRouter(removeCmd.id)}><Trash2 />{t('احذف من Mikro', 'Remove from Mikro')}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -258,7 +273,8 @@ export function NetworkPanel() {
 
 export function routerAlerts(r: Row, ar: boolean): string[] {
   const s = (r.last_status ?? {}) as Status; const out: string[] = [];
-  if (r.last_seen_at && !isOnline(r.last_seen_at)) out.push(ar ? `${r.name}: ما أرسل إشارة من ${Math.round((Date.now() - new Date(r.last_seen_at).getTime()) / 60000)} دقيقة` : `${r.name}: no signal for ${Math.round((Date.now() - new Date(r.last_seen_at).getTime()) / 60000)} min`);
+  if (r.last_seen_at && !isOnline(r.last_seen_at)) out.push(ar ? `${r.name}: ما أرسل إشارة من ${relativeRead(r.last_seen_at, true)}` : `${r.name}: last signal ${relativeRead(r.last_seen_at, false)}`);
+  if (!isOnline(r.last_seen_at)) return out;
   const mem = pct(s.freeMemory, s.totalMemory);
   if (mem != null && mem >= 90) out.push(ar ? `${r.name}: الذاكرة شبه ممتلئة (${mem}%)` : `${r.name}: memory almost full (${mem}%)`);
   if ((s.cpu ?? 0) >= 90) out.push(ar ? `${r.name}: المعالج مضغوط (${s.cpu}%)` : `${r.name}: CPU under load (${s.cpu}%)`);

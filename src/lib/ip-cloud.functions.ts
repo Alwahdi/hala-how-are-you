@@ -40,10 +40,10 @@ export const rotatePushRouter = createServerFn({ method: 'POST' })
     const token = newToken(); const password = newApiPassword();
     const { data: row, error } = await context.supabase.from('routers').update({
       token_hash: await hashToken(token), api_user: API_USER, api_secret_encrypted: await encrypt(key, password),
-      cloud_host: null, direct_port: null, direct_tls: null, direct_checked_at: null, last_check_error: null,
+      cloud_host: null, direct_port: null, direct_tls: null, direct_checked_at: null, last_check_error: null, last_seen_at: null,
     }).eq('id', data.id).select('id').maybeSingle();
     if (error || !row) return { ok: false as const };
-    return { ok: true as const, token, password, code: await issueSetup(row.id, token, password) };
+    return { ok: true as const, issuedAt: new Date().toISOString(), token, password, code: await issueSetup(row.id, token, password) };
   });
 
 /** Refreshes direct links of the signed-in owner while their page is open, with the same automatic rules as the router reports. */
