@@ -148,6 +148,13 @@
       "when": 1794453492972,
       "tag": "0020_voucher_serialized_request",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794453609675,
+      "tag": "0021_voucher_archive_explicit_privileges",
+      "breakpoints": true
     }
   ]
 }
