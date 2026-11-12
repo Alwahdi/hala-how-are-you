@@ -21,6 +21,7 @@ describe("voucher printing and issuance", () => {
       charset: "digits",
       mode: "same",
       requestKey: "00000000-0000-4000-8000-000000000002",
+      hotspotLimits: {bytes: 629145600, time: 18000},
     });
     const names = generateNames(v, (k) => {
       const a = new Uint32Array(k);
@@ -29,6 +30,17 @@ describe("voucher printing and issuance", () => {
     });
     expect(new Set(names).size).toBe(10);
     expect(names.every((x) => x.length === 8 && x.startsWith("0") && x.endsWith("X"))).toBe(true);
+  });
+  it("allows a manual leading-zero number only for one card",()=> {
+    const v={routerId:"00000000-0000-4000-8000-000000000001",requestKey:"00000000-0000-4000-8000-000000000002",source:"hotspot",packageName:"p",label:"one",count:1,length:8,prefix:"",suffix:"",charset:"digits",mode:"same",manualName:"001234",hotspotLimits:{bytes:0,time:0}};
+    expect(generateNames(issuanceSchema.parse(v))).toEqual(["001234"]);
+    expect(issuanceSchema.safeParse({...v,count:2}).success).toBe(false);
+    expect(issuanceSchema.safeParse({...v,manualName:'bad|command'}).success).toBe(false);
+  });
+  it("never treats unknown Hotspot limits as unlimited",()=>{
+    const v={routerId:"00000000-0000-4000-8000-000000000001",requestKey:"00000000-0000-4000-8000-000000000002",source:"hotspot",packageName:"p",label:"one",count:1,length:8,prefix:"",suffix:"",charset:"digits",mode:"same"};
+    expect(issuanceSchema.safeParse(v).success).toBe(false);
+    expect(issuanceSchema.parse({...v,hotspotLimits:{bytes:629145600,time:18000}}).hotspotLimits).toEqual({bytes:629145600,time:18000});
   });
   it("encrypts reprint credentials and authenticates their item binding", async () => {
     const encrypted = await seal("test-voucher-only", "test-encryption-only", "item-1");

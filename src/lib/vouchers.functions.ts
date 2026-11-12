@@ -8,6 +8,12 @@ export const issueVouchers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => issuanceSchema.parse(v))
   .handler(async ({ data, context }) => {
+    setResponseHeader("Cache-Control", "no-store");
+    const { data: prior, error: priorError } = await context.supabase
+      .from("voucher_batches").select("id").eq("request_key", data.requestKey)
+      .eq("owner_id", context.userId).maybeSingle();
+    if (priorError) throw Error("read_failed");
+    if (prior) return { id: prior.id };
     if (process.env["VOUCHER_ISSUANCE_VERIFIED"] !== "true") throw Error("issuer_testing_required");
     const { data: router, error } = await context.supabase
       .from("routers")
@@ -31,36 +37,19 @@ export const issueVouchers = createServerFn({ method: "POST" })
       .eq("name", data.packageName)
       .maybeSingle();
     if (pe || !profile) throw Error("package_missing");
-    const { data: prior } = await context.supabase
-      .from("voucher_batches")
-      .select("id")
-      .eq("request_key", data.requestKey)
-      .eq("owner_id", context.userId)
-      .maybeSingle();
-    if (prior) return { id: prior.id };
-    const { data: cardLimits, error: ce } = await context.supabase
-      .from("router_cards")
-      .select("limit_uptime_s,limit_bytes")
-      .eq("router_id", data.routerId)
-      .eq("source", data.source)
-      .eq("profile", data.packageName)
-      .limit(1000);
-    if (ce) throw Error("read_failed");
-    const facts = packageFacts(
-      profile as unknown as import("@/components/dashboard/types").ProfileRow,
-      cardLimits ?? [],
-    );
-    if (data.source === "hotspot" && facts.dataBytes === null && facts.uptimeS === null)
-      throw Error("package_limits_unknown");
     const snapshot = {
       ...profile,
-      issue_limits: { bytes: facts.dataBytes ?? 0, time: facts.uptimeS ?? 0 },
+      issue_limits: data.source === "hotspot" ? data.hotspotLimits : null,
     };
     const secret = process.env["VOUCHER_ARCHIVE_KEY"];
     if (!secret) throw Error("archive_unavailable");
     const { seal } = await import("./voucher-crypto.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const names = generateNames(data);
+    const {data: conflicts,error: conflictError} = await context.supabase.from("router_cards")
+      .select("name").eq("router_id",data.routerId).eq("source",data.source).in("name",names);
+    if(conflictError) throw Error("read_failed");
+    if(conflicts?.length) throw Error("number_exists");
     const items = await Promise.all(
       names.map(async (name, ordinal) => {
         const id = crypto.randomUUID();
@@ -94,8 +83,13 @@ export const issueVouchers = createServerFn({ method: "POST" })
       },
       items,
     });
-    if (e) throw Error("issuance_failed");
+    if (e) throw Error(e.code === "23505" ? "number_exists" : "issuance_failed");
     return { id: bid };
+  });
+export const voucherReadiness = createServerFn({method:"GET"})
+  .middleware([requireSupabaseAuth]).handler(async()=> {
+    setResponseHeader("Cache-Control","no-store");
+    return {verified:process.env["VOUCHER_ISSUANCE_VERIFIED"] === "true"};
   });
 const batchSchema = z.object({ batchId: z.string().uuid() });
 export const printableVouchers = createServerFn({ method: "POST" })
