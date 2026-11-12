@@ -5,14 +5,14 @@ import { buckets, yesterdayAt, type LogPoint } from '@/lib/active-history';
 import { STATE_LABEL } from './cards-tab';
 
 type Props = {
-  ar: boolean; activeNow: number; log: LogPoint[]; counts: Record<CardState, number>; total: number; inUse: number;
+  ar: boolean; activeNow: number | null; log: LogPoint[]; counts: Record<CardState, number>; total: number; inUse: number;
   lowPackages: { name: string; ready: number }[]; onlineCount: number; routerCount: number; alerts: string[]; styleConfirmed: boolean;
   go: (tab: 'cards' | 'active' | 'more', filter?: CardState) => void;
 };
 
 export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages, onlineCount, routerCount, alerts, styleConfirmed, go }: Props) {
   const t = (a: string, b: string) => (ar ? a : b);
-  const y = yesterdayAt(log); const diff = y == null ? null : activeNow - y;
+  const y = yesterdayAt(log); const diff = y == null || activeNow == null ? null : activeNow - y;
   const series = buckets(log); const max = Math.max(1, ...series.map((b) => b.value ?? 0));
   return (
     <div className="mt-6 space-y-5">
@@ -25,9 +25,9 @@ export function HomeTab({ ar, activeNow, log, counts, total, inUse, lowPackages,
       )}
 
       <button type="button" onClick={() => go('active')} className="app-panel tap-card block w-full p-5 text-start">
-        <span className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-sm text-muted-foreground"><Wifi className="size-4 text-primary" />{t('متصلون الآن', 'Connected now')}</span><ChevronRight className="tap-chevron" /></span>
+        <span className="flex items-center justify-between"><span className="flex items-center gap-1.5 text-sm text-muted-foreground"><Wifi className="size-4 text-primary" />{activeNow == null ? t('الحالة الحالية غير معروفة', 'Current status unknown') : t('متصلون الآن', 'Connected now')}</span><ChevronRight className="tap-chevron" /></span>
         <span className="mt-1 flex items-end gap-3">
-          <b className="text-5xl" dir="ltr">{activeNow}</b>
+          <b className="text-5xl" dir="ltr">{activeNow ?? '—'}</b>
           {diff != null && <span className={`mb-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-semibold ${diff >= 0 ? 'bg-primary/15 text-primary' : 'bg-destructive/10 text-destructive'}`}>{diff >= 0 ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}<bdi dir="ltr">{diff >= 0 ? `+${diff}` : diff}</bdi></span>}
         </span>
         <span className="text-xs text-muted-foreground">{diff == null ? t('المقارنة مع أمس تظهر بعد 24 ساعة من التسجيل.', 'The comparison with yesterday appears after 24 hours of history.') : t(`مقارنة بنفس الوقت أمس (${y})`, `vs. same time yesterday (${y})`)}</span>
