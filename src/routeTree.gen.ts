@@ -22,6 +22,7 @@ import { Route as AuthenticatedHealthRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedVouchersRouteImport } from './routes/_authenticated/vouchers'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as ApiPublicRouterCardsRouteImport } from './routes/api/public/router-cards'
 import { Route as ApiPublicRouterJobRouteImport } from './routes/api/public/router-job'
@@ -94,6 +95,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVouchersRoute = AuthenticatedVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/routers': typeof AuthenticatedRoutersRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/vouchers': typeof AuthenticatedVouchersRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/api/public/router-cards': typeof ApiPublicRouterCardsRoute
   '/api/public/router-job': typeof ApiPublicRouterJobRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/settings'
+    | '/vouchers'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/routers'
     | '/settings'
+    | '/vouchers'
     | '/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/routers'
     | '/_authenticated/settings'
+    | '/_authenticated/vouchers'
     | '/_authenticated/welcome'
     | '/api/public/router-cards'
     | '/api/public/router-job'
@@ -370,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/vouchers': {
+      id: '/_authenticated/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof AuthenticatedVouchersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/welcome': {
       id: '/_authenticated/welcome'
       path: '/welcome'
@@ -430,6 +449,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedVouchersRoute: typeof AuthenticatedVouchersRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
 }
 
@@ -441,6 +461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedVouchersRoute: AuthenticatedVouchersRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
 }
 
