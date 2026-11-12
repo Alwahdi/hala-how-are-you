@@ -1,4 +1,4 @@
-import { SignInMethods } from '@/components/account/sign-in-methods';
+import { PageHeading } from '@/components/account/page-heading';
 import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -19,9 +19,9 @@ import { AlertPrefs } from '@/components/alerts/alert-prefs';
 
 export const Route = createFileRoute('/_authenticated/settings')({
   head: () => ({ meta: [
-    { title: 'Mikro — إعدادات الحساب' },
+    { title: 'Mikro — إعدادات الشبكة' },
     { name: 'description', content: 'Set your card style once: number only or number with a code, length and prefix.' },
-    { property: 'og:title', content: 'Mikro — Account settings' },
+    { property: 'og:title', content: 'Mikro — Network settings' },
     { property: 'og:description', content: 'Card style and network details for your Mikro account.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary' },
@@ -68,12 +68,11 @@ function SettingsPage() {
 
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
-      <PageLanguage titles={['إعدادات الحساب', 'Account settings']} />
+      <PageLanguage titles={['إعدادات الشبكة', 'Network settings']} />
       <div aria-hidden className="landing-pattern" />
-      <Link to="/dashboard" search={{ tab: 'more' }} className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
-      <h1 className="mt-2 text-2xl font-bold">{t('إعدادات الحساب', 'Account settings')}</h1>
+      <PageHeading title={t('إعدادات الشبكة','Network settings')} back="/account" />
 
-      <section className="app-panel mt-6 p-5">
+      <section className="mt-6 border-b border-border py-6">
         <h2 className="flex items-center gap-2 text-lg font-bold"><Ticket className="size-5 text-primary" />{t('شكل كروتك', 'Your card style')}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('تضبطه مرة واحدة، وكل كرت جديد يطلع بنفس الشكل.', 'Set it once; every new card follows it.')}</p>
         <div className="seg mt-4" role="group" aria-label={t('نوع الكروت', 'Card system')}>
@@ -87,7 +86,7 @@ function SettingsPage() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3" aria-label={t('معاينة', 'Preview')}>
           {preview.map((c, i) => (
-            <div key={i} className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+            <div key={i} className={`${i > 0 ? 'hidden sm:block' : ''} rounded-md border border-primary/30 bg-primary/5 p-4`}>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wifi className="size-3.5" />{profile?.network_name || t('شبكتي', 'My network')}</p>
               <p className="mt-2 text-xs text-muted-foreground">{style.mode === 'number_only' ? t('رقم الكرت', 'Card number') : t('اسم المستخدم', 'Username')}</p>
               <p className="font-mono text-xl font-bold tracking-wider" dir="ltr">{c.user}</p>
@@ -128,7 +127,6 @@ function SettingsPage() {
         )}
       </section>
 
-      <SignInMethods ar={ar} />
       <div className="mt-6"><EnableAlerts ar={ar} /></div>
       <AlertPrefs ar={ar} />
 
@@ -154,7 +152,7 @@ function NetworkInfo({ ar, name, city }: { ar: boolean; name: string; city: stri
   const [n, setN] = useState(name); const [c, setC] = useState(city); const [state, setState] = useState<'idle' | 'busy' | 'ok' | 'err'>('idle');
   useEffect(() => { setN(name); setC(city); }, [name, city]);
   return (
-    <section className="app-panel mt-6 space-y-3 p-5">
+    <section className="mt-6 space-y-3 border-t border-border py-6">
       <h2 className="text-lg font-bold">{t('بيانات الشبكة', 'Network details')}</h2>
       <div><Label htmlFor="nn">{t('اسم الشبكة', 'Network name')}</Label><Input id="nn" value={n} onChange={(e) => { setN(e.target.value); setState('idle'); }} className="mt-1 h-11" dir="auto" /></div>
       <div><Label htmlFor="cc">{t('المدينة', 'City')}</Label><Input id="cc" value={c} onChange={(e) => { setC(e.target.value); setState('idle'); }} className="mt-1 h-11" dir="auto" /></div>
