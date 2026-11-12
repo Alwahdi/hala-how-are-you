@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useRef, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
@@ -141,6 +142,7 @@ function AuthPage() {
 
   return (
     <main className="app-shell flex min-h-screen flex-col py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['تسجيل الدخول', 'Sign in']} />
       <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <a href="/" className="text-lg font-extrabold">Mikro</a>

@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -66,6 +67,7 @@ function SettingsPage() {
 
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['إعدادات الحساب', 'Account settings']} />
       <div aria-hidden className="landing-pattern" />
       <Link to="/dashboard" search={{ tab: 'more' }} className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
       <h1 className="mt-2 text-2xl font-bold">{t('إعدادات الحساب', 'Account settings')}</h1>

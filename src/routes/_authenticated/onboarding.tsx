@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
@@ -113,6 +114,7 @@ function Onboarding() {
 
   return (
     <main className="app-shell min-h-screen py-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['أضف شبكتك', 'Add your network']} />
       <div aria-hidden className="landing-pattern" />
       <div className="flex items-center justify-between">
         <span className="text-lg font-extrabold">Mikro</span>

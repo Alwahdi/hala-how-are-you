@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -30,6 +31,7 @@ function HealthPage() {
   const { data: routers = [], isLoading, isError, refetch } = useQuery({ queryKey: ['routers-health'], queryFn: async () => { const { data, error } = await supabase.from('routers').select('id, name, last_status, last_seen_at, card_runs').order('created_at'); if (error) throw error; return data ?? []; }, refetchInterval: 15000 });
   return (
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['صحة الراوتر', 'Router health']} />
       <div aria-hidden className="landing-pattern" />
       <Link to="/dashboard" search={{ tab: 'more' }} className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
       <h1 className="mt-2 text-2xl font-bold">{t('صحة الراوتر', 'Router health')}</h1>

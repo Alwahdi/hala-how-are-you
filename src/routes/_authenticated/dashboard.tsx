@@ -1,3 +1,4 @@
+import { PageLanguage } from '@/components/page-language';
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -137,6 +138,7 @@ function Dashboard() {
 
   return (
     <main className="app-shell min-h-screen pb-28 pt-6 sm:pb-10" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
+      <PageLanguage titles={['لوحة الشبكة', 'Network dashboard']} />
       <div aria-hidden className="landing-pattern" />
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
