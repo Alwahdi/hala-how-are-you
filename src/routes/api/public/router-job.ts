@@ -61,7 +61,7 @@ export const Route = createFileRoute('/api/public/router-job')({
               // Keep our copy in step right away; the next card run confirms it.
               if (p.action === 'off') await where(card.update({ disabled: true }));
               if (p.action === 'on') await where(card.update({ disabled: false }));
-              if (p.action === 'pw') await where(card.update({ pw_mode: 'other' }));
+              if (p.action === 'pw') { await where(card.update({ pw_mode: 'other' })); await sb.from('voucher_items').update({secret_valid:false}).eq('router_id',router.id).eq('source',p.source).eq('name',p.name); }
               if (p.action === 'name' && p.value) await where(card.update({ name: p.value }));
               if (p.action === 'del') await where(card.delete());
               if (p.action === 'renew') await where(card.update({ uptime_s: 0, bytes: 0, disabled: false, expires_at: null, finished_at: null, first_used_at: null, ...(p.source === 'usermanager' ? { um_state: 'waiting' } : {}) }));
