@@ -129,7 +129,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
               {phase.tone === 'wait' ? <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin" /> : phase.tone === 'ok' ? <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /> : <XCircle className="mt-0.5 size-4 shrink-0" />}
               <span>{phase.tone === 'ok' ? doneText : phase.text}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="dialog-actions grid grid-cols-2 gap-2">
               {phase.tone === 'bad' && <Button variant="outline" className="h-11" onClick={() => setJob(null)}>{t('رجوع للنموذج', 'Back to form')}</Button>}
               <Button className={`h-11 ${phase.tone === 'bad' ? '' : 'col-span-2'}`} onClick={onClose}>{t('تم', 'Done')}</Button>
             </div>
@@ -168,9 +168,9 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"><p className="text-xs text-muted-foreground">{t('هكذا يفهمها الزبون', 'What the customer gets')}</p><p className="mt-1 font-semibold">{preview}</p></div>
             {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{t(...ERR[problem]!)}</p>}
-            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ نرسلها لما يرجع.', 'The router is offline now.')}</p>}
+            {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ انتظر عودته ثم أرسل. اختياراتك باقية ما دامت النافذة مفتوحة.', 'The router is offline now.')}</p>}
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="dialog-actions grid grid-cols-2 gap-2">
               <Button type="button" variant="outline" className="h-11" onClick={onClose}>{t('إلغاء', 'Cancel')}</Button>
               <Button type="submit" className="h-11" disabled={busy || !!problem || !online || !routerId}>{busy ? <Loader2 className="animate-spin" /> : null}{edit ? t('احفظ على الراوتر', 'Save to router') : t('أضف للراوتر', 'Add to router')}</Button>
             </div>

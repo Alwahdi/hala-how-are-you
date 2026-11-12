@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { relativeRead } from '@/lib/operations-ui';
 import { CalendarClock, Copy, Layers, MessageCircle, Server, StickyNote, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,6 +13,8 @@ const ago = (iso: string, ar: boolean) => { const m = Math.round((Date.now() - D
 
 /** Everything about one card: used and left (data, time, days), online now, package and the actions. */
 export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: { card: CardRow; pkg?: ProfileRow | undefined; router?: RouterRow | undefined; routers: RouterRow[]; live?: Session | undefined; ar: boolean; onRenamed: (n: string) => void }) {
+  const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const t = (a: string, b: string) => (ar ? a : b);
   const st = cardState(card); const share = usedShare(card); const pct = share == null ? null : Math.min(100, Math.round(share * 100));
   const left = remaining(card);
@@ -44,16 +48,17 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
         ) : <p className="mt-1 text-muted-foreground">{t('بلا صلاحية بالأيام.', 'No day limit.')}</p>}
       </div>
 
+      <p className="text-xs text-muted-foreground">{t('آخر قراءة للكرت', 'Card last read')}: {relativeRead(card.synced_at, ar)}</p>
       {live ? (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
           <p className="flex items-center gap-1.5 font-semibold text-primary"><Wifi className="size-4" />{t('متصل الآن', 'Online now')}</p>
-          <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
+          <dl className="mt-2 grid grid-cols-2 gap-3 text-xs">
             <div><dt className="text-muted-foreground">{t('من', 'For')}</dt><dd className="font-semibold">{formatDuration(live.uptime_s, ar)}</dd></div>
             <div><dt className="text-muted-foreground">{t('هذي الجلسة', 'This session')}</dt><dd className="font-semibold" dir="ltr">{formatBytes(live.bytes)}</dd></div>
-            <div className="min-w-0"><dt className="text-muted-foreground">{t('الجهاز', 'Device')}</dt><dd className="truncate font-mono" dir="ltr">{live.mac || live.address || '-'}</dd></div>
+            <div className="col-span-2 min-w-0"><dt className="text-muted-foreground">{t('الجهاز', 'Device')}</dt><dd className="break-all font-mono" dir="ltr">{live.mac || live.address || '-'}</dd></div>
           </dl>
         </div>
-      ) : <p className="text-sm text-muted-foreground">{card.last_online_at ? t(`غير متصل الآن · آخر مرة شفناه ${ago(card.last_online_at, true)}`, `Not online now · last seen ${ago(card.last_online_at, false)}`) : t('غير متصل الآن', 'Not online now')}</p>}
+      ) : <p className="text-sm text-muted-foreground">{card.last_online_at ? t(`غير متصل الآن · آخر مرة شفناه ${ago(card.last_online_at, true)}`, `Not online now · last seen ${ago(card.last_online_at, false)}`) : t('لا يوجد اتصال حي مؤكد الآن', 'No confirmed live session now')}</p>}
 
       <dl className="grid grid-cols-2 gap-3 text-sm">
         <Item icon={<Layers />} label={t('الباقة', 'Package')} value={`${card.profile || '-'}${pkg?.price ? ` · ${pkg.price}` : ''}`} />
@@ -62,14 +67,15 @@ export function CardDetail({ card, pkg, router, routers, live, ar, onRenamed }: 
         <Item icon={<StickyNote />} label={t('ملاحظة', 'Note')} value={card.comment || '-'} />
       </dl>
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" className="h-11" onClick={() => navigator.clipboard.writeText(card.name)}><Copy />{t('نسخ الرقم', 'Copy number')}</Button>
+        <Button variant="outline" className="h-11" onClick={async () => { try { await navigator.clipboard.writeText(card.name); setCopied(true); setCopyError(false); } catch { setCopyError(true); } }}><Copy />{copied ? t('تم النسخ', 'Copied') : t('نسخ الرقم', 'Copy number')}</Button>
         <Button className="h-11" asChild><a href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer"><MessageCircle />{t('أرسل للزبون', 'Send to customer')}</a></Button>
       </div>
+      {copyError && <p role="alert" className="text-sm text-destructive">{t('تعذر النسخ. حدد الرقم أعلى النافذة وانسخه يدويًا.', 'Copy failed. Select the number above and copy it manually.')}</p>}
       <CardControls key={`${card.router_id}-${card.source}-${card.name}`} card={card} router={router ?? routers.find((r) => r.id === card.router_id)} live={!!live} ar={ar} onRenamed={onRenamed} />
     </>
   );
 }
 
 function Item({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return <div className="stat-tile"><dt className="flex items-center gap-1 text-xs text-muted-foreground [&>svg]:size-3.5">{icon}{label}</dt><dd className="mt-1 truncate font-semibold" dir="auto">{value}</dd></div>;
+  return <div className="stat-tile"><dt className="flex items-center gap-1 text-xs text-muted-foreground [&>svg]:size-3.5">{icon}{label}</dt><dd className="mt-1 break-words font-semibold" dir="auto">{value}</dd></div>;
 }

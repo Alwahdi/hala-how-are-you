@@ -4,7 +4,7 @@ import { humanData, type PkgFacts } from '@/lib/packages';
 import { formatDuration } from '@/lib/card-status';
 import type { ProfileRow } from './types';
 
-export type PkgSummary = { name: string; total: number; ready: number; live: number; today: number; p?: ProfileRow; facts: PkgFacts };
+export type PkgSummary = { id: string; routerId: string; routerName: string; name: string; total: number; ready: number; live: number; today: number; p?: ProfileRow; facts: PkgFacts };
 
 const LOW_READY = 20;
 
@@ -24,6 +24,7 @@ export function PackageCard({ e, selected, ar, onClick }: { e: PkgSummary; selec
   return (
     <button type="button" aria-pressed={selected} onClick={onClick} className={`app-panel tap-card flex flex-col p-4 text-start ${selected ? 'border-primary' : ''}`}>
       <span className="flex items-center justify-between gap-1"><b className="truncate" dir="auto">{e.name === '-' ? t('بدون باقة', 'No package') : e.name}</b><ChevronRight className="tap-chevron" /></span>
+      <span className="mt-1 text-xs text-muted-foreground">{e.routerName}</span>
       <span className="mt-1 block text-lg font-bold" dir="auto">
         {f.price ? <span className="text-primary">{f.price}</span> : <span className="text-sm font-normal text-muted-foreground">{t('بدون سعر', 'No price')}</span>}
         {f.sell ? <span className="ms-1 text-xs font-normal text-muted-foreground">{t(`(بيع ${f.sell})`, `(sells ${f.sell})`)}</span> : null}
