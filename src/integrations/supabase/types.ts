@@ -748,6 +748,7 @@ export type Database = {
         Row: {
           attempts: number
           batch_id: string
+          dispatch_id: string | null
           id: string
           lease_at: string | null
           name: string
@@ -762,6 +763,7 @@ export type Database = {
         Insert: {
           attempts?: number
           batch_id: string
+          dispatch_id?: string | null
           id?: string
           lease_at?: string | null
           name: string
@@ -776,6 +778,7 @@ export type Database = {
         Update: {
           attempts?: number
           batch_id?: string
+          dispatch_id?: string | null
           id?: string
           lease_at?: string | null
           name?: string
@@ -870,7 +873,15 @@ export type Database = {
         }
         Returns: string
       }
+      claim_voucher_chunk: {
+        Args: { amount: number; rid: string }
+        Returns: Json
+      }
       claim_voucher_item: { Args: { rid: string }; Returns: Json }
+      confirm_voucher_chunk: {
+        Args: { lease: string; results: Json; rid: string }
+        Returns: undefined
+      }
       confirm_voucher_item: {
         Args: { iid: string; res: string; rid: string }
         Returns: undefined

@@ -169,6 +169,13 @@
       "when": 1794456477009,
       "tag": "0023_voucher_large_batch_staging",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794459024376,
+      "tag": "0024_voucher_transport_chunks",
+      "breakpoints": true
     }
   ]
 }

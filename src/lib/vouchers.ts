@@ -1,7 +1,7 @@
 import { z } from "zod";
 export const MAX_VOUCHERS = 1500;
 export const VOUCHER_CHUNK = 100;
-export const VOUCHER_PROTOCOL = 3;
+export const VOUCHER_PROTOCOL = 4;
 export function issuanceHold(status: Record<string, unknown> | null, seen: string | null, now = Date.now()) {
   if (!seen || !Number.isFinite(Date.parse(seen)) || now - Date.parse(seen) > 90000) return "offline";
   if (status?.["voucherProtocol"] !== VOUCHER_PROTOCOL) return "upgrade";

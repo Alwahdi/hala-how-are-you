@@ -7,6 +7,7 @@ export function voucherCommands(
   marker: string,
   bytes: number,
   time: number,
+  indexed = false,
 ) {
   for (const v of [name, password, profile, marker])
     if (!/^[\w.@-]*$/.test(v)) throw Error("unsafe_value");
@@ -26,7 +27,26 @@ export function voucherCommands(
       ? `:if ([${base} get $u actual-profile] != "${profile}") do={${base} create-and-activate-profile $u customer=[${base} get $u customer] profile="${profile}"}; :if ([${base} get $u actual-profile] != "${profile}") do={:error "profile_not_assigned"}`
       : `:if ([:len [/user-manager user-profile find user="${name}" profile="${profile}"]] = 0) do={/user-manager user-profile add user="${name}" profile="${profile}"}; :if ([:len [/user-manager user-profile find user="${name}" profile="${profile}"]] != 1) do={:error "profile_not_assigned"}`;
   const receipt = `mikro-issued-${marker}`;
-  return `:local u [${base} find ${field}="${name}"]; :local receipt [/system script find name="${receipt}"]; :if ([:len $u] > 0) do={:if ([:len $receipt] != 1) do={:error "exists"}; :if ([/system script get $receipt source] != [:tostr $u]) do={:error "exists"}; :if ([${base} get $u password] != "${password}") do={:error "credentials_changed"}} else={:if ([:len $receipt] > 0) do={:error "previous_account_removed"}; ${add}; :set u [${base} find ${field}="${name}"]; /system script add name="${receipt}" source=[:tostr $u] comment="Mikro issuance receipt"}; ${assign}; ${base} set $u disabled=no`;
+  const lookup = indexed ? `($users->"${source}:${name}")` : `[${base} find ${field}="${name}"]`;
+  const receiptLookup = indexed ? `($receipts->"${receipt}")` : `[/system script find name="${receipt}"]`;
+  const receiptValue = indexed ? '$receipt' : '[/system script get $receipt source]';
+  return `:local u ${lookup}; :local receipt ${receiptLookup}; :if ([:len [:tostr $u]] > 0) do={:if ([:len [:tostr $receipt]] = 0) do={:error "exists"}; :if (${receiptValue} != [:tostr $u]) do={:error "exists"}; :if ([${base} get $u password] != "${password}") do={:error "credentials_changed"}} else={:if ([:len [:tostr $receipt]] > 0) do={:error "previous_account_removed"}; ${add}; :set u [${base} find ${field}="${name}"]; /system script add name="${receipt}" source=[:tostr $u] comment="Mikro issuance receipt"; ${indexed ? `:set ($users->"${source}:${name}") [:tostr $u]; :set ($receipts->"${receipt}") [:tostr $u];` : ''}}; ${assign}; ${base} set $u disabled=no`;
+}
+
+export function voucherIndexes(source: string, version: string) {
+  const base = source === 'hotspot' ? '/ip hotspot user' : version.startsWith('6') ? '/tool user-manager user' : '/user-manager user';
+  const field = source === 'usermanager' && version.startsWith('6') ? 'username' : 'name';
+  return `:local users [:toarray ""]; :local receipts [:toarray ""]; :foreach r in=[${base} print as-value] do={:set ($users->("${source}:" . ($r->"${field}"))) ($r->".id")}; :foreach r in=[/system script print as-value where name~"^mikro-issued-"] do={:set ($receipts->($r->"name")) ($r->"source")}`;
+}
+
+export type VoucherTask = { id: string; source: string; name: string; password: string; profile: string; bytes: number; time: number };
+export function voucherChunkScript(tasks: VoucherTask[], version: string, lease: string, token: string, resultUrl: string) {
+  if (!tasks.length || tasks.length > 100 || !/^[a-f0-9-]{36}$/.test(lease) || !/^[a-f0-9]{48}$/.test(token)) throw Error('invalid_chunk');
+  if (tasks.some(t=>t.source !== tasks[0]?.source || !/^[a-f0-9-]{36}$/.test(t.id))) throw Error('invalid_chunk');
+  return [voucherIndexes(tasks[0]?.source ?? '', version), ':local results ""',
+    ...tasks.map(t=>`:if ([/system resource get cpu-load] >= 80) do={:delay 1s}; :local res "ok"; :do {${voucherCommands(t.source,version,t.name,t.password,t.profile,'vc-'+t.id,t.bytes,t.time,true)}} on-error={:set res "error"}; :if ([:len $results]>0) do={:set results ($results . ",")}; :set results ($results . "{\\\"item\\\":\\\"${t.id}\\\",\\\"result\\\":\\\"" . $res . "\\\"}"); :delay 10ms`),
+    `/tool fetch url="${resultUrl}" check-certificate=yes http-method=post http-header-field="Content-Type: application/json,X-Mikro-Token: ${token}" http-data=("{\\\"lease\\\":\\\"${lease}\\\",\\\"results\\\":[" . $results . "]}") output=none`,
+  ].join('; ');
 }
 export function voucherDispatcher(token: string, url: string, chained = false) {
   const expr = (source: string, version: string) => {
@@ -34,7 +54,7 @@ export function voucherDispatcher(token: string, url: string, chained = false) {
     cmd = cmd
       .replace("limit-bytes-total=0", "limit-bytes-total=BYTES")
       .replace("limit-uptime=0s", "limit-uptime=TIMEs");
-    let quoted = '"' + cmd.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$") + '"';
+    let quoted = '"' + cmd.replace(/\\/g, "\\").replace(/"/g, '\\"').replace(/\$/g, "\\$") + '"';
     for (const [needle, v] of [
       ["NAME", "vn"],
       ["PASSWORD", "vp"],
@@ -75,13 +95,14 @@ export function voucherDispatcher(token: string, url: string, chained = false) {
 export function voucherWorker(token: string, url: string) {
   return [
     ':if ([:len [/system script job find where script="mikro-issue"]] > 1) do={:return}',
-    ':local ver [/system resource get version]', ':local job ""', ':local started [/system resource get uptime]',
-    ':for tick from=1 to=10 do={',
+    ':local started [/system resource get uptime]',
+    ':for tick from=1 to=4 do={',
     ':if (([/system resource get uptime] - $started) > 20s) do={:return}',
     ':if ([/system resource get cpu-load] >= 80) do={:return}',
     ':if ([/system resource get free-memory] < 16777216) do={:return}',
     ':if ([/system resource get free-hdd-space] < 4194304) do={:return}',
-    `:if ($job = "") do={:do {:local nx [/tool fetch url="${url.replace("router-report", "voucher-next")}" check-certificate=yes http-method=post http-header-field="X-Mikro-Token: ${token}" output=user as-value]; :set job ($nx->"data")} on-error={:return}}`,
-    ':if ([:pick $job 0 6] != "issue|") do={:return}', voucherDispatcher(token, url, true), '}',
-  ].join("; ");
+    `:do {/tool fetch url="${url.replace("router-report", "voucher-next")}" check-certificate=yes http-method=post http-header-field="X-Mikro-Token: ${token}" dst-path="mikro-chunk.rsc"} on-error={:return}`,
+    ':do {/import file-name=mikro-chunk.rsc} on-error={/file remove [find name="mikro-chunk.rsc"]; :return}',
+    '/file remove [find name="mikro-chunk.rsc"]', ':delay 200ms', '}',
+  ].join('; ');
 }
