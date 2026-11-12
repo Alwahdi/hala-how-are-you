@@ -8,7 +8,7 @@ export function AppNavigation() {
   const location = useLocation();
   const t = (a: string,b: string) => ar ? a : b;
   const tab = new URLSearchParams(location.searchStr).get('tab');
-  const current = location.pathname === '/dashboard' ? (tab === 'cards' ? 'cards' : tab === 'more' ? 'routers' : 'home') : location.pathname === '/routers' || location.pathname === '/health' ? 'routers' : location.pathname === '/account' || location.pathname === '/settings' ? 'account' : 'home';
+  const current = location.pathname === '/vouchers' ? 'cards' : location.pathname === '/dashboard' ? (tab === 'cards' ? 'cards' : tab === 'more' ? 'routers' : 'home') : location.pathname === '/routers' || location.pathname === '/health' ? 'routers' : location.pathname === '/account' || location.pathname === '/settings' ? 'account' : 'home';
   const items = [
     { id:'home', to:'/dashboard' as const, label:t('الرئيسية','Overview'), icon:Home, search:{} },
     { id:'cards', to:'/dashboard' as const, label:t('الكروت','Cards'), icon:Ticket, search:{tab:'cards' as const} },

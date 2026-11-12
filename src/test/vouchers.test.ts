@@ -1,0 +1,10 @@
+import {describe,it,expect} from 'vitest';
+import {DEFAULT_TEMPLATE,a4Layout,generateNames,issuanceSchema} from '@/lib/vouchers';
+import {voucherCommands} from '@/lib/voucher-router';
+import {seal,unseal} from '@/lib/voucher-crypto.server';
+describe('voucher printing and issuance',()=>{
+ it('fits 12 cards on A4 210 x 297 and paginates 25 into three pages',()=>{expect(a4Layout(DEFAULT_TEMPLATE.layout,25)).toEqual({perPage:12,pages:3});expect(()=>a4Layout({...DEFAULT_TEMPLATE.layout,width:110},1)).toThrow('paper_overflow');});
+ it('generates distinct names preserving a leading zero and suffix',()=>{let n=0;const v=issuanceSchema.parse({routerId:'00000000-0000-4000-8000-000000000001',source:'hotspot',packageName:'p',label:'b',count:10,length:8,prefix:'0',suffix:'X',charset:'digits',mode:'same',requestKey:'00000000-0000-4000-8000-000000000002'});const names=generateNames(v,k=>Uint32Array.from({length:k},()=>n++));expect(new Set(names).size).toBe(10);expect(names.every(x=>x.length===8&&x.startsWith('0')&&x.endsWith('X'))).toBe(true);});
+ it('encrypts reprint credentials and authenticates their item binding',async()=>{const encrypted=await seal('test-voucher-only','test-encryption-only','item-1');expect(encrypted).not.toContain('test-voucher-only');expect(await unseal(encrypted,'test-encryption-only','item-1')).toBe('test-voucher-only');await expect(unseal(encrypted,'test-encryption-only','item-2')).rejects.toThrow();});
+ it('does not overwrite existing accounts and supports both manager menu versions',()=>{const hs=voucherCommands('hotspot','7','001','','basic','vc-test',600*1024*1024,18000);expect(hs).toContain('limit-bytes-total=629145600');expect(hs).toContain('limit-uptime=18000s');expect(hs).toContain(':error "exists"');expect(voucherCommands('usermanager','6','001','test','basic','vc-test',0,0)).toContain('/tool user-manager user');expect(voucherCommands('usermanager','7','001','test','basic','vc-test',0,0)).toContain('/user-manager user-profile');expect(()=>voucherCommands('hotspot','7','bad"','test','basic','vc-test',0,0)).toThrow();});
+});
