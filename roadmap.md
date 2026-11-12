@@ -2,7 +2,8 @@
 
 ## Voucher issuance, templates and A4 printing (requested 2026-11-12)
 - [ ] Study quick single-card issuance and complete available session details including NAS-Port — implementation awaits a separate scope because current approval permits visual samples only
-- [ ] Replace rejected visual templates — present a reference-faithful sample for founder approval before app changes
+- [x] Prepare reference-faithful single-card visual sample; inspected full-size with synthetic data
+- [ ] Apply corrected templates — blocked on founder's acceptance of the visual sample
 - [x] Study current functionality and inspect founder's uploaded visual references
 - [x] Resolve A4 and requirement for later reprinting; retain credential encryption as a safety requirement
 - [x] Approve implementation plan and private credential archive policy
