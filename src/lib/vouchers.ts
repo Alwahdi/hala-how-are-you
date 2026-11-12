@@ -31,6 +31,9 @@ export const issuanceSchema = z
     message: "Keep at least four random characters.",
   });
 export type IssueInput = z.infer<typeof issuanceSchema>;
+export function passwordInput(v:IssueInput):IssueInput {
+  return {...v,count:1,length:12,prefix:'',suffix:'',charset:'mixed',manualName:undefined};
+}
 export function generateNames(
   v: IssueInput,
   random = (n: number) => crypto.getRandomValues(new Uint32Array(n)),

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_TEMPLATE, a4Layout, generateNames, issuanceSchema } from "@/lib/vouchers";
+import { DEFAULT_TEMPLATE, a4Layout, generateNames, issuanceSchema, passwordInput } from "@/lib/vouchers";
 import { voucherCommands } from "@/lib/voucher-router";
 import { seal, unseal } from "@/lib/voucher-crypto.server";
 describe("voucher printing and issuance", () => {
@@ -48,6 +48,9 @@ describe("voucher printing and issuance", () => {
       hotspotLimits: { bytes: 0, time: 0 },
     };
     expect(generateNames(issuanceSchema.parse(v))).toEqual(["001234"]);
+    const passwordConfig=passwordInput(issuanceSchema.parse(v));
+    expect(passwordConfig.manualName).toBeUndefined();
+    expect(generateNames(passwordConfig, n=>new Uint32Array(n))[0]).toHaveLength(12);
     expect(issuanceSchema.safeParse({ ...v, count: 2 }).success).toBe(false);
     expect(issuanceSchema.safeParse({ ...v, manualName: "bad|command" }).success).toBe(false);
   });

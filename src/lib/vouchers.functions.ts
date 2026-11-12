@@ -3,7 +3,7 @@ import { setResponseHeader } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { packageFacts } from "./packages";
-import { generateNames, issuanceSchema } from "./vouchers";
+import { generateNames, issuanceSchema, passwordInput } from "./vouchers";
 export const issueVouchers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => issuanceSchema.parse(v))
@@ -67,15 +67,7 @@ export const issueVouchers = createServerFn({ method: "POST" })
             ? name
             : data.mode === "empty"
               ? ""
-              : (generateNames({
-                  ...data,
-                  count: 1,
-                  length: 12,
-                  prefix: "",
-                  suffix: "",
-                  charset: "mixed",
-                  manualName: undefined,
-                })[0] ?? "");
+              : (generateNames(passwordInput(data))[0] ?? "");
         return { id, name, ordinal, ciphertext: await seal(password, secret, id) };
       }),
     );
