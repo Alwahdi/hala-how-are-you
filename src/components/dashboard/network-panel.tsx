@@ -169,7 +169,7 @@ export function NetworkPanel() {
                   {!direct && access === 'needs_api' && (
                     <div className="mt-4 space-y-2 rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm">
                       <p className="flex items-center gap-2 font-semibold"><Cloud className="size-4 text-primary" />{t('راوترك عليه IP عام وIP Cloud — باقي خطوة للاتصال المباشر', 'Public IP and IP Cloud found — one step to direct access')}</p>
-                      <p className="text-xs text-muted-foreground">{t('خدمة API مطفية في الراوتر. الصق هذا السطر مرة واحدة ونتصل تلقائياً خلال دقيقة.', 'The API service is off on the router. Paste this once and we connect automatically within a minute.')}</p>
+                      <p className="text-xs text-muted-foreground">{t('خدمة API غير مفعّلة في الراوتر. الصق هذا السطر مرة واحدة ونتصل تلقائياً خلال دقيقة.', 'The API service is off on the router. Paste this once and we connect automatically within a minute.')}</p>
                       <Button variant="outline" className="h-11 w-full" onClick={() => copy(API_ENABLE_COMMAND + '\n')}><Copy />{copied ? t('تم النسخ ✓', 'Copied ✓') : t('نسخ أمر تشغيل API', 'Copy API command')}</Button>
                     </div>
                   )}
