@@ -356,7 +356,7 @@ function UmEmpty({ states, ar, v7 }: { states: { r: RouterRow; st: UmState }[]; 
   if (reading.length) return <p className="app-panel p-5 text-sm">{t(`User Manager شغال على ${names(reading)}. ننتظر أول قائمة كروت (بعد اكتمال قراءة الكروت). لو ما فيه كروت أصلاً، تظهر هنا أول ما تضيفها.`, `User Manager is on at ${names(reading)}. Waiting for the first card list (after a completed card read). If it has no cards yet, they appear here once added.`)}</p>;
   if (off.length) return (
     <div className="space-y-3">
-      <p className="app-panel p-4 text-sm">{t(`User Manager مثبت على ${names(off)} بس مطفي. شغّله بالخطوات تحت.`, `User Manager is installed on ${names(off)} but switched off. Turn it on with the steps below.`)}</p>
+      <p className="app-panel p-4 text-sm">{t(`User Manager مثبت على ${names(off)} لكنه غير مفعّل. فعّله بالخطوات أدناه.`, `User Manager is installed on ${names(off)} but switched off. Turn it on with the steps below.`)}</p>
       <UserManagerSetup ar={ar} v7={v7} />
     </div>
   );
