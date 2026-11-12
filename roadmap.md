@@ -1,5 +1,11 @@
 # Roadmap
 
+## Whole-app mobile-first UX redesign (requested 2026-11-12)
+- [ ] Review NN/g references and map relevant principles to every current user journey
+- [ ] Audit public/account/setup/operations screens and interactions without mutations
+- [ ] Present phased redesign and acceptance matrix for founder approval
+- [ ] Implement approved scope and verify Arabic/English, phone and desktop behavior
+
 ## Sign-in UI, UX and interactions (requested 2026-11-12)
 - [x] Inspect current sign-in, recovery and linked-method presentation without account changes
 - [x] Approve focused visual and interaction improvement plan
