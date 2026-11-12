@@ -66,6 +66,7 @@ export const issueVouchers = createServerFn({ method: "POST" })
                   prefix: "",
                   suffix: "",
                   charset: "mixed",
+                  manualName: undefined,
                 })[0] ?? "");
         return { id, name, ordinal, ciphertext: await seal(password, secret, id) };
       }),
