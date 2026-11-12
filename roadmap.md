@@ -1,5 +1,11 @@
 # Roadmap
 
+## Independent sign-in methods (requested 2026-11-12)
+- [x] Review current phone verification and resolve email/password preference
+- [ ] Approve plan for phone-only sign-in, independent email/password and settings linking
+- [ ] Confirm supported phone-session and message-delivery setup before implementation
+- [ ] Implement and verify independent sign-in and secure linking without duplicate accounts
+
 ## CPU load and direct API (plan approved 2026-11-11)
 - [x] 1. No overlap: scripts exit when a previous run is still going
 - [x] 2. Lighter UM v6 read: one print as-value, online from hotspot active, short pauses
