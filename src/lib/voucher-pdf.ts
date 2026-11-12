@@ -1,11 +1,12 @@
 import { jsPDF } from "jspdf";
-import fontAsset from "@/assets/voucher-cairo.ttf.asset.json";
+import fontAsset from "@/assets/voucher-cairo-complete.ttf.asset.json";
 import { a4Layout, type VoucherTemplate, type PrintVoucher } from "./vouchers";
 export async function voucherPdf(
   t: VoucherTemplate,
   cards: PrintVoucher[],
   artwork = "",
   logo = "",
+  options: { signal?: AbortSignal; progress?: (n: number, total: number) => void } = {},
 ) {
   const { perPage } = a4Layout(t.layout, cards.length);
   const pdf = new jsPDF({ format: "a4", unit: "mm" });
@@ -23,7 +24,12 @@ export async function voucherPdf(
     amber: [163, 95, 0],
   } as const;
   const tone = palette[t.tone];
-  cards.forEach((c, index) => {
+  for (const [index, c] of cards.entries()) {
+    if (options.signal?.aborted) throw Error("cancelled");
+    if (index % 24 === 0) {
+      options.progress?.(index, cards.length);
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
     if (index && index % perPage === 0) pdf.addPage();
     const n = index % perPage;
     const { width: w, height: h, margin, gap, columns } = t.layout;
@@ -74,6 +80,7 @@ export async function voucherPdf(
       pdf.rect(x, y, w, h);
       pdf.setLineDashPattern([], 0);
     }
-  });
+  }
+  options.progress?.(cards.length, cards.length);
   return pdf;
 }
