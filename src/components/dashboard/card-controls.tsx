@@ -27,14 +27,16 @@ export function CardControls({ card, router, live, ar, onRenamed }: { card: Card
   const [run, setRun] = useState<{ id: string; action: CardAction; value?: string } | null>(null);
   const [newPw, setNewPw] = useState<string | null>(null);
 
-  const { data: job } = useQuery({
+  const { data: job, isError: jobError, refetch: retryOutcome } = useQuery({
     queryKey: ['card-job', run?.id],
     enabled: !!run,
     queryFn: async () => {
-      const { data } = await supabase.from('router_jobs').select('status, result, requested_at, sent_at').eq('id', run!.id).maybeSingle();
+      if (!run) return null;
+      const { data, error } = await supabase.from('router_jobs').select('status, result, requested_at, sent_at').eq('id', run.id).maybeSingle();
+      if (error) throw error;
       const j = data as Job | null;
       if (j && (j.status === 'done' || j.status === 'failed')) {
-        if (j.status === 'done' && run!.action === 'name' && run!.value) onRenamed(run!.value);
+        if (j.status === 'done' && run.action === 'name' && run.value) onRenamed(run.value);
         qc.invalidateQueries({ queryKey: ['cards'] });
         qc.invalidateQueries({ queryKey: ['sessions'] });
       }

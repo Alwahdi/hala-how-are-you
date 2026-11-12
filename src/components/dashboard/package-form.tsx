@@ -67,7 +67,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
   const [err, setErr] = useState<string | null>(null);
   const [job, setJob] = useState<{ id: string; action: 'add' | 'edit' | 'del' } | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
-  const { data: jr } = useRouterJob(job?.id, () => { qc.invalidateQueries({ queryKey: ['profiles-pkg'] }); });
+  const { data: jr, isError: jobReadError, refetch: retryJobRead } = useRouterJob(job?.id, () => { qc.invalidateQueries({ queryKey: ['profiles-pkg'] }); });
   const set = (k: keyof typeof d, v: number | string | undefined) => setD((x) => ({ ...x, [k]: v }));
   const action = edit ? 'edit' : 'add';
   const problem = checkPackage({ ...d, action });
@@ -168,7 +168,7 @@ export function PackageForm({ open, onClose, source, routers, edit, cardCount, a
             {!um && <p className="rounded-xl bg-muted p-3 text-xs leading-relaxed text-muted-foreground">{t('في Hotspot الوقت والبيانات تنحفظ على كل كرت وقت إنشائه، مش في الباقة. الصلاحية والسعر نكتبهم بطريقة Mikhmon، فتشتغل مع Mikhmon لو تستخدمه.', 'In Hotspot, time and data live on each card when it is made, not on the package. Validity and price are written the Mikhmon way, so Mikhmon keeps working.')}</p>}
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm"><p className="text-xs text-muted-foreground">{t('هكذا يفهمها الزبون', 'What the customer gets')}</p><p className="mt-1 font-semibold">{preview}</p></div>
-            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{t(...(ERR[problem] ?? ERR.bad_name))}</p>}
+            {problem && problem !== 'bad_name' && <p role="alert" className="text-sm text-destructive">{(ERR[problem]?.[ar ? 0 : 1] ?? t('راجع القيم وأعد المحاولة.', 'Check the values and retry.'))}</p>}
             {!online && <p className="text-sm text-muted-foreground">{t('الراوتر غير متصل الآن؛ انتظر عودته ثم أرسل. اختياراتك باقية ما دامت النافذة مفتوحة.', 'The router is offline. Wait for it to return, then send. Your choices stay while this window is open.')}</p>}
             {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             <div className="dialog-actions grid grid-cols-2 gap-2">

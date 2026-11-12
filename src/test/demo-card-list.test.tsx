@@ -10,7 +10,9 @@ describe('Demonstration card inspection', () => {
     expect(within(dialog).getAllByText('DEMO-003')[0]).toBeInTheDocument();
     expect(within(dialog).getByText('68.2%')).toBeInTheDocument();
     expect(within(dialog).queryByText('DEMO-001')).not.toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole('button', { name: 'إغلاق' }));
+    const close = within(dialog).getAllByRole('button', { name: 'إغلاق' })[0];
+    if (!close) throw new Error('Missing close control');
+    fireEvent.click(close);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

@@ -27,7 +27,7 @@ const PAGE = 50;
 const SELECT_MAX = BULK_MAX * 5;
 
 type Load = { loaded: number; total: number | null; fetching: boolean } | null;
-type Props = { cards: CardRow[]; profiles: ProfileRow[]; routers: RouterRow[]; sessions: Session[]; ar: boolean; initialFilter?: CardState | undefined; load?: Load };
+type Props = { cards: CardRow[]; profiles: ProfileRow[]; routers: RouterRow[]; sessions: Session[]; ar: boolean; initialFilter?: CardState | undefined; load?: Load; readError?: boolean };
 const key = (c: Pick<CardRow, 'router_id' | 'source' | 'name'>) => `${c.router_id}|${c.source}|${c.name}`;
 
 const REQ_ERR: Record<string, [string, string]> = {
