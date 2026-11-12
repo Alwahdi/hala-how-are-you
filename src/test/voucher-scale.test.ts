@@ -33,12 +33,12 @@ describe("large voucher safety", () => {
   });
   it("holds when CPU reaches 80 percent", () => {
     const now = Date.now(); const seen = new Date(now).toISOString();
-    const s = { voucherProtocol: 3, cpu: 80, freeMemory: 33554432, freeHdd: 8388608 };
+    const s = { voucherProtocol: 4, cpu: 80, freeMemory: 33554432, freeHdd: 8388608 };
     expect(issuanceHold(s, seen, now)).toBe("cpu");
     expect(issuanceHold({ ...s, cpu: 79 }, seen, now)).toBe(null);
   });
   it("does not dispatch to stale or old scripts", () => {
-    const now = Date.now(); const s = { voucherProtocol: 3, cpu: 1, freeMemory: 33554432, freeHdd: 8388608 };
+    const now = Date.now(); const s = { voucherProtocol: 4, cpu: 1, freeMemory: 33554432, freeHdd: 8388608 };
     expect(issuanceHold(s, new Date(now - 90001).toISOString(), now)).toBe("offline");
     expect(issuanceHold({ ...s, voucherProtocol: 2 }, new Date(now).toISOString(), now)).toBe("upgrade");
   });
