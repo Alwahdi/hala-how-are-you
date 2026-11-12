@@ -57,3 +57,4 @@ related: [../templates/decision.md]
 - [D-043](D-043-mobile-first-app-redesign.md) — إعادة تصميم الرحلات والشاشات بأولوية الهاتف (approved)
 - [D-044](D-044-voucher-issuance-and-printing.md) — قوالب A4 وأرشيف الطباعة وتهيئة الإصدار وحدود التحقق (approved)
 - [D-045](D-045-single-and-batch-issuance.md) — إضافة كرت واحد والدفعات وحدود تفعيل الإصدار (approved)
+- [D-046](D-046-large-voucher-batches.md) — توسعة الدفعات والتجهيز والطباعة المتدرجة وبوابة اختبار المختبر (approved)

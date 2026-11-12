@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import fontAsset from "@/assets/voucher-cairo-complete.ttf.asset.json";
+import fontAsset from "@/assets/voucher-cairo-print.ttf.asset.json";
 import { a4Layout, type VoucherTemplate, type PrintVoucher } from "./vouchers";
 export async function voucherPdf(
   t: VoucherTemplate,

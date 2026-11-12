@@ -926,9 +926,7 @@ function Studio() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      setPrint({ ...print, selected: new Set(print.cards.map((c) => c.name)) })
-                    }
+                    onClick={() => {setPreparedPdf(null);setPrint({ ...print, selected: new Set(print.cards.map((c) => c.name)) });}}
                   >
                     {t("تحديد الكل", "Select all")}
                   </Button>
@@ -946,7 +944,7 @@ function Studio() {
                           const s = new Set(print.selected);
                           if (e.target.checked) s.add(c.name);
                           else s.delete(c.name);
-                          setPrint({ ...print, selected: s });
+                          setPreparedPdf(null);setPrint({ ...print, selected: s });
                         }}
                       />
                       <span dir="ltr">{c.name}</span>
@@ -1404,7 +1402,7 @@ function Studio() {
             )}
             {!capable && form.routerId && (
               <p role="alert" className="text-sm text-warning">
-                {t(
+                {readiness.data?.verified || readiness.data?.testRouters.includes(form.routerId) ? t("الإصدار متوقف مؤقتًا: يلزم تقرير حديث وأمر ربط محدّث ومعالج وذاكرة ومساحة جاهزة.","Issuance held: a recent report, updated setup script and healthy CPU, memory and disk are required.") : t(
                   "الإصدار غير مفعّل حتى اجتياز اختبار الراوتر التجريبي، ثم النشر وإعادة الربط بموافقتك.",
                   "Issuance is disabled until test-router verification, then approved publication and reconnect.",
                 )}
