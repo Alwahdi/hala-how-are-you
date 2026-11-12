@@ -10,6 +10,7 @@ import { checkHealth, healthScore, readTime, type HealthInput, type Issue } from
 import { QueryNotice } from '@/components/query-notice';
 import { freshReport, relativeRead } from '@/lib/operations-ui';
 import { cardReadSecs, type CardRuns } from '@/lib/card-runs';
+import { PageHeading } from '@/components/account/page-heading';
 
 export const Route = createFileRoute('/_authenticated/health')({
   head: () => ({ meta: [
@@ -33,10 +34,10 @@ function HealthPage() {
     <main className="app-shell min-h-screen pb-16 pt-6" lang={ar ? 'ar' : 'en'} dir={ar ? 'rtl' : 'ltr'}>
       <PageLanguage titles={['صحة الراوتر', 'Router health']} />
       <div aria-hidden className="landing-pattern" />
-      <Link to="/dashboard" search={{ tab: 'more' }} className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4 rtl:rotate-180" />{t('رجوع', 'Back')}</Link>
-      <h1 className="mt-2 text-2xl font-bold">{t('صحة الراوتر', 'Router health')}</h1>
-      <p className="text-sm text-muted-foreground">{t('فحص للقراءة فقط — ما نغيّر أي شيء. نعرض آخر تقرير، ونتحقق من تحديثه كل 15 ثانية.', 'Read-only — we change nothing. Shows the last report; checks for updates every 15 seconds.')}</p>
+      <PageHeading title={t('صحة الشبكة','Network health')} back="/routers" />
+      <p className="mt-4 text-sm text-muted-foreground">{t('نتائج آخر تقارير الراوترات.','Checks from the latest router reports.')}</p>
       {isError && <QueryNotice ar={ar} stale={routers.length > 0} retry={() => { refetch(); }} />}
+      {!isLoading&&!isError&&routers.length===0&&<p className="py-8 text-sm text-muted-foreground">{t('لا توجد راوترات لفحصها.','No routers to check.')}</p>}
       {isLoading ? <p role="status" className="mt-4">{t('نحمّل الفحص…', 'Loading checks…')}</p> : routers.map((r) => {
         const st = (r.last_status ?? {}) as Record<string, never>;
         const fields = ['version','ntp','services','clockDate','totalHdd','totalMemory'].every((k) => k in st);
