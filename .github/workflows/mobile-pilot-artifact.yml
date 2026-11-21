@@ -16,6 +16,7 @@ jobs:
     env:
       GH_REPO: ${{ github.repository }}
       RELEASE_TAG: mobile-v0.1.0-pilot
+      RELEASE_ID: "453891013"
       SOURCE_COMMIT: ce1d70518c7fdb5d0e7b6c99e5917d35b82142f1
       APK_FILE: mikro-pilot-0.1.0-e5ee2960.apk
       APK_URL: https://expo.dev/artifacts/eas/08CfwoHY4v2fGPW7NKlW-JXl25GscJlVmAkx1EwFP8I.apk
@@ -30,12 +31,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          release="$(gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG")"
+          set -euo pipefail
+          release="$(gh api "repos/$GH_REPO/releases/$RELEASE_ID")"
+          test "$(jq -r '.tag_name' <<< "$release")" = "$RELEASE_TAG"
           test "$(jq -r '.target_commitish' <<< "$release")" = "$SOURCE_COMMIT"
           if [ "$(jq -r '.draft' <<< "$release")" = "true" ]; then
-            gh release upload "$RELEASE_TAG" "$APK_FILE#Android APK" --clobber
-            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+            asset_id="$(jq -r --arg name "$APK_FILE" '.assets[] | select(.name == $name) | .id' <<< "$release")"
+            asset_digest="$(jq -r --arg name "$APK_FILE" '.assets[] | select(.name == $name) | .digest' <<< "$release")"
+            if [ "$asset_digest" != "sha256:$EXPECTED_SHA" ]; then
+              if [ -n "$asset_id" ]; then
+                test "$(jq -r --arg name "$APK_FILE" '.assets[] | select(.name == $name) | .state' <<< "$release")" = "starter"
+                gh api --method DELETE "repos/$GH_REPO/releases/assets/$asset_id"
+              fi
+              curl --fail --silent --show-error --request POST \
+                --header "Authorization: Bearer $GH_TOKEN" \
+                --header "Content-Type: application/vnd.android.package-archive" \
+                --data-binary "@$APK_FILE" \
+                "https://uploads.github.com/repos/$GH_REPO/releases/$RELEASE_ID/assets?name=$APK_FILE&label=Android%20APK" \
+                | jq '{id, name, size, state, digest}'
+            fi
+            gh api --method PATCH "repos/$GH_REPO/releases/$RELEASE_ID" \
+              -F draft=false -F prerelease=true -f make_latest=false \
+              --jq '{url:.html_url, draft, prerelease}'
           fi
-          gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" | jq --exit-status \
+          gh api "repos/$GH_REPO/releases/$RELEASE_ID" | jq --exit-status \
             --arg name "$APK_FILE" --arg digest "sha256:$EXPECTED_SHA" \
             '.draft == false and .prerelease == true and any(.assets[]; .name == $name and .size == 101702703 and .state == "uploaded" and .digest == $digest)'
