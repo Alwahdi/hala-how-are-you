@@ -1,0 +1,11 @@
+{
+  "name": "mikro-mobile-design-qa",
+  "private": true,
+  "scripts": {
+    "test": "node check-owner-ready.cjs && node check-owner-ready-regression.cjs && node check-owner-ready-networks.cjs",
+    "persona": "node persona-walkthrough.cjs"
+  },
+  "dependencies": {
+    "linkedom": "^0.18.15"
+  }
+}

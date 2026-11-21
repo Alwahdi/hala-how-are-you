@@ -2,7 +2,7 @@
 type: index
 status: draft
 owner: founder
-updated: 2026-11-08
+updated: 2026-11-13
 related: [../05-operations/roadmap.md]
 ---
 # الاستكشاف
@@ -12,8 +12,10 @@ related: [../05-operations/roadmap.md]
 
 | الملف | وش فيه | الحالة |
 |---|---|---|
+| [mums-mobile-reference.md](mums-mobile-reference.md) | [confirmed] تجربة المؤسس في مرجع طباعة الكروت وحدود قراءة ملفاته | مرجع متطلبات؛ لا اعتماد تنفيذ |
 | [problems.md](problems.md) | المشاكل مرقمة مع درجة التأكد | 3 مؤكدة من المؤسس، والباقي افتراض |
 | [personas.md](personas.md) | الأطراف الأربعة | مسودة |
+| [network-owner-persona.md](network-owner-persona.md) | [confirmed] توسع PER-001 مع درجات الدليل والمعرفة والقيود وأوضاع الاستخدام | شخصية أولية؛ لا بحث مستخدمين جديد |
 | [brainstorm.md](brainstorm.md) | كل أفكار العصف الذهني | مكتمل (الجولة الأولى) |
 | [network-owner-workflows.md](network-owner-workflows.md) | احتياجات الكروت والطباعة ونقاط البيع والمتابعة [confirmed] (المؤسس) | جولة ثانية؛ أسئلة التفاصيل مفتوحة |
 | [voucher-lifecycle.md](voucher-lifecycle.md) | خريطة دورة الكرت وروابط التحليل التفصيلي | مسودة تحليل؛ قواعد تحتاج حسم المؤسس |

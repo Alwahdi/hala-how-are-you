@@ -2,7 +2,7 @@
 type: roadmap
 status: approved
 owner: founder
-updated: 2026-11-12
+updated: 2026-11-21
 related: [status.md]
 ---
 # خارطة الطريق
@@ -15,6 +15,20 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
+- [ ] تسليم المصدر والتصاميم وAPK التجريبي إلى GitHub وفق [D-057](../04-decisions/D-057-github-project-delivery.md) والتحقق من النتيجة؛ [السجل](github-delivery.md). [confirmed]
+- [x] إكمال بناء APK داخلي على EAS وفق [D-056](../04-decisions/D-056-eas-pilot-build.md) والتحقق من نتيجته؛ [السجل](../03-product/mobile-eas-build.md). [confirmed]
+- [x] اعتماد وتنفيذ كود الرحلة المحلية المحدودة وفق [D-055](../04-decisions/D-055-expo-local-pilot.md) وفحص المختبر والمتصفح؛ [حدود النتائج](../03-product/mobile-pilot-verification.md). [confirmed]
+- [ ] إكمال بناء وقبول رحلة D-055 على الهاتف والراوتر والطباعة الفعلية وملاحظة مستخدم مبتدئ. [confirmed]
+- [x] اعتماد [خطة الجوال للطباعة المحلية](../03-product/mobile-voucher-plan.md) وفق D-047 وإعداد [تسليم التصميم](../03-product/mobile-voucher-experience.md). [confirmed]
+- [x] مراجعة تصور الجوال بالعناصر الأكبر ومساحات الراوترات؛ [D-048](../04-decisions/D-048-roomy-router-workspaces.md) مسودة تنتظر مراجعة النسخة. [confirmed]
+- [x] إعداد مراجعة رحلة صاحب الشبكة ومهامه والبداية والربط والقوالب وفق [D-049](../04-decisions/D-049-owner-mobile-journey-review.md)؛ لا بناء فعلي أو توثيق أو جمع بيانات منفذ. [confirmed]
+- [x] مراجعة تفاعل المستخدم الجديد وJTBD ومسودات الرد والتجديد والشكوى وفق [D-050](../04-decisions/D-050-novice-owner-interactions.md)؛ [حدود المحاكاة](../03-product/mobile-voucher-experience.md#مراجعة-التفاعل-للمستخدم-الجديد) وبوابات البناء باقية. [confirmed]
+- [x] محاكاة إدارة الباقات والإجراءات والتجديد ضمن المصدر ومراجعة المناهج وفق [D-051](../04-decisions/D-051-mobile-plans-and-actions.md)؛ [النتائج والمتبقي](../03-product/mobile-voucher-experience.md#مراجعة-الباقات-والإجراءات)، لا تنفيذ RouterOS أو إغلاق تحقق المستخدم. [confirmed]
+- [ ] مراجعة مواصفات الجوال واعتمادها، ثم تجربة الاتصال والطباعة على iPhone وAndroid وفق الخطة؛ لا نشر أو إنتاج. [confirmed]
+- [x] تنقيح بطاقة الربط والاستكشاف وإدارة الاتصالات المحفوظة والتنقل وفق [D-052](../04-decisions/D-052-mobile-network-hub.md)؛ [حدود المحاكاة](../03-product/mobile-voucher-experience.md#مراجعة-ربط-الشبكات-والتنقل) لا تغلق اختبار الهاتف أو اعتماد المواصفات. [confirmed]
+- [x] دراسة شخصية صاحب الشبكة ومراجعة المهام وفق [D-053](../04-decisions/D-053-owner-persona-review.md)؛ [النتائج](../03-product/mobile-persona-walkthrough.md) فحص خبير لا اختبار مستخدمين. [confirmed]
+- [x] اعتماد وتنفيذ تحسينات نتائج PER-001 في التصور وفق [D-054](../04-decisions/D-054-owner-journey-refinements.md)؛ [نتائج الفحص](../03-product/mobile-owner-refinements.md). [confirmed]
+- [ ] مراجعة التنقيح والتحقق من الفهم مع مستخدم مبتدئ والعرض والأجهزة؛ بوابة المواصفات والبناء الفعلي باقية. [confirmed]
 - [x] تنفيذ التوسعة المتدرجة وفق [D-046](../04-decisions/D-046-large-voucher-batches.md)؛ [نتائج الاختبار والمتبقي](../03-product/voucher-large-batch-review.md). [confirmed]
 - [x] نموذج الكرت الواحد والدفعات وتحسين قواعد الإصدار وفق [D-045](../04-decisions/D-045-single-and-batch-issuance.md). [confirmed]
 - [ ] إكمال اختبار دورة الإصدار والأرشيف ثم التفعيل وفق D-045. [confirmed]

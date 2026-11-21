@@ -30,3 +30,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local configuration, runtime databases and signing credentials
+.env
+.env.*
+!.env.example
+credentials.json
+*.jks
+*.keystore
+*.pem
+*.key
+*.p8
+*.p12
+*.mobileprovision
+*.db
+*.db-*
+*.sqlite*

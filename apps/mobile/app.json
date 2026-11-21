@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Mikro Pilot",
+    "orientation": "portrait",
+    "android": {
+      "permissions": ["android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE"],
+      "allowBackup": false,
+      "package": "dev.mikro.localpilot"
+    },
+    "userInterfaceStyle": "dark",
+    "slug": "mikro-local-pilot",
+    "extra": {
+      "verifiedTcpPatch": 1,
+      "pilotOnly": true,
+      "eas": {
+        "projectId": "2b6f2149-dcc4-40e1-849a-76101b116ff0"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "dev.mikro.localpilot",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "الاتصال براوتر شبكتك لفحص الكروت وإصدار كرت اختبار محليًا. Connect to your router to inspect and issue a test voucher.",
+        "UIFileSharingEnabled": false
+      },
+      "supportsTablet": true
+    },
+    "plugins": [
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": false
+        }
+      ],
+      "./plugins/with-verified-tcp.cjs"
+    ],
+    "scheme": "mikropilot",
+    "version": "0.1.0",
+    "owner": "syndeocare"
+  }
+}

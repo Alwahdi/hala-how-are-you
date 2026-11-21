@@ -2,7 +2,7 @@
 type: index
 status: approved
 owner: founder
-updated: 2026-11-12
+updated: 2026-11-21
 related: [../templates/decision.md]
 ---
 # سجل القرارات
@@ -58,3 +58,14 @@ related: [../templates/decision.md]
 - [D-044](D-044-voucher-issuance-and-printing.md) — قوالب A4 وأرشيف الطباعة وتهيئة الإصدار وحدود التحقق (approved)
 - [D-045](D-045-single-and-batch-issuance.md) — إضافة كرت واحد والدفعات وحدود تفعيل الإصدار (approved)
 - [D-046](D-046-large-voucher-batches.md) — توسعة الدفعات والتجهيز والطباعة المتدرجة وبوابة اختبار المختبر (approved)
+- [D-047](D-047-mobile-local-voucher-plan.md) — اعتماد خطة الجوال للطباعة المحلية وتسليم التصميم قبل البناء (approved)
+- [D-048](D-048-roomy-router-workspaces.md) — مراجعة عناصر الجوال الأكبر ومساحات الراوترات؛ تصور للمراجعة (draft)
+- [D-049](D-049-owner-mobile-journey-review.md) — مراجعة رئيسية صاحب الشبكة والبداية والربط والقوالب مع رقم غير موثق (draft)
+- [D-050](D-050-novice-owner-interactions.md) — تفاعل المستخدم الجديد: بداية مختصرة وإضافة موحدة وفحص وقائمة ورد وشكوى وتحرير مباشر (draft)
+- [D-051](D-051-mobile-plans-and-actions.md) — إكمال الباقات والإجراءات والتجديد داخل المصدر وشرح الأنظمة وتوحيد الأرقام (draft)
+- [D-052](D-052-mobile-network-hub.md) — بطاقة ربط واحدة واستكشاف محلي وإدارة الاتصالات المحفوظة وتنقل أوضح (draft)
+- [D-053](D-053-owner-persona-review.md) — دراسة PER-001 ومراجعة المهام من منظور صاحب الشبكة وأولويات الإصلاح (draft)
+- [D-054](D-054-owner-journey-refinements.md) — اعتماد تحسينات الشخصية في التصور واختبار التفسير والتسليم والدفعات والتفاعل (approved)
+- [D-055](D-055-expo-local-pilot.md) — اعتماد أول رحلة فعلية محلية في Expo وبوابة تحقق الهاتف والراوتر والطباعة (approved)
+- [D-056](D-056-eas-pilot-build.md) — اعتماد بناء Android الداخلي على EAS ورفع مصدر الجوال فقط (approved)
+- [D-057](D-057-github-project-delivery.md) — اعتماد تسليم مصدر المشروع والتصاميم وAPK التجريبي إلى GitHub (approved)

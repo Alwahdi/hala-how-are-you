@@ -1,0 +1,12 @@
+{
+  "cli": { "version": ">=27.11.0", "appVersionSource": "local", "requireCommit": false },
+  "build": {
+    "development": { "developmentClient": true, "distribution": "internal" },
+    "preview": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "environment": "preview",
+      "android": { "buildType": "apk", "credentialsSource": "remote", "image": "auto" }
+    }
+  }
+}

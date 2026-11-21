@@ -1,0 +1,294 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+#mikro-mobile-design{--mk-bg:#0b1210;--mk-surface:#131e18;--mk-raised:#1b2921;--mk-line:#2c3a30;--mk-ink:#f2f5ec;--mk-muted:#a5b3a7;--mk-lime:#bafa70;--mk-deep:#183014;--mk-warn:#ffd490;--mk-red:#ffafa6;--mk-radius:20px;color:var(--mk-ink);font-family:Cairo,system-ui,sans-serif;color-scheme:dark}
+#mikro-mobile-design *{box-sizing:border-box}
+#mikro-mobile-design button,#mikro-mobile-design input,#mikro-mobile-design select{font:inherit}
+#mikro-mobile-design button{-webkit-tap-highlight-color:transparent;overflow-wrap:anywhere}
+#mikro-mobile-design button:focus-visible,#mikro-mobile-design input:focus-visible,#mikro-mobile-design select:focus-visible{outline:3px solid var(--mk-lime);outline-offset:3px}
+#mikro-mobile-design h1,#mikro-mobile-design h2,#mikro-mobile-design h3,#mikro-mobile-design p{margin:0}
+#mikro-mobile-design .mk-stage{padding:22px 0 12px;display:grid;justify-items:center;gap:14px}
+#mikro-mobile-design .mk-demo{width:min(100%,420px);display:flex;gap:10px;justify-content:space-between;align-items:center;color:light-dark(#566154,#a5b3a7);font-size:12px;padding:0 12px;flex-wrap:wrap}
+#mikro-mobile-design .mk-demo strong{font-weight:500}
+#mikro-mobile-design .mk-device{width:min(100%,420px);background:var(--mk-bg);border:1px solid var(--mk-line);border-radius:32px;overflow:clip;box-shadow:0 18px 70px #0003}
+#mikro-mobile-design .mk-statusbar{height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-family:Manrope,sans-serif;font-weight:700;font-size:11px;direction:ltr}
+#mikro-mobile-design .mk-sensors{display:flex;align-items:center;gap:6px}
+#mikro-mobile-design .mk-head{padding:10px 20px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--mk-line)}
+#mikro-mobile-design .mk-word{font:800 27px Manrope,sans-serif;letter-spacing:-1.7px;direction:ltr;display:inline-block}
+#mikro-mobile-design .mk-word span{color:var(--mk-lime)}
+#mikro-mobile-design .mk-sub{color:var(--mk-muted);font-size:11px;margin-top:1px}
+#mikro-mobile-design .mk-router{display:flex;align-items:center;gap:8px;min-height:44px;color:var(--mk-ink);border:1px solid var(--mk-line);background:var(--mk-surface);border-radius:14px;padding:6px 10px;font-size:12px;text-align:start}
+#mikro-mobile-design .mk-dot{width:6px;height:6px;border-radius:50%;background:var(--mk-lime);display:inline-block;flex-shrink:0}
+#mikro-mobile-design .mk-dot.off{background:var(--mk-warn)}
+#mikro-mobile-design .mk-main{padding:22px 20px 24px;min-height:530px}
+#mikro-mobile-design .mk-nav{display:grid;grid-template-columns:repeat(4,1fr);padding:10px 8px 13px;border-top:1px solid var(--mk-line);background:var(--mk-bg);gap:3px}
+#mikro-mobile-design .mk-nav button{min-height:54px;display:grid;justify-items:center;align-content:center;gap:4px;border:0;background:transparent;color:var(--mk-muted);font-size:10px;border-radius:12px}
+#mikro-mobile-design .mk-nav button[aria-current=page]{color:var(--mk-lime);background:var(--mk-surface)}
+#mikro-mobile-design .mk-nav svg{width:19px;height:19px}
+#mikro-mobile-design .mk-homebar{width:98px;height:4px;background:var(--mk-ink);opacity:.65;border-radius:9px;margin:0 auto 8px}
+#mikro-mobile-design .mk-eyebrow{color:var(--mk-lime);font-size:11px;font-weight:600;display:flex;gap:6px;align-items:center;letter-spacing:.1px}
+#mikro-mobile-design h1{font-size:27px;font-weight:700;letter-spacing:-.7px;line-height:1.6;margin:5px 0 6px}
+#mikro-mobile-design h2{font-size:18px;font-weight:700;line-height:1.6}
+#mikro-mobile-design h3{font-size:14px;font-weight:600}
+#mikro-mobile-design [lang=en]{font-family:Manrope,Cairo,sans-serif}
+#mikro-mobile-design .mk-copy{font-size:12px;color:var(--mk-muted);line-height:1.9}
+#mikro-mobile-design .mk-hero{padding:19px 18px;border:1px solid var(--mk-line);border-radius:var(--mk-radius);background:radial-gradient(ellipse at 15% 15%,#44612a3b,transparent 70%),var(--mk-surface);margin:16px 0 24px;overflow:clip}
+#mikro-mobile-design .mk-hero-ticket{margin:17px 0;transform:rotate(-3deg);box-shadow:0 8px 15px #0003}
+#mikro-mobile-design .mk-btn{min-height:48px;border:1px solid var(--mk-line);border-radius:14px;color:var(--mk-ink);background:var(--mk-surface);padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:13px;text-align:center}
+#mikro-mobile-design .mk-btn.primary{background:var(--mk-lime);color:#15200d;border-color:var(--mk-lime)}
+#mikro-mobile-design .mk-btn.ghost{background:transparent;border-color:transparent;color:var(--mk-muted)}
+#mikro-mobile-design .mk-btn.danger{color:var(--mk-red)}
+#mikro-mobile-design .mk-btn.full{width:100%}
+#mikro-mobile-design .mk-btn:disabled{opacity:.45;cursor:not-allowed}
+#mikro-mobile-design .mk-btn svg{width:17px;height:17px;flex-shrink:0}
+#mikro-mobile-design .mk-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#mikro-mobile-design .mk-heading .mk-btn{padding:5px 0;min-height:44px;font-size:11px}
+#mikro-mobile-design .mk-row{display:flex;align-items:center;gap:12px;min-height:77px;border-bottom:1px solid var(--mk-line);padding:12px 0;text-align:start;width:100%;background:transparent;border-top:0;border-inline:0;color:var(--mk-ink)}
+#mikro-mobile-design .mk-row:last-child{border-bottom:0}
+#mikro-mobile-design .mk-row .mk-title{font-size:13px;font-weight:600}
+#mikro-mobile-design .mk-row .mk-meta{color:var(--mk-muted);font-size:11px;margin-top:3px}
+#mikro-mobile-design .mk-row .mk-arrow{margin-inline-start:auto;color:var(--mk-muted)}
+#mikro-mobile-design .mk-row svg{width:17px;height:17px;flex-shrink:0}
+#mikro-mobile-design .mk-row-icon{width:40px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--mk-surface);flex-shrink:0;color:var(--mk-lime)}
+#mikro-mobile-design .mk-badge{border-radius:6px;background:var(--mk-raised);padding:3px 7px;font-size:10px;color:var(--mk-lime);display:inline-block;white-space:nowrap}
+#mikro-mobile-design .mk-badge.warn{color:var(--mk-warn)}
+#mikro-mobile-design .mk-back{background:transparent;border:0;color:var(--mk-muted);padding:0;min-height:44px;display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:10px}
+#mikro-mobile-design .mk-back svg{width:17px;height:17px}
+#mikro-mobile-design .mk-steps{display:flex;gap:5px;margin-bottom:18px}
+#mikro-mobile-design .mk-steps span{height:3px;flex:1;background:var(--mk-line);border-radius:4px}
+#mikro-mobile-design .mk-steps span.on{background:var(--mk-lime)}
+#mikro-mobile-design .mk-field{display:grid;gap:7px;margin:17px 0}
+#mikro-mobile-design .mk-field label,#mikro-mobile-design .mk-label{font-size:12px;color:var(--mk-muted)}
+#mikro-mobile-design .mk-field input,#mikro-mobile-design .mk-field select{width:100%;min-width:0;min-height:48px;border:1px solid var(--mk-line);border-radius:12px;background:var(--mk-surface);color:var(--mk-ink);padding:11px 13px;font-size:16px}
+#mikro-mobile-design .mk-field input[type=number]{font-family:Manrope,sans-serif}
+#mikro-mobile-design .mk-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#mikro-mobile-design .mk-inline>*{min-width:0}
+#mikro-mobile-design .mk-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#mikro-mobile-design .mk-segments{display:flex;gap:4px;padding:4px;background:var(--mk-surface);border:1px solid var(--mk-line);border-radius:13px;margin:17px 0}
+#mikro-mobile-design .mk-segments button{flex:1;border:0;border-radius:9px;min-height:43px;color:var(--mk-muted);background:transparent;font-size:12px;padding:5px}
+#mikro-mobile-design .mk-segments button[aria-pressed=true]{background:var(--mk-raised);color:var(--mk-ink);box-shadow:0 2px 5px #0002}
+#mikro-mobile-design .mk-package{display:block;width:100%;text-align:start;padding:15px;margin:10px 0;border:1px solid var(--mk-line);border-radius:15px;background:var(--mk-surface);color:var(--mk-ink)}
+#mikro-mobile-design .mk-package[aria-pressed=true]{border-color:var(--mk-lime);background:#18261b}
+#mikro-mobile-design .mk-package .mk-inline{justify-content:space-between;flex-wrap:nowrap}
+#mikro-mobile-design .mk-package strong{font:700 23px Manrope,sans-serif;color:var(--mk-lime)}
+#mikro-mobile-design .mk-package small{color:var(--mk-muted);font-size:11px;display:block;margin-top:7px}
+#mikro-mobile-design details{border-top:1px solid var(--mk-line);border-bottom:1px solid var(--mk-line);padding:13px 0;margin:18px 0;font-size:12px}
+#mikro-mobile-design summary{min-height:28px;color:var(--mk-muted)}
+#mikro-mobile-design .mk-note{font-size:11px;color:var(--mk-muted);line-height:1.9;display:flex;gap:8px;margin:14px 0;align-items:flex-start}
+#mikro-mobile-design .mk-note svg{width:15px;height:15px;flex-shrink:0;margin-top:4px}
+#mikro-mobile-design .mk-notice{padding:13px 14px;background:var(--mk-surface);border-inline-start:3px solid var(--mk-lime);border-radius:0 10px 10px 0;margin:16px 0;font-size:12px;line-height:1.9}
+#mikro-mobile-design .mk-notice.warn{border-color:var(--mk-warn);color:var(--mk-warn)}
+#mikro-mobile-design .mk-error{color:var(--mk-red);font-size:12px;margin:8px 0}
+#mikro-mobile-design .mk-summary{background:var(--mk-surface);border-radius:var(--mk-radius);padding:5px 16px;margin:18px 0}
+#mikro-mobile-design .mk-fact{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--mk-line);font-size:12px}
+#mikro-mobile-design .mk-fact:last-child{border:0}
+#mikro-mobile-design .mk-fact span:first-child{color:var(--mk-muted)}
+#mikro-mobile-design .mk-fact b{font-weight:600;text-align:end}
+#mikro-mobile-design .mk-progress{height:8px;background:var(--mk-line);border-radius:8px;overflow:hidden;margin:20px 0 10px}
+#mikro-mobile-design .mk-progress>div{height:100%;background:var(--mk-lime);border-radius:8px;transition:width .3s}
+#mikro-mobile-design .mk-big{font:700 56px Manrope,sans-serif;letter-spacing:-3px;line-height:1.3;direction:ltr;text-align:center;padding:25px 0 0}
+#mikro-mobile-design .mk-center{text-align:center}
+#mikro-mobile-design .mk-checkmark{width:64px;height:64px;display:grid;place-items:center;border-radius:22px;background:var(--mk-deep);color:var(--mk-lime);margin:15px auto}
+#mikro-mobile-design .mk-checkmark svg{width:30px;height:30px}
+#mikro-mobile-design .mk-ticket{position:relative;border-radius:12px;background:#f2f3e6;color:#142119;overflow:hidden;min-height:148px;display:grid;grid-template-columns:1fr 78px;text-align:start;direction:rtl;isolation:isolate}
+#mikro-mobile-design .mk-ticket-main{padding:16px 16px 11px;min-width:0}
+#mikro-mobile-design .mk-ticket .mk-ticket-brand{font:800 18px Manrope,sans-serif;letter-spacing:-1px;direction:ltr;text-align:right}
+#mikro-mobile-design .mk-ticket small{font-size:9px;color:#53634b;display:block;margin:2px 0}
+#mikro-mobile-design .mk-ticket-number{font:800 clamp(18px,5vw,25px) Manrope,sans-serif;direction:ltr;letter-spacing:1.4px;white-space:nowrap;margin:10px 0 8px}
+#mikro-mobile-design .mk-ticket-side{position:relative;display:flex;align-items:center;justify-content:center;background:#bafa70;color:#173413;border-inline-start:1px dashed #537c35;flex-direction:column}
+#mikro-mobile-design .mk-ticket-side strong{font:800 25px Manrope,sans-serif;z-index:1}
+#mikro-mobile-design .mk-ticket-side span{font-size:10px}
+#mikro-mobile-design .mk-ticket.orbit .mk-ticket-side:before{content:'';position:absolute;width:160px;height:160px;inset-inline-end:-85px;border:1px solid #2b4e2344;border-radius:50%;box-shadow:0 0 0 12px #2b4e2310,0 0 0 28px #2b4e2310}
+#mikro-mobile-design .mk-ticket.path .mk-ticket-side{background:#1d3d31;color:#eef6df}
+#mikro-mobile-design .mk-ticket.economy{background:#fff;border:1px solid #c8cec1}
+#mikro-mobile-design .mk-ticket.economy .mk-ticket-side{background:#fff;border-color:#c8cec1;color:#19251a}
+#mikro-mobile-design .mk-chip{min-height:44px;border:1px solid var(--mk-line);border-radius:10px;padding:7px 14px;color:var(--mk-muted);background:var(--mk-surface);font-size:12px}
+#mikro-mobile-design .mk-chip[aria-pressed=true]{color:var(--mk-lime);border-color:var(--mk-lime)}
+#mikro-mobile-design .mk-paper{background:#e6e9e0;padding:12px;aspect-ratio:210/297;margin:15px auto;border-radius:5px;display:grid;gap:6px;align-content:start;color:#19251a}
+#mikro-mobile-design .mk-mini-ticket{background:#fff;min-width:0;border:1px dashed #bac5af;padding:7px 3px;font:700 8px Manrope,sans-serif;text-align:center;overflow:hidden}
+#mikro-mobile-design .mk-mini-ticket span{display:block;font-size:6px;color:#5c6a51;margin-bottom:4px}
+#mikro-mobile-design .mk-paper-foot{text-align:center;font-size:10px;color:#53634b;grid-column:1/-1;align-self:end;padding-top:9px;font-family:Cairo,sans-serif}
+#mikro-mobile-design .mk-search{width:100%;background:var(--mk-surface);border:1px solid var(--mk-line);border-radius:12px;min-height:46px;padding:9px 14px;color:var(--mk-ink);font-size:15px;margin:15px 0}
+#mikro-mobile-design .mk-hidden{display:none!important}
+#mikro-mobile-design .mk-spacer{height:22px}
+#mikro-mobile-design [dir=ltr] .mk-back svg,#mikro-mobile-design [dir=ltr] .mk-arrow{transform:rotate(180deg)}
+#mikro-mobile-design .mk-language{font-family:Manrope,sans-serif;font-size:11px;background:transparent;color:inherit;border:1px solid currentColor;border-radius:8px;min-height:34px;padding:4px 10px}
+#mikro-mobile-design .mk-radio{display:flex;align-items:center;gap:9px;font-size:12px;min-height:44px}
+#mikro-mobile-design .mk-radio input{width:18px;height:18px;accent-color:var(--mk-lime)}
+@media(max-width:370px){#mikro-mobile-design .mk-main{padding:18px 15px}#mikro-mobile-design .mk-head{padding-inline:15px}#mikro-mobile-design h1{font-size:24px}#mikro-mobile-design .mk-hero{padding:15px}#mikro-mobile-design .mk-ticket{grid-template-columns:1fr 64px}#mikro-mobile-design .mk-ticket-main{padding:12px}#mikro-mobile-design .mk-ticket-number{font-size:20px;letter-spacing:.6px}}
+@media(prefers-reduced-motion:reduce){#mikro-mobile-design *{transition:none!important}}
+/* Roomy mobile scale; printed sheet samples retain their physical preview scale. */
+#mikro-mobile-design{font-size:17px;line-height:1.8}
+#mikro-mobile-design [hidden]{display:none!important}
+#mikro-mobile-design .mk-device,#mikro-mobile-design .mk-demo{width:min(100%,430px)}
+#mikro-mobile-design .mk-main{padding:24px 22px 28px;min-height:540px}
+#mikro-mobile-design .mk-head{padding:14px 22px;flex-wrap:wrap}
+#mikro-mobile-design .mk-head>div{min-width:0;flex:1}
+#mikro-mobile-design .mk-word{font-size:30px}
+#mikro-mobile-design .mk-sub{font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+#mikro-mobile-design .mk-router{min-height:52px;font-size:14px;padding:9px 12px;flex-shrink:0}
+#mikro-mobile-design .mk-eyebrow{font-size:14px;gap:8px}
+#mikro-mobile-design h1{font-size:32px;line-height:1.55;margin:8px 0 12px;letter-spacing:-.5px}
+#mikro-mobile-design h2{font-size:23px;line-height:1.6}
+#mikro-mobile-design h3{font-size:18px;line-height:1.75}
+#mikro-mobile-design .mk-copy{font-size:16px;line-height:1.95}
+#mikro-mobile-design .mk-btn{min-height:58px;font-size:17px;padding:13px 18px;border-radius:18px;gap:10px}
+#mikro-mobile-design .mk-btn.full+.mk-btn.full{margin-top:12px}
+#mikro-mobile-design .mk-btn svg{width:22px;height:22px}
+#mikro-mobile-design .mk-heading{flex-wrap:wrap;gap:8px}
+#mikro-mobile-design .mk-heading .mk-btn{min-height:48px;font-size:14px}
+#mikro-mobile-design .mk-row{min-height:96px;gap:12px;padding:17px 0;flex-wrap:wrap}
+#mikro-mobile-design .mk-row>span:nth-child(2){flex:1;min-width:100px}
+#mikro-mobile-design .mk-row .mk-title{font-size:17px}
+#mikro-mobile-design .mk-row .mk-meta{font-size:14px;line-height:1.85}
+#mikro-mobile-design .mk-row-icon{width:48px;height:52px;border-radius:16px}
+#mikro-mobile-design .mk-row svg{width:22px;height:22px}
+#mikro-mobile-design .mk-badge{font-size:12px;white-space:normal;line-height:1.8;padding:5px 9px}
+#mikro-mobile-design .mk-back{min-height:52px;font-size:16px;margin-bottom:16px}
+#mikro-mobile-design .mk-back svg{width:22px;height:22px}
+#mikro-mobile-design .mk-field{gap:9px;margin:22px 0}
+#mikro-mobile-design .mk-field label,#mikro-mobile-design .mk-label{font-size:15px}
+#mikro-mobile-design .mk-field input,#mikro-mobile-design .mk-field select{min-height:58px;padding:14px;font-size:17px;border-radius:16px}
+#mikro-mobile-design .mk-field select{font-size:16px;text-overflow:ellipsis}
+#mikro-mobile-design .mk-inline{gap:10px}
+#mikro-mobile-design .mk-segments{gap:6px;border-radius:17px;margin:22px 0}
+#mikro-mobile-design .mk-segments button{min-height:54px;font-size:15px;padding:8px;min-width:0}
+#mikro-mobile-design .mk-package{padding:20px;margin:14px 0;border-radius:20px}
+#mikro-mobile-design .mk-package .mk-inline{flex-wrap:wrap}
+#mikro-mobile-design .mk-package strong{font-size:28px}
+#mikro-mobile-design .mk-package small{font-size:14px;line-height:1.9;margin-top:9px}
+#mikro-mobile-design details{font-size:16px;padding:18px 0;margin:24px 0}
+#mikro-mobile-design summary{min-height:48px;display:flex;align-items:center}
+#mikro-mobile-design summary:after{content:'+';margin-inline-start:auto;font:500 24px Manrope,sans-serif}
+#mikro-mobile-design details[open]>summary:after{content:'−'}
+#mikro-mobile-design .mk-note{font-size:14px;line-height:1.95;gap:10px}
+#mikro-mobile-design .mk-note svg{width:20px;height:20px;flex-shrink:0}
+#mikro-mobile-design .mk-notice{font-size:15px;padding:17px 18px;border-radius:0 16px 16px 0}
+#mikro-mobile-design .mk-error{font-size:15px}
+#mikro-mobile-design .mk-summary{padding:6px 18px;margin:22px 0}
+#mikro-mobile-design .mk-fact{font-size:15px;padding:16px 0;flex-wrap:wrap;gap:8px 14px}
+#mikro-mobile-design .mk-fact b{overflow-wrap:anywhere}
+#mikro-mobile-design .mk-chip{min-height:54px;font-size:16px;padding:10px 17px;border-radius:15px}
+#mikro-mobile-design .mk-search{min-height:58px;font-size:17px;border-radius:16px;padding:13px 16px}
+#mikro-mobile-design .mk-radio{font-size:16px;min-height:58px;gap:13px;line-height:1.8}
+#mikro-mobile-design .mk-radio input{width:23px;height:23px;flex-shrink:0}
+#mikro-mobile-design .mk-nav{padding:12px 8px;gap:5px}
+#mikro-mobile-design .mk-nav button{min-height:68px;font-size:12px;gap:7px;border-radius:17px}
+#mikro-mobile-design .mk-nav svg{width:23px;height:23px}
+#mikro-mobile-design .mk-language{min-height:44px;font-size:12px}
+#mikro-mobile-design .mk-workspace-name{font-size:17px;font-weight:700;overflow-wrap:anywhere}
+#mikro-mobile-design .mk-workspace-status{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--mk-muted)}
+#mikro-mobile-design .mk-router-card{padding:22px;border:1px solid var(--mk-line);background:var(--mk-surface);border-radius:24px;margin:18px 0}
+#mikro-mobile-design .mk-router-card .mk-btn{margin-top:18px}
+#mikro-mobile-design .mk-router-card .mk-router-glyph{width:52px;height:52px;border-radius:17px;display:grid;place-items:center;background:var(--mk-raised);color:var(--mk-lime)}
+#mikro-mobile-design .mk-router-glyph svg{width:26px;height:26px}
+#mikro-mobile-design .mk-router-identity{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+#mikro-mobile-design .mk-router-identity>div{min-width:0;flex:1}
+#mikro-mobile-design .mk-router-meta{font-size:14px;line-height:1.9;color:var(--mk-muted);margin-top:10px;overflow-wrap:anywhere}
+#mikro-mobile-design .mk-resume{padding:20px;background:var(--mk-deep);border-radius:22px;margin:22px 0}
+#mikro-mobile-design .mk-resume .mk-btn{margin-top:14px}
+@media(max-width:370px){#mikro-mobile-design .mk-main{padding:22px 16px}#mikro-mobile-design .mk-head{padding:14px 16px}#mikro-mobile-design h1{font-size:30px}#mikro-mobile-design .mk-two{grid-template-columns:1fr;gap:0}#mikro-mobile-design .mk-router-card{padding:18px}#mikro-mobile-design .mk-hero{padding:16px}#mikro-mobile-design .mk-package{padding:18px}#mikro-mobile-design .mk-summary{padding-inline:15px}}
+</style>
+<div id="mikro-mobile-design">
+ <div class="mk-stage viz-dotted-background">
+  <div class="mk-demo" dir="rtl"><strong>تصور تفاعلي · بيانات تجريبية</strong><button class="mk-language mk-scenario" data-action="toggle-connection">اختبار انقطاع الراوتر</button><button class="mk-language" data-action="language" aria-label="Change language">English</button></div>
+  <section class="mk-device" aria-label="تصميم Mikro Mobile">
+   <div class="mk-statusbar"><span>9:41</span><span class="mk-sensors"><i data-lucide="wifi" aria-hidden="true"></i><i data-lucide="battery-full" aria-hidden="true"></i></span></div>
+   <header class="mk-head"></header><main class="mk-main" dir="rtl"></main><nav class="mk-nav" dir="rtl" aria-label="التنقل الرئيسي"></nav><div class="mk-homebar"></div>
+  </section>
+ </div>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('mikro-mobile-design');
+ const main=root.querySelector('.mk-main'),head=root.querySelector('.mk-head'),nav=root.querySelector('.mk-nav');
+ const defaults={connected:true,source:'usermanager',pkg:0,count:25,mode:'same',prefix:'',suffix:'',label:'',step:1,confirmed:0,uncertain:0,running:false,paused:false,pauseReason:'',style:'orbit',cols:2,rows:6,showPassword:false,dataOnly:false,checked:false,query:'',filter:'all',draft:false,created:false,connectionMode:'scan',checking:false,setupError:'',selectedCard:false,savedDraft:null};
+ const S={...defaults,lang:'ar',page:'routers',routerId:null};
+ const demoRouters=[{id:'main',ar:'الشبكة الرئيسية',en:'Main network',ip:'192.168.88.1',version:'7',connected:true},{id:'branch',ar:'شبكة الفرع',en:'Branch network',ip:'192.168.90.1',version:'6',connected:false}];
+ const workspaces={};let connectFrom='routers',connectionTimer=null;
+ const currentRouter=()=>demoRouters.find(r=>r.id===S.routerId);
+ const routerName=()=>{const r=currentRouter();return r?(S.lang==='ar'?r.ar:r.en):t('راوتر تجريبي','Demo router');};
+ const snapshot=()=>Object.fromEntries(Object.keys(defaults).map(k=>[k,S[k]]));
+ const draftKeys=['source','pkg','count','mode','prefix','suffix','label','step','confirmed','uncertain','running','paused','pauseReason','draft','created'];
+ function restoreDraft(){if(!S.savedDraft)return;Object.assign(S,S.savedDraft,{savedDraft:null});}
+ function enterRouter(id){const r=demoRouters.find(r=>r.id===id);if(!r)return;clearInterval(timer);Object.assign(S,workspaces[id]||{...defaults,connected:r.connected}, {routerId:id,page:'home'});restoreDraft();render();persist();}
+ function leaveRouter(){restoreDraft();clearInterval(timer);clearTimeout(connectionTimer);S.checking=false;if(S.running){S.running=false;S.paused=true;S.pauseReason='user';}if(S.routerId){workspaces[S.routerId]=snapshot();currentRouter().connected=S.connected;}Object.assign(S,{routerId:null,page:'routers'});render();persist();}
+ const appearance={radius:20};let timer=null;
+ const t=(ar,en)=>S.lang==='ar'?ar:en;
+ const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const num=x=>new Intl.NumberFormat('en-US').format(x);
+ const icon=n=>`<i data-lucide="${n}" aria-hidden="true"></i>`;
+ const btn=(a,label,primary=false,extra='')=>`<button type="button" class="mk-btn ${primary?'primary':''} ${extra}" data-action="${a}">${label}</button>`;
+ const back=(page='home',label=t('رجوع','Back'))=>`<button type="button" class="mk-back" data-action="go:${page}">${icon('arrow-right')}${label}</button>`;
+ const fact=(a,b)=>`<div class="mk-fact"><span>${a}</span><b>${b}</b></div>`;
+ const badge=(a,w=false)=>`<span class="mk-badge ${w?'warn':''}">${a}</span>`;
+ const prices=[100,250,500];
+ const packageName=i=>t(['يومية','أسبوعية','شهرية'][i],['Daily','Weekly','Monthly'][i]);
+ const pkgFacts=i=>[t('600 MB · استخدام 5 ساعات · صلاحية يومين','600 MB · 5 hours online · valid 2 days'),t('2 GB · استخدام 15 ساعة · صلاحية 7 أيام','2 GB · 15 hours online · valid 7 days'),t('8 GB · استخدام 60 ساعة · صلاحية 30 يومًا','8 GB · 60 hours online · valid 30 days')][i];
+ const row=(title,meta,action,ic='layers',end='')=>`<button type="button" class="mk-row" data-action="${action}"><span class="mk-row-icon">${icon(ic)}</span><span><span class="mk-title">${title}</span><span class="mk-meta" style="display:block">${meta}</span></span>${end||icon('chevron-left').replace('aria-hidden','class="mk-arrow" aria-hidden')}</button>`;
+ const notice=(s,w=false)=>`<div class="mk-notice ${w?'warn':''}" role="status">${s}</div>`;
+ function ticket(cls=S.style){return `<div class="mk-ticket ${cls}"><div class="mk-ticket-main"><div class="mk-ticket-brand">Mikro<span style="color:#568336">.</span></div><small>${routerName()+' · '+packageName(S.pkg)}</small><div class="mk-ticket-number">${esc(S.prefix)}00123874${esc(S.suffix)}</div>${S.showPassword?'<small dir="ltr">PIN: ••••••</small>':''}<small>${[t('600 MB · 5 ساعات · يومان','600 MB · 5 hours · 2 days'),t('2 GB · 15 ساعة · 7 أيام','2 GB · 15 hours · 7 days'),t('8 GB · 60 ساعة · 30 يومًا','8 GB · 60 hours · 30 days')][S.pkg]}</small><small>${t('نموذج للمعاينة فقط','Preview sample only')}</small></div><div class="mk-ticket-side"><strong>${prices[S.pkg]}</strong><span>${t('ريال','YER')}</span></div></div>`;}
+ function persist(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{design:'Mikro Mobile',language:S.lang,screen:S.page,router:S.routerId,template:S.style,layout:'roomy-router-first'},privateContent:{radius:appearance.radius}}).catch(()=>{});}
+ function restore(v){if(!v)return;const m=v.modelContent||{},p=v.privateContent||{};if(['ar','en'].includes(m.language))S.lang=m.language;if(!S.routerId&&['orbit','path','economy'].includes(m.template))S.style=m.template;if(Number.isFinite(p.radius))appearance.radius=Math.min(26,Math.max(12,p.radius));}
+ restore(window.openai?.widgetState);
+ window.addEventListener('openai:set_globals',e=>{restore(e.detail?.globals?.widgetState);render();});
+ function pending(){return S.running||S.paused||S.draft;}
+ function resumeCard(){return `<section class="mk-resume"><div class="mk-eyebrow">${icon(S.running?'loader-circle':'bookmark-check')}${S.running?t('دفعة قيد الإصدار','Issuance in progress'):t('نكمل من حيث وقفت؟','Pick up where you left off?')}</div><h3>${esc(S.label)||packageName(S.pkg)}</h3><p class="mk-copy">${S.created?num(S.confirmed)+t(' مؤكد من ',' confirmed of ')+num(S.count):num(S.count)+t(' كرتًا · مسودة لم تصدر',' vouchers · draft, not issued')}</p>${btn(S.created?'go:progress':'go:configure',S.running?t('متابعة التقدم','View progress'):t('استكمال الدفعة','Continue batch'),true,'full')}</section>`;}
+ function home(){return `<div class="mk-eyebrow">${icon('sparkles')}${t('مساحة الراوتر','Router workspace')}</div><h1>${t('جاهز لدفعة جديدة؟','Ready for the next batch?')}</h1><p class="mk-copy">${t('باقات ودفعات ','Plans and batches for ')}${esc(routerName())}${t(' في مكان واحد.','. All together.')}</p>${pending()?resumeCard():''}${!S.connected?notice(t('تعرض المحفوظ فقط. أعد الاتصال بالراوتر للتحقق من حالته أو إصدار كروت.','Saved data only. Reconnect to check status or issue vouchers.'),true):''}<div class="mk-hero"><div class="mk-inline" style="justify-content:space-between"><h3>${t('من الباقة إلى الورقة','From plan to paper')}</h3>${badge(t('محلي','Local'))}</div><div class="mk-hero-ticket">${ticket()}</div>${btn(pending()?'go:archive':'new',icon(pending()?'layers':'plus')+(pending()?t('فتح الدفعات','Open batches'):t('إصدار كروت','Issue vouchers')),true,'full')}<p class="mk-note">${icon('wifi-off')}${t('الاتصال داخل الشبكة يكفي، حتى بدون إنترنت.','A local network connection is enough, even without internet.')}</p></div><div class="mk-heading"><h3>${t('آخر الدفعات','Recent batches')}</h3>${btn('go:archive',t('عرض الكل','View all'),false,'ghost')}</div>${archiveRows()}`;}
+ function connect(){return back('routers')+`<div class="mk-eyebrow">${t('الربط المحلي','Local connection')}</div><h1>${t('أضف الراوتر.','Add your router.')}</h1><p class="mk-copy">${t('اتصل بشبكته عبر Wi-Fi، ثم اختره أو اكتب عنوانه.','Join its Wi-Fi network, then select it or enter its address.')}</p><div class="mk-segments"><button data-action="connection:scan" aria-pressed="${S.connectionMode==='scan'}">${t('اكتشاف قريب','Find nearby')}</button><button data-action="connection:manual" aria-pressed="${S.connectionMode==='manual'}">${t('إدخال العنوان','Enter address')}</button></div>${S.connectionMode==='scan'?`<button class="mk-package" data-action="choose-router"><div class="mk-inline"><span><strong style="font-size:16px">${t('راوتر تجريبي','Demo router')}</strong><small dir="ltr">192.168.88.1 · RouterOS 7</small></span>${icon('router')}</div></button><p class="mk-copy">${t('نتيجة اكتشاف توضيحية.','Illustrative discovery result.')}</p>`:`<div class="mk-field"><label for="mk-host">${t('عنوان الراوتر','Router address')}</label><input id="mk-host" dir="ltr" value="192.168.88.1" autocomplete="off"></div>`}<div class="mk-field"><label for="mk-user">${t('اسم المستخدم','Username')}</label><input id="mk-user" autocomplete="off" placeholder="${t('حسابك في الراوتر','Your router account')}"></div><div class="mk-field"><label for="mk-pw">${t('كلمة المرور','Password')}</label><input id="mk-pw" type="password" autocomplete="off" placeholder="${t('لا تدخل بيانات حقيقية في هذا التصور','Do not enter real credentials here')}"></div><details><summary>${t('إعدادات الاتصال','Connection settings')}</summary><div class="mk-field"><label for="mk-port">${t('المنفذ','Port')}</label><input id="mk-port" inputmode="numeric" value="8729" dir="ltr"></div></details>${S.checking?notice(t('جارٍ محاكاة التحقق من الاتصال…','Simulating a connection check…')):btn('connect',t('اختبار الربط التجريبي','Test demo connection'),true,'full')}<p class="mk-note">${icon('shield-check')}${t('الاتصال لا يحتاج إنشاء حساب سحابي.','No cloud account is needed to connect.')}</p>`;}
+ function packages(){return back()+`<div class="mk-steps"><span class="on"></span><span></span><span></span></div><div class="mk-eyebrow">${t('خطوة 1 من 3','Step 1 of 3')}</div><h1>${t('أي باقة نجهز؟','Which plan today?')}</h1><p class="mk-copy">${t('الكروت تصدر على الراوتر المحدد أعلاه.','Vouchers will be issued on the router shown above.')}</p><div class="mk-segments">${['usermanager','hotspot'].map(v=>`<button type="button" data-action="source:${v}" aria-pressed="${S.source===v}">${v==='hotspot'?'Hotspot':'User Manager'}</button>`).join('')}</div>${prices.map((p,i)=>`<button type="button" class="mk-package" data-action="pkg:${i}" aria-pressed="${S.pkg===i}"><div class="mk-inline"><h3>${packageName(i)}</h3><strong>${p}<span style="font:400 10px Cairo,sans-serif"> ${t('ريال','YER')}</span></strong></div><small>${pkgFacts(i)}</small></button>`).join('')}<p class="mk-note">${icon('clock-3')}${t('الصلاحية تبدأ عند أول استخدام حسب تعريف الباقة.','Validity starts at first use, as defined by the plan.')}</p>${btn('go:configure',t('التالي: إعداد الكروت','Next: voucher details')+icon('arrow-left'),true,'full')}`;}
+ function configure(){return back('packages')+`<div class="mk-steps"><span class="on"></span><span class="on"></span><span></span></div><div class="mk-eyebrow">${t('خطوة 2 من 3','Step 2 of 3')}</div><h1>${t('كيف تريد كروتك؟','Make this batch yours.')}</h1><p class="mk-copy">${packageName(S.pkg)} · ${S.source==='hotspot'?'Hotspot':'User Manager'}</p><div class="mk-field"><label for="mk-count">${t('عدد الكروت','Number of vouchers')}</label><input id="mk-count" type="number" min="1" max="1500" value="${S.count}" inputmode="numeric"></div><div class="mk-inline">${[1,25,100,500,1500].map(n=>`<button class="mk-chip" data-action="count:${n}" aria-pressed="${S.count===n}">${num(n)}</button>`).join('')}</div><div class="mk-field"><label for="mk-mode">${t('بيانات الدخول','Login details')}</label><select id="mk-mode"><option value="same" ${S.mode==='same'?'selected':''}>${t('رقم وكلمة مرور متطابقان','Same number and password')}</option><option value="different" ${S.mode==='different'?'selected':''}>${t('رقم وكلمة مرور مختلفان','Different number and password')}</option><option value="empty" ${S.mode==='empty'?'selected':''}>${t('رقم فقط، بدون كلمة مرور','Number only, no password')}</option></select></div><div class="mk-field"><label for="mk-label">${t('اسم الدفعة / نقطة البيع — اختياري','Batch name / sales point — optional')}</label><input id="mk-label" value="${esc(S.label)}" maxlength="40" placeholder="${t('مثل: دفعة الصباح','For example: Morning batch')}"></div><details><summary>${t('تخصيص أرقام الكروت','Customize voucher numbers')}</summary><div class="mk-two"><div class="mk-field"><label for="mk-prefix">${t('البادئة','Prefix')}</label><input id="mk-prefix" value="${esc(S.prefix)}" maxlength="4" dir="ltr" placeholder="A"></div><div class="mk-field"><label for="mk-suffix">${t('اللاحقة','Suffix')}</label><input id="mk-suffix" value="${esc(S.suffix)}" maxlength="4" dir="ltr" placeholder="01"></div></div><p class="mk-copy">${t('مثال توضيحي:','Illustrative sample:')} <bdi dir="ltr" id="mk-sample">${esc(S.prefix)}00123874${esc(S.suffix)}</bdi></p></details><div id="mk-validation" role="alert" class="mk-error"></div>${btn('review',t('مراجعة قبل الإصدار','Review before issuing'),true,'full')}<p class="mk-note">${icon('shield-check')}${t('لن يبدأ الإصدار قبل تأكيدك في الخطوة التالية.','Issuance starts only after your next confirmation.')}</p>`;}
+ function review(){return back('configure')+`<div class="mk-steps"><span class="on"></span><span class="on"></span><span class="on"></span></div><div class="mk-eyebrow">${t('خطوة 3 من 3','Step 3 of 3')}</div><h1>${t('راجع، ثم أصدر.','One last look.')}</h1><p class="mk-copy">${t('هذه تفاصيل الدفعة التي ستضاف إلى الراوتر.','These vouchers will be added to the selected router.')}</p><div class="mk-summary">${fact(t('الراوتر','Router'),esc(routerName()))}${fact(t('النظام','System'),S.source==='hotspot'?'Hotspot':'User Manager')}${fact(t('الباقة','Plan'),packageName(S.pkg))}${fact(t('العدد','Quantity'),num(S.count)+t(' كرتًا',' vouchers'))}${fact(t('البيانات','Data'),['600 MB','2 GB','8 GB'][S.pkg])}${fact(t('وقت الاستخدام','Online time'),[5,15,60][S.pkg]+t(' ساعات',' hours'))}${fact(t('الصلاحية من أول استخدام','Validity from first use'),[2,7,30][S.pkg]+t(' أيام',' days'))}${fact(t('كلمة المرور','Password'),S.mode==='same'?t('نفس الرقم','Same as number'):S.mode==='empty'?t('بدون','None'):t('مختلفة لكل كرت','Different for each voucher'))}${S.label?fact(t('اسم الدفعة','Batch name'),esc(S.label)):''}</div>${S.connected?'':notice(t('الراوتر غير متصل. أعد الاتصال قبل الإصدار.','Router disconnected. Reconnect before issuing.'),true)}${btn(S.connected?'issue':'toggle-connection',S.connected?t('تأكيد إصدار '+num(S.count)+' كرتًا','Confirm '+num(S.count)+' vouchers'):t('إعادة الاتصال التجريبي','Reconnect demo router'),true,'full')}<p class="mk-note">${icon('info')}${t('إصدار تجريبي داخل التصور؛ لا تُرسل أوامر إلى راوتر.','Demo issuance only. No commands are sent to a router.')}</p>`;}
+ function progress(){const done=S.confirmed===S.count;return `<div class="mk-eyebrow">${t('دفعة قيد التجهيز','Preparing batch')}</div><h1>${done?t('كروتك جاهزة.','Vouchers ready.'):S.paused?t('توقفنا عند آخر تأكيد.','Paused at the last confirmation.'):t('نجهزها، كرتًا كرتًا.','Preparing every voucher.')}</h1><p class="mk-copy">${packageName(S.pkg)} · ${S.source==='hotspot'?'Hotspot':'User Manager'}</p>${done?`<div class="mk-checkmark">${icon('check')}</div>`:''}<div class="mk-big">${num(S.confirmed)}<span style="font-size:20px;letter-spacing:0;color:var(--mk-muted)"> / ${num(S.count)}</span></div><p class="mk-copy mk-center">${t('كرت مؤكد','vouchers confirmed')}</p><div class="mk-progress" role="progressbar" aria-label="${t('الكروت المؤكدة','Confirmed vouchers')}" aria-valuemin="0" aria-valuemax="${S.count}" aria-valuenow="${S.confirmed}"><div style="width:${S.confirmed/S.count*100}%"></div></div><div class="mk-summary">${fact(t('مؤكد','Confirmed'),num(S.confirmed))}${fact(t('بانتظار التحقق','Awaiting verification'),num(S.uncertain))}${fact(t('لم يبدأ','Not started'),num(Math.max(0,S.count-S.confirmed-S.uncertain)))}</div>${S.paused?notice(S.pauseReason==='user'?t('أوقفت الإصدار. الكروت المؤكدة محفوظة ويمكن استكمال الباقي.','Issuance paused. Confirmed vouchers are kept; the rest can be continued.'):t('انقطع الاتصال. الدفعة محفوظة، ونفحص النتيجة المعلقة قبل الاستكمال.','Connection lost. The batch is kept; we verify the pending result before continuing.'),true):''}${done?btn('go:print',icon('printer')+t('اختيار القالب والطباعة','Choose template & print'),true,'full')+btn('go:batch',t('عرض الدفعة','View batch'),false,'full'):S.paused?btn('resume',icon('refresh-cw')+(S.pauseReason==='user'?t('استكمال الإصدار','Continue issuing'):t('تحقق واستكمل','Verify & continue')),true,'full')+btn('go:print',t('معاينة المؤكد فقط ('+num(S.confirmed)+')','Preview confirmed only ('+num(S.confirmed)+')'),false,'full'):btn('pause',icon('pause')+t('إيقاف بعد الكرت الحالي','Pause after current voucher'),false,'full')}<p class="mk-note">${icon('shield-check')}${t('الطباعة متاحة للكروت المؤكدة فقط.','Only confirmed vouchers can be printed.')}</p>${btn('go:home',t('العودة للرئيسية','Back to overview'),false,'full ghost')}`;}
+ function printStudio(){const amount=S.created?S.confirmed:100;return back(S.created?'batch':'templates')+`<div class="mk-eyebrow">${t('القالب والطباعة','Template & print')}</div><h1>${t('شكل يليق بشبكتك.','Made for your network.')}</h1><div style="margin:17px 0">${ticket()}</div><div class="mk-inline">${[['orbit','مدار','Orbit'],['path','مسار','Path'],['economy','اقتصادي','Economy']].map(([id,a,e])=>`<button class="mk-chip" data-action="style:${id}" aria-pressed="${S.style===id}">${t(a,e)}</button>`).join('')}</div><div class="mk-two"><div class="mk-field"><label for="mk-cols">${t('الأعمدة','Columns')}</label><select id="mk-cols">${[2,3].map(n=>`<option ${S.cols===n?'selected':''}>${n}</option>`).join('')}</select></div><div class="mk-field"><label for="mk-rows">${t('الصفوف','Rows')}</label><select id="mk-rows">${[5,6,8].map(n=>`<option ${S.rows===n?'selected':''}>${n}</option>`).join('')}</select></div></div><label class="mk-radio"><input type="checkbox" id="mk-showpass" ${S.showPassword?'checked':''}>${t('إظهار حقل كلمة المرور','Show password field')}</label><label class="mk-radio"><input type="checkbox" id="mk-dataonly" ${S.dataOnly?'checked':''}>${t('البيانات فقط — ورق مطبوع مسبقًا','Data only — preprinted paper')}</label><div class="mk-summary">${fact(t('الورق','Paper'),'A4 · 210 × 297 mm')}${fact(t('الكروت المختارة','Selected vouchers'),num(amount))}${fact(t('عدد الصفحات','Pages'),num(Math.ceil(amount/(S.cols*S.rows))))}</div>${!S.connected?notice(t('الطباعة من الأرشيف. بيانات الدخول لم تُفحص مع الراوتر الآن.','Printing from archive. Credentials have not been checked against the router now.'),true):''}${btn('go:paper',icon('scan-eye')+t('معاينة الورقة','Preview sheet'),true,'full')}<p class="mk-note">${icon('printer')}${t('ابدأ بورقة اختبار لضبط المحاذاة قبل الدفعة كاملة.','Start with a test sheet to check alignment.')}</p>`;}
+ function paper(){const amount=S.created?S.confirmed:100;const per=S.cols*S.rows;return back('print')+`<div class="mk-heading"><h2>${t('معاينة ورقة A4','A4 sheet preview')}</h2>${badge(t('صفحة 1 من ','Page 1 of ')+Math.max(1,Math.ceil(amount/per)))}</div><div class="mk-paper" style="grid-template-columns:repeat(${S.cols},minmax(0,1fr))">${Array.from({length:Math.min(per,amount)},(_,i)=>`<div class="mk-mini-ticket" style="${S.dataOnly?'border-color:transparent;background:transparent;':''}"><span>${S.dataOnly?'':routerName()+' · '+packageName(S.pkg)}</span>${esc(S.prefix)}${String(123874+i).padStart(8,'0')}${esc(S.suffix)}${S.showPassword?'<span>PIN: ••••••</span>':''}</div>`).join('')}<div class="mk-paper-foot">${t('نموذج توضيحي · لا يحتوي حسابات حقيقية','Illustrative preview · no real accounts')}</div></div>${notice(t('هذه معاينة للتصميم. لم يُنشأ PDF أو تُرسل مهمة للطابعة.','Design preview only. No PDF or print job has been created.'))}${btn('go:print',t('تعديل القالب والورقة','Adjust template & sheet'),true,'full')}${btn('go:archive',t('العودة للدفعات','Back to batches'),false,'full ghost')}`;}
+ function archive(){return `<div class="mk-eyebrow">${t('أرشيفك، معك','Your archive, with you')}</div><h1>${t('كل دفعة لها مكان.','Every batch, in place.')}</h1><p class="mk-copy">${t('ابحث، افتح، وأعد طباعة ما تحتاجه.','Find, open, and reprint what you need.')}</p><input class="mk-search" id="mk-search" aria-label="${t('بحث في الدفعات','Search batches')}" placeholder="${t('اسم الدفعة أو الباقة','Batch name or plan')}" value="${esc(S.query)}"><div id="mk-batch-results">${archiveRows()}</div>${btn('new',icon('plus')+t('دفعة جديدة','New batch'),true,'full')}`;}
+ function archiveFixtures(){return S.routerId==='branch'?[{title:t('دفعة الفرع','Branch batch'),meta:t('75 كرت · أسبوعية · قراءة محفوظة','75 vouchers · Weekly · saved reading'),a:'sample-batch:75'}]:[{title:t('دفعة الصباح','Morning batch'),meta:t('100 كرت · يومية · اليوم','100 vouchers · Daily · today'),a:'sample-batch:100'},{title:t('دفعة الأسبوع','Weekly batch'),meta:t('250 كرت · أسبوعية · أمس','250 vouchers · Weekly · yesterday'),a:'sample-batch:250'}];}
+ function archiveRows(){const rows=[...(S.created?[{title:S.label||t('دفعتك الجديدة','Your new batch'),meta:num(S.confirmed)+t(' مؤكد · الآن',' confirmed · just now'),a:'go:batch'}]:[]),...archiveFixtures()];const q=S.query.trim().toLowerCase();const out=rows.filter(r=>(r.title+' '+r.meta).toLowerCase().includes(q));return out.length?out.map(r=>row(esc(r.title),r.meta,r.a,'layers')).join(''):`<p class="mk-copy" role="status" style="padding:25px 0">${t('لا توجد دفعات بهذا البحث.','No batches match this search.')}</p>`;}
+ function batch(){return back('archive')+`<div class="mk-inline">${badge(S.paused?t('غير مكتملة','Incomplete'):t('مؤكدة','Confirmed'),S.paused)}</div><h1>${esc(S.label)||t('دفعتك الجديدة','Your new batch')}</h1><p class="mk-copy">${esc(routerName())} · ${packageName(S.pkg)}</p><div class="mk-summary">${fact(t('الكروت المؤكدة','Confirmed vouchers'),num(S.confirmed))}${fact(t('المطلوب','Requested'),num(S.count))}${fact(t('الرموز','Credentials'),S.mode==='different'?t('رقم وكلمة مرور','Number & password'):t('رقم الدخول','Voucher number'))}${fact(t('حالة الراوتر','Router status'),S.connected?t('متصل','Connected'):t('غير متصل','Disconnected'))}</div>${S.paused?btn('go:progress',t('استكمال الدفعة','Continue batch'),true,'full'):''}${btn('go:print',icon('printer')+t('طباعة / إعادة طباعة','Print / reprint'),!S.paused,'full')}<div class="mk-spacer"></div><h3>${t('عينة الكروت','Sample vouchers')}</h3>${Array.from({length:Math.min(3,S.confirmed)},(_,i)=>row(String(123874+i).padStart(8,'0'),t('مؤكد · لم يستخدم','Confirmed · unused'),'card:'+i,'ticket',badge(t('مؤكد','Confirmed')))).join('')}`;}
+ function card(){return back('batch')+`<div class="mk-eyebrow">${t('تفاصيل كرت تجريبي','Demo voucher details')}</div><h1 dir="ltr" style="font-family:Manrope,sans-serif">${String(123874+(S.selectedCard||0)).padStart(8,'0')}</h1><div class="mk-summary">${fact(t('الباقة','Plan'),packageName(S.pkg))}${fact(t('حالة الإصدار','Issuance'),t('مؤكد','Confirmed'))}${fact(t('الاستخدام','Usage'),S.connected?t('لم يستخدم — قراءة تجريبية','Unused — demo reading'):t('غير معلوم حاليًا','Currently unknown'))}${fact(t('كلمة المرور','Password'),'••••••••')}</div>${btn('go:print',icon('printer')+t('معاينة الطباعة','Preview print'),true,'full')}<p class="mk-note">${icon('lock-keyhole')}${t('البيانات المعروضة توضيحية وليست بيانات دخول.','Displayed values are illustrative, not credentials.')}</p>`;}
+ function templates(){return `<div class="mk-eyebrow">${t('مساحة الطباعة','Print workspace')}</div><h1>${t('قالبك. بطريقتك.','Your template. Your way.')}</h1><p class="mk-copy">${t('ابدأ بقالب جاهز واضبطه لورقك.','Start with a template and fit it to your paper.')}</p>${[['orbit','مدار','Orbit'],['path','مسار','Path'],['economy','اقتصادي','Economy']].map(([id,a,e])=>`<button type="button" class="mk-package" data-action="template:${id}"><h3 style="margin-bottom:12px">${t(a,e)}</h3>${ticket(id)}</button>`).join('')}`;}
+ function routers(){return `<div class="mk-eyebrow">${icon('router')}${t('شبكاتك، بوضوح','Your networks, clearly')}</div><h1>${t('على أي راوتر نشتغل؟','Choose your router.')}</h1><p class="mk-copy">${t('ادخل إلى الراوتر لفتح باقاته ودفعاته.','Open a router to see its plans and batches.')}</p>${demoRouters.map(r=>{const w=workspaces[r.id];const connected=w?w.connected:r.connected;const unfinished=w&&(w.draft||w.paused||w.running);return `<section class="mk-router-card"><div class="mk-router-identity"><span class="mk-router-glyph">${icon('router')}</span><div><h2>${esc(S.lang==='ar'?r.ar:r.en)}</h2><div class="mk-workspace-status"><span class="mk-dot ${connected?'':'off'}"></span>${connected?t('متصل محليًا · محاكاة','Connected locally · demo'):t('غير متصل · المحفوظ متاح','Offline · saved data available')}</div></div></div><div class="mk-router-meta" dir="ltr">${r.ip} · RouterOS ${r.version}</div>${unfinished?`<div class="mk-router-meta">${icon('bookmark-check')}${t(' لديك دفعة لم تكتمل',' Unfinished batch kept here')}</div>`:''}${btn('enter:'+r.id,icon(connected?'arrow-left':'folder-open')+(connected?t('دخول إلى الراوتر','Open workspace'):t('فتح المحفوظ','Open saved workspace')),connected,'full')}</section>`;}).join('')}${btn('add-router',icon('plus')+t('إضافة راوتر','Add router'),false,'full')}<p class="mk-note">${icon('wifi-off')}${t('لا يحتاج حساب كلاود. يتطلب الإصدار الوصول إلى الراوتر داخل شبكتك.','No cloud account needed. Issuance requires access to your router on the local network.')}</p>`;}
+ function settings(){return `<div class="mk-eyebrow">${t('إعدادات الراوتر','Router settings')}</div><h1>${esc(routerName())}</h1><div class="mk-summary">${fact(t('العنوان','Address'),`<bdi dir="ltr">${currentRouter().ip}</bdi>`)}${fact(t('الإصدار','Version'),'RouterOS '+currentRouter().version)}${fact(t('الحالة التجريبية','Demo status'),S.connected?t('متصل محليًا','Connected locally'):t('غير متصل','Disconnected'))}</div>${btn('reconnect',icon('refresh-cw')+t('فحص الاتصال التجريبي','Check demo connection'),true,'full')}${row(t('النسخ الاحتياطي','Backup'),t('أرشيف وقوالب هذا الراوتر','This router’s archive and templates'),'backup','hard-drive-download')}${row(t('اللغة','Language'),S.lang==='ar'?'العربية':'English','language','languages')}<div class="mk-spacer"></div>${btn('exit-workspace',icon('log-out')+t('العودة للراوترات','Back to routers'),false,'full')}<p class="mk-note">${icon('info')}${t('الخروج يحفظ عملك في هذه الجلسة ولا يوقف الراوتر.','Leaving keeps your work in this demo session and does not power off the router.')}</p>`;}
+ function exitConfirm(){return `<div class="mk-eyebrow">${icon('pause')}${t('قبل مغادرة الراوتر','Before leaving this router')}</div><h1>${t('نحفظ التقدم أولًا.','Keep your progress first.')}</h1><p class="mk-copy">${t('الإصدار ما زال جاريًا. للخروج نوقفه بعد آخر نتيجة مؤكدة، ونحفظ الباقي لهذا الراوتر.','Issuance is running. Leaving pauses at the last confirmed result and keeps the remaining work with this router.')}</p><div class="mk-summary">${fact(t('الراوتر','Router'),esc(routerName()))}${fact(t('مؤكد حتى الآن','Confirmed so far'),num(S.confirmed))}${fact(t('المطلوب','Requested'),num(S.count))}</div>${btn('go:progress',t('البقاء ومتابعة الدفعة','Stay & view progress'),true,'full')}${btn('confirm-exit',t('إيقاف وحفظ والخروج','Pause, keep & leave'),false,'full')}`;}
+ function render(){root.style.setProperty('--mk-radius',appearance.radius+'px');const ar=S.lang==='ar';main.dir=nav.dir=head.dir=ar?'rtl':'ltr';main.lang=ar?'ar':'en';root.querySelector('.mk-demo').dir=ar?'rtl':'ltr';root.querySelector('.mk-demo strong').textContent=t('تصور تفاعلي · بيانات تجريبية','Interactive concept · demo data');root.querySelector('[data-action=language]').textContent=ar?'English':'العربية';const scenario=root.querySelector('.mk-scenario');scenario.hidden=!S.routerId;scenario.textContent=S.connected?t('اختبار انقطاع الراوتر','Test router disconnect'):t('إعادة الاتصال','Reconnect');head.innerHTML=S.routerId?`<div><div class="mk-workspace-name">${esc(routerName())}</div><div class="mk-workspace-status"><span class="mk-dot ${S.connected?'':'off'}"></span>${S.connected?t('متصل محليًا · محاكاة','Connected locally · demo'):t('غير متصل · تعرض المحفوظ','Offline · viewing saved data')}</div></div><button type="button" class="mk-router" data-action="exit-workspace">${icon('log-out')}${t('الراوترات','Routers')}</button>`:`<div><span class="mk-word">Mikro<span>.</span></span><div class="mk-sub">${t('إصدار وطباعة الكروت','Voucher workspace')}</div></div>`;
+ const screens={home,connect,packages,configure,review,progress,print:printStudio,paper,archive,batch,card,templates,routers,settings,'exit-confirm':exitConfirm};main.innerHTML=(screens[S.page]||routers)();
+ const active=['packages','configure','review','progress','batch','card','archive'].includes(S.page)?'archive':['print','paper','templates'].includes(S.page)?'templates':['connect','settings'].includes(S.page)?'settings':'home';
+ nav.hidden=!S.routerId||S.page==='connect'||S.page==='exit-confirm';nav.innerHTML=S.routerId?[['home','house','الرئيسية','Home'],['archive','layers','الدفعات','Batches'],['templates','panels-top-left','القوالب','Templates'],['settings','settings-2','الإعدادات','Settings']].map(([p,ic,a,e])=>`<button type="button" data-action="go:${p}" ${active===p?'aria-current="page"':''}>${icon(ic)}<span>${t(a,e)}</span></button>`).join(''):'';
+ root.querySelectorAll('button,summary').forEach(el=>el.classList.add('cursor-interaction'));
+ if(globalThis.lucide)lucide.createIcons({attrs:{width:16,height:16}});
+ }
+ function go(p){if(p==='home')restoreDraft();if(S.page==='connect'&&p!=='connect'){clearTimeout(connectionTimer);S.checking=false;}if(p==='routers'&&S.routerId){go(connectFrom==='workspace'?'home':'settings');return;}if(!S.routerId&&!['routers','connect'].includes(p))p='routers';S.page=p;render();persist();}
+ function tick(){if(!S.running||S.paused)return;S.confirmed=Math.min(S.count,S.confirmed+Math.max(1,Math.ceil(S.count/7)));if(S.confirmed===S.count){S.running=false;S.created=true;S.draft=false;clearInterval(timer);}if(['progress','exit-confirm','home'].includes(S.page))render();}
+ function start(){clearInterval(timer);S.running=true;S.paused=false;timer=setInterval(tick,500);}
+ root.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
+ if(a.startsWith('enter:')){enterRouter(a.slice(6));return;}
+ if(a==='exit-workspace'){if(S.running)go('exit-confirm');else leaveRouter();return;}
+ if(a==='confirm-exit'){leaveRouter();return;}
+ if(a==='add-router'){connectFrom='routers';go('connect');return;}
+ if(a==='reconnect'){connectFrom='workspace';go('connect');return;}
+ if(a.startsWith('go:')){if(a==='go:configure')S.draft=true;go(a.slice(3));return;}
+ if(a==='language'){S.lang=S.lang==='ar'?'en':'ar';render();persist();return;}
+ if(a==='new'){restoreDraft();if(S.running||S.paused){go('progress');return;}if(S.draft){go('configure');return;}S.count=25;S.confirmed=0;S.uncertain=0;S.label='';S.created=false;S.draft=true;connectFrom='workspace';go(S.connected?'packages':'connect');return;}
+ if(a.startsWith('pkg:')){S.pkg=Number(a.split(':')[1]);render();return;}
+ if(a.startsWith('source:')){S.source=a.split(':')[1];render();return;}
+ if(a.startsWith('count:')){S.count=Number(a.split(':')[1]);render();return;}
+ if(a==='review'){const v=Number(root.querySelector('#mk-count').value);const p=root.querySelector('#mk-prefix')?.value||S.prefix;const s=root.querySelector('#mk-suffix')?.value||S.suffix;if(!Number.isInteger(v)||v<1||v>1500||!/^[a-zA-Z0-9_-]{0,4}$/.test(p)||!/^[a-zA-Z0-9_-]{0,4}$/.test(s)){root.querySelector('#mk-validation').textContent=t('اختر عددًا صحيحًا من 1 إلى 1500، وبادئة ولاحقة من أحرف لاتينية أو أرقام حتى 4 خانات.','Choose 1–1500 vouchers. Prefix and suffix accept up to 4 Latin letters or digits.');return;}S.count=v;go('review');return;}
+ if(a==='issue'){if(!S.routerId||!S.connected||S.running)return;S.confirmed=0;S.uncertain=0;S.created=true;start();go('progress');return;}
+ if(a==='pause'){clearInterval(timer);S.running=false;S.paused=true;S.pauseReason='user';S.uncertain=0;render();return;}
+ if(a==='resume'){S.connected=true;S.uncertain=0;S.pauseReason='';start();render();return;}
+ if(a==='toggle-connection'){S.connected=!S.connected;if(!S.connected&&S.running){clearInterval(timer);S.running=false;S.paused=true;S.pauseReason='connection';S.uncertain=S.confirmed<S.count?1:0;}render();return;}
+ if(a.startsWith('style:')){S.style=a.split(':')[1];render();persist();return;}
+ if(a.startsWith('template:')){S.style=a.split(':')[1];go('print');return;}
+ if(a.startsWith('sample-batch:')){if(S.running||S.paused){go('progress');return;}if(S.draft&&!S.savedDraft)S.savedDraft=Object.fromEntries(draftKeys.map(k=>[k,S[k]]));S.created=true;S.draft=false;S.count=Number(a.split(':')[1]);S.confirmed=S.count;S.pkg=S.count===250||S.count===75?1:0;S.label=S.count===75?t('دفعة الفرع','Branch batch'):S.count===250?t('دفعة الأسبوع','Weekly batch'):t('دفعة الصباح','Morning batch');S.paused=false;go('batch');return;}
+ if(a.startsWith('card:')){S.selectedCard=Number(a.split(':')[1]);go('card');return;}
+ if(a.startsWith('connection:')){S.connectionMode=a.split(':')[1];render();return;}
+ if(a==='choose-router'){const u=root.querySelector('#mk-user');u?.focus();return;}
+ if(a==='connect'){if(S.checking)return;S.checking=true;render();const id=S.routerId;clearTimeout(connectionTimer);connectionTimer=setTimeout(()=>{if(S.page!=='connect'||S.routerId!==id){S.checking=false;return;}if(!id){enterRouter('main');S.checking=false;S.connected=true;render();return;}S.checking=false;S.connected=true;go(S.draft?'packages':'home');},650);return;}
+ if(a==='backup'){go('settings');main.insertAdjacentHTML('beforeend',notice(t('تصور النسخ الاحتياطي: نسخة مشفرة، مع تجربة الاستعادة قبل الاعتماد. لم يُصدّر ملف.','Backup concept: encrypted export, verified by a restore test. No file was exported.')));return;}
+ });
+ root.addEventListener('input',e=>{const id=e.target.id,v=e.target.value;if(id==='mk-count')S.count=Number(v);if(id==='mk-label')S.label=v;if(id==='mk-prefix')S.prefix=v;if(id==='mk-suffix')S.suffix=v;if(id==='mk-search'){S.query=v;root.querySelector('#mk-batch-results').innerHTML=archiveRows();if(globalThis.lucide)lucide.createIcons({attrs:{width:16,height:16}});}const sample=root.querySelector('#mk-sample');if(sample)sample.textContent=S.prefix+'00123874'+S.suffix;});
+ root.addEventListener('change',e=>{const id=e.target.id;if(id==='mk-mode')S.mode=e.target.value;if(id==='mk-cols'){S.cols=Number(e.target.value);render();}if(id==='mk-rows'){S.rows=Number(e.target.value);render();}if(id==='mk-showpass'){S.showPassword=e.target.checked;render();}if(id==='mk-dataonly'){S.dataOnly=e.target.checked;render();}});
+ render();
+ if(globalThis.Tweak){const tweak=new Tweak({container:root.querySelector('.mk-device'),onChange:()=>root.style.setProperty('--mk-radius',appearance.radius+'px')});tweak.addSlider(appearance,'radius',{label:'استدارة الأسطح',min:12,max:26,unit:'px'});}
+})();
+</script>

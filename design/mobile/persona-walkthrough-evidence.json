@@ -1,0 +1,1487 @@
+{
+  "prototype": "mikro-network-hub.html",
+  "method": "single-reviewer cognitive walkthrough using synthetic DOM; no human participant, browser, device, LAN, messages or printing",
+  "tasks": 12,
+  "assertions": 15,
+  "traces": [
+    {
+      "id": "T01-first-launch-and-connection",
+      "steps": [
+        {
+          "label": "First opening",
+          "page": "registration",
+          "text": "أول تشغيلنبدأ برقمك.أضف رقم تواصلك. يمكنك العمل محليًا قبل توثيقه أو مراجعة الحساب.مفتاح الدولةاليمن / Yemen (+967)مصر / Egypt (+20)سوريا / Syria (+963)السعودية / Saudi Arabia (+966)رقم الهاتفرقم الحساب خاص ولا يُطبع على الكروت.أرغب برسائل عن الميزات والعروض — اختياريمتابعة بدون توثيق الآنبدون إنترنت: يبقى الطلب على الجهاز إلى أن يتوفر اتصال وتسمح بإرساله.كيف نستخدم معلوماتك؟للربط بطلب حسابك والدعم. بيانات الشبكة التالية اختيارية. الاشتراك برسائل الميزات مستقل ويمكن إيقافه. لا تُرفع بيانات دخول الراوتر ضمن ملف التواصل. هذه محاكاة لا تحفظ أو ترسل أرقامًا.",
+          "actions": [
+            {
+              "action": "register",
+              "label": "متابعة بدون توثيق الآن",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Optional profile",
+          "page": "profile",
+          "text": "رجوعبيانات الشبكة · اختياريمعلومات تساعدك، بدون تكرار.تقدر تتخطى هذه الخطوة وتكملها لاحقًا.بلد الشبكة: اليمنتغييراسم الشبكة على الكروتالمحافظةاختيار المحافظة المديريةاختيار المديريةاختر المحافظة أولًا.رقم دعم الشبكة — يمكنك طباعتهإضافة رقم تواصل خاص آخررقم خاص لا يظهر على الكرتحفظ ومتابعةتخطي الآن",
+          "actions": [
+            {
+              "action": "go:registration",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "change-country",
+              "label": "تغيير",
+              "disabled": false
+            },
+            {
+              "action": "pick-place:province",
+              "label": "اختيار المحافظة",
+              "disabled": false
+            },
+            {
+              "action": "pick-place:district",
+              "label": "اختيار المديرية",
+              "disabled": true
+            },
+            {
+              "action": "save-profile",
+              "label": "حفظ ومتابعة",
+              "disabled": false
+            },
+            {
+              "action": "skip-profile",
+              "label": "تخطي الآن",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Single connection card",
+          "page": "connect",
+          "text": "رجوعإضافة شبكةاربط راوتر شبكتك.استكشاف الشبكة المحليةوأنت متصل بشبكة الراوتر، أو اكتب العنوان مباشرة.عنوان الراوترالمنفذبيانات دخول الراوتراسم المستخدمكلمة المرورنفس بيانات Winbox أو WebFig للراوتر، وليست رقم حساب Mikro.فحص الاتصالوين ألقى العنوان والمنفذ؟داخل الشبكة استخدم عنوان الراوتر المحلي. من خارجها استخدم رابط التحكم والمنفذ من المهندس. منفذ API قد يختلف عن منفذ صفحة الويب أو Winbox. طريقة الاتصال تختبر تلقائيًا، ولا نغير إعداد الراوتر.",
+          "actions": [
+            {
+              "action": "go:routers",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "start-discovery",
+              "label": "استكشاف الشبكة المحلية",
+              "disabled": false
+            },
+            {
+              "action": "show-password",
+              "label": "",
+              "disabled": false
+            },
+            {
+              "action": "check-connection",
+              "label": "فحص الاتصال",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Unreachable remote host",
+          "page": "connection-result",
+          "text": "رجوعنتيجة فحص تجريبيةلم نصل للراوتر.راجع العنوان والمنفذ واتصالك بالشبكة. DDNS وحده لا يضمن الوصول.مراجعة وإعادة المحاولة",
+          "actions": [
+            {
+              "action": "go:connect",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:connect",
+              "label": "مراجعة وإعادة المحاولة",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "requires_phone_before_local_workspace": true,
+        "actual_authentication_or_discovery": false
+      }
+    },
+    {
+      "id": "T02-complaint-and-source-choice",
+      "steps": [
+        {
+          "label": "Duplicate number across account sources",
+          "page": "lookup-results",
+          "text": "رجوعنتيجة البحثاختر الكرت المقصود.الرقم موجود في أكثر من نظام؛ لا نخلط أرصدتها.00123874Hotspot · يوميةالرصيد منتهٍتجديدإجراءات00123874User Manager · يوميةنشطتجديدإجراءات",
+          "actions": [
+            {
+              "action": "go:lookup",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:00123874",
+              "label": "00123874Hotspot · يوميةالرصيد منتهٍ",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:usermanager:00123874",
+              "label": "00123874User Manager · يوميةنشط",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:usermanager:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:usermanager:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Explain an exhausted data voucher",
+          "page": "card",
+          "text": "رجوعHotspot · الشبكة الرئيسية00123874الرصيد منتهٍ600 MB من 600 MBالمتبقي0 MBتنزيل512 MBرفع88 MBوقت الاتصال المستخدم80 / 300 دقيقةالباقةيوميةالصلاحيةسارية في المثالماذا تقول القراءة؟اكتمل حد البيانات. هذا لا يحدد التطبيق أو الشخص الذي استهلكها.قراءة تجريبية قبل 12 ثانيةإرسال تقرير للزبونتجديد الكرتتسجيل شكوىالأجهزة وسجل القراءات",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:share",
+              "label": "إرسال تقرير للزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:renew",
+              "label": "تجديد الكرت",
+              "disabled": false
+            },
+            {
+              "action": "go:complaint-new",
+              "label": "تسجيل شكوى",
+              "disabled": false
+            },
+            {
+              "action": "go:card-history",
+              "label": "الأجهزة وسجل القراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Report preview",
+          "page": "share",
+          "text": "رجوعتقرير الزبونراجع التقرير قبل مشاركته.صورةنصMikro.تقرير الكرت 00123874 الشبكة: الشبكة الرئيسية النظام: Hotspot الباقة: يومية الصلاحية: سارية في المثال الحالة: الرصيد منتهٍ الاستهلاك: 600 / 600 MB المتبقي: 0 MB تنزيل / رفع: 512 / 88 MB وقت الاستخدام: 80 / 300 دقيقة وقت القراءة: 12 ثانية · تجريبيتضمين عنوان الجهاز MAC — اختياريلا تتضمن المشاركة كلمة المرور أو ملاحظات الشكوى الداخلية.كيف تريد إرساله؟واتسابرسالة نصيةمشاركةمعاينة خطوة الإرسالمعاينة فقط؛ لا ملف صورة أو رسالة أو مشاركة فعلية هنا.",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "report-format:image",
+              "label": "صورة",
+              "disabled": false
+            },
+            {
+              "action": "report-format:text",
+              "label": "نص",
+              "disabled": false
+            },
+            {
+              "action": "channel:whatsapp",
+              "label": "واتساب",
+              "disabled": false
+            },
+            {
+              "action": "channel:sms",
+              "label": "رسالة نصية",
+              "disabled": false
+            },
+            {
+              "action": "channel:system",
+              "label": "مشاركة",
+              "disabled": false
+            },
+            {
+              "action": "share-review",
+              "label": "معاينة خطوة الإرسال",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Recipient handoff preview",
+          "page": "share-review",
+          "text": "رجوعالخطوة التالية على الهاتفأنت تختار المستلم ثم ترسل.في التطبيق الفعلي تفتح وسيلة المشاركة التي اخترتها. لا نرسل تلقائيًا، ولا نعتبر فتحها دليل تسليم.هذه محاكاة: لم تفتح أي وسيلة إرسال ولم تُرسل رسالة.العودة للكرت",
+          "actions": [
+            {
+              "action": "go:share",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:card",
+              "label": "العودة للكرت",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "contextual_system_help_on_results": false,
+        "real_message_sent": false
+      }
+    },
+    {
+      "id": "T03-time-limit-only",
+      "steps": [
+        {
+          "label": "Online time exhausted with data remaining",
+          "page": "card",
+          "text": "رجوعHotspot · الشبكة الرئيسية00123874الرصيد منتهٍ200 MB من 600 MBالمتبقي400 MBتنزيل512 MBرفع88 MBوقت الاتصال المستخدم300 / 300 دقيقةالباقةيوميةالصلاحيةسارية في المثالماذا تقول القراءة؟ما زال هناك رصيد في هذه القراءة؛ تاريخ الاستخدام يحتاج سجلًا مؤرخًا.قراءة تجريبية قبل 12 ثانيةإرسال تقرير للزبونتجديد الكرتتسجيل شكوىالأجهزة وسجل القراءات",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:share",
+              "label": "إرسال تقرير للزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:renew",
+              "label": "تجديد الكرت",
+              "disabled": false
+            },
+            {
+              "action": "go:complaint-new",
+              "label": "تسجيل شكوى",
+              "disabled": false
+            },
+            {
+              "action": "go:card-history",
+              "label": "الأجهزة وسجل القراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Customer report of time-only exhaustion",
+          "page": "share",
+          "text": "رجوعتقرير الزبونراجع التقرير قبل مشاركته.صورةنصMikro.تقرير الكرت 00123874 الشبكة: الشبكة الرئيسية النظام: Hotspot الباقة: يومية الصلاحية: سارية في المثال الحالة: الرصيد منتهٍ الاستهلاك: 200 / 600 MB المتبقي: 400 MB تنزيل / رفع: 512 / 88 MB وقت الاستخدام: 300 / 300 دقيقة وقت القراءة: 12 ثانية · تجريبيتضمين عنوان الجهاز MAC — اختياريلا تتضمن المشاركة كلمة المرور أو ملاحظات الشكوى الداخلية.كيف تريد إرساله؟واتسابرسالة نصيةمشاركةمعاينة خطوة الإرسالمعاينة فقط؛ لا ملف صورة أو رسالة أو مشاركة فعلية هنا.",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "report-format:image",
+              "label": "صورة",
+              "disabled": false
+            },
+            {
+              "action": "report-format:text",
+              "label": "نص",
+              "disabled": false
+            },
+            {
+              "action": "channel:whatsapp",
+              "label": "واتساب",
+              "disabled": false
+            },
+            {
+              "action": "channel:sms",
+              "label": "رسالة نصية",
+              "disabled": false
+            },
+            {
+              "action": "channel:system",
+              "label": "مشاركة",
+              "disabled": false
+            },
+            {
+              "action": "share-review",
+              "label": "معاينة خطوة الإرسال",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "remaining_data_message_despite_time_exhausted": true
+      }
+    },
+    {
+      "id": "T04-expired-validity-only",
+      "steps": [
+        {
+          "label": "Validity exhausted with time and data remaining",
+          "page": "card",
+          "text": "رجوعHotspot · الشبكة الرئيسية00123874الرصيد منتهٍ200 MB من 600 MBالمتبقي400 MBتنزيل512 MBرفع88 MBوقت الاتصال المستخدم50 / 300 دقيقةالباقةيوميةالصلاحيةسارية في المثالماذا تقول القراءة؟ما زال هناك رصيد في هذه القراءة؛ تاريخ الاستخدام يحتاج سجلًا مؤرخًا.قراءة تجريبية قبل 12 ثانيةإرسال تقرير للزبونتجديد الكرتتسجيل شكوىالأجهزة وسجل القراءات",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:share",
+              "label": "إرسال تقرير للزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:renew",
+              "label": "تجديد الكرت",
+              "disabled": false
+            },
+            {
+              "action": "go:complaint-new",
+              "label": "تسجيل شكوى",
+              "disabled": false
+            },
+            {
+              "action": "go:card-history",
+              "label": "الأجهزة وسجل القراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Report repeats validity",
+          "page": "share",
+          "text": "رجوعتقرير الزبونراجع التقرير قبل مشاركته.صورةنصMikro.تقرير الكرت 00123874 الشبكة: الشبكة الرئيسية النظام: Hotspot الباقة: يومية الصلاحية: سارية في المثال الحالة: الرصيد منتهٍ الاستهلاك: 200 / 600 MB المتبقي: 400 MB تنزيل / رفع: 512 / 88 MB وقت الاستخدام: 50 / 300 دقيقة وقت القراءة: 12 ثانية · تجريبيتضمين عنوان الجهاز MAC — اختياريلا تتضمن المشاركة كلمة المرور أو ملاحظات الشكوى الداخلية.كيف تريد إرساله؟واتسابرسالة نصيةمشاركةمعاينة خطوة الإرسالمعاينة فقط؛ لا ملف صورة أو رسالة أو مشاركة فعلية هنا.",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "report-format:image",
+              "label": "صورة",
+              "disabled": false
+            },
+            {
+              "action": "report-format:text",
+              "label": "نص",
+              "disabled": false
+            },
+            {
+              "action": "channel:whatsapp",
+              "label": "واتساب",
+              "disabled": false
+            },
+            {
+              "action": "channel:sms",
+              "label": "رسالة نصية",
+              "disabled": false
+            },
+            {
+              "action": "channel:system",
+              "label": "مشاركة",
+              "disabled": false
+            },
+            {
+              "action": "share-review",
+              "label": "معاينة خطوة الإرسال",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "incorrect_validity_label": true,
+        "report_repeats_valid_label": true
+      }
+    },
+    {
+      "id": "T05-one-generated-voucher-for-waiting-customer",
+      "steps": [
+        {
+          "label": "Choose plan for one customer",
+          "page": "issue",
+          "text": "رجوعإضافة كرت واحداختر الباقة، ونحن نجهز الرقم.الباقةيومية · Hotspot · 100 YERيومية · User Manager · 100 YERأسبوعية · User Manager · 250 YERمرنة 200 · Hotspot · 200 YERمرنة 200 · User Manager · 200 YERالبيانات600 MBالسعر100 YERالرقم تلقائيأكتب الرقم بنفسيسنولد رقمًا جديدًا ونفحص عدم تكراره قبل الإضافة.التالي: مراجعة الإضافةما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.",
+          "actions": [
+            {
+              "action": "go:add-choice",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "card-mode:generated",
+              "label": "الرقم تلقائي",
+              "disabled": false
+            },
+            {
+              "action": "card-mode:manual",
+              "label": "أكتب الرقم بنفسي",
+              "disabled": false
+            },
+            {
+              "action": "review-issue",
+              "label": "التالي: مراجعة الإضافة",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Review single issuance",
+          "page": "review-issue",
+          "text": "رجوعقبل الإضافةراجع، ثم أكد.الراوترالشبكة الرئيسيةالباقةيومية · Hotspotالعدد1رقم الدخولرقم جديد تلقائي لكل كرتتأكيد الإضافة التجريبيةمحاكاة فقط؛ لا تنشأ حسابات على راوتر حقيقي.",
+          "actions": [
+            {
+              "action": "go:issue",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "confirm-issue",
+              "label": "تأكيد الإضافة التجريبية",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Issuance completed",
+          "page": "done",
+          "text": "نتيجة تجريبيةالكروت جاهزة في المثال.المؤكد في المحاكاة1الباقةيومية · Hotspotعرض الكروتالقالب والطباعةالرئيسية",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "عرض الكروت",
+              "disabled": false
+            },
+            {
+              "action": "design:hs-day",
+              "label": "القالب والطباعة",
+              "disabled": false
+            },
+            {
+              "action": "go:home",
+              "label": "الرئيسية",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Show cards after issuing one",
+          "page": "cards",
+          "text": "كروت الشبكة الرئيسيةكل الكروت، بوضوح.بحث برقم الكرتالحالةكل الحالاتنشطالرصيد منتهٍلم يستخدمجاهز بعد التجديدموقوفالنظامكل الأنظمةHotspotUser Manager7 كرت في النتائج التجريبية00123874Hotspot · يوميةالرصيد منتهٍتجديدإجراءات00123874User Manager · يوميةنشطتجديدإجراءات00123875Hotspot · يوميةلم يستخدمتجديدإجراءات00123876User Manager · أسبوعيةموقوفتجديدإجراءات00123877Hotspot · يوميةنشطتجديدإجراءات00123878Hotspot · يوميةنشطتجديدإجراءات90000007Hotspot · يوميةلم يستخدمتجديدإجراءاتإضافة كروتما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.",
+          "actions": [
+            {
+              "action": "open-card:hotspot:00123874",
+              "label": "00123874Hotspot · يوميةالرصيد منتهٍ",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:usermanager:00123874",
+              "label": "00123874User Manager · يوميةنشط",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:usermanager:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:usermanager:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:00123875",
+              "label": "00123875Hotspot · يوميةلم يستخدم",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123875",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123875",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:usermanager:00123876",
+              "label": "00123876User Manager · أسبوعيةموقوف",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:usermanager:00123876",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:usermanager:00123876",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:00123877",
+              "label": "00123877Hotspot · يوميةنشط",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123877",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123877",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:00123878",
+              "label": "00123878Hotspot · يوميةنشط",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123878",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123878",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:90000007",
+              "label": "90000007Hotspot · يوميةلم يستخدم",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:90000007",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:90000007",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "go:add-choice",
+              "label": "إضافة كروت",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "new_number_on_completion": false,
+        "completion_has_direct_share_or_copy": false,
+        "opens_specific_new_card": false,
+        "list_contains_new_number": true
+      }
+    },
+    {
+      "id": "T06-batch-and-print-handoff",
+      "steps": [
+        {
+          "label": "Batch completed",
+          "page": "done",
+          "text": "نتيجة تجريبيةالكروت جاهزة في المثال.المؤكد في المحاكاة25الباقةيومية · Hotspotعرض الكروتالقالب والطباعةالرئيسية",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "عرض الكروت",
+              "disabled": false
+            },
+            {
+              "action": "design:hs-day",
+              "label": "القالب والطباعة",
+              "disabled": false
+            },
+            {
+              "action": "go:home",
+              "label": "الرئيسية",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Template editor entered from completed batch",
+          "page": "design",
+          "text": "رجوعيومية · Hotspotالكرت أمامك. عدّله مباشرة.اسم الشبكةرقم الدخولكلمة المرورالباقةالسعرالدعم الفنيرمز QRملاحظةنقطة البيعالشبكة الرئيسية00123874يومية · 600 MB100 YERاضغط اسم الحقل لإظهاره أو إخفائه. المسه على الكرت لتحديده، واسحبه إلى مكانه. رقم الدخولظاهرأصغر23أكبرلون الحقل المحددتوسيط الحقلإعادة مكانهتراجع رفع صورة خلفيةقالب جاهز ترتيب الكروت في ورقة A4الأعمدة1234الصفوف345681012 كرتًا في الصفحةمعاينة الورقة البيانات داخل المعاينة تجريبية.حفظ قالب الباقةالتجهيز لاحقًا",
+          "actions": [
+            {
+              "action": "go:plan-setup",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:network",
+              "label": "اسم الشبكة",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:username",
+              "label": "رقم الدخول",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:password",
+              "label": "كلمة المرور",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:plan",
+              "label": "الباقة",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:price",
+              "label": "السعر",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:support",
+              "label": "الدعم الفني",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:qr",
+              "label": "رمز QR",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:note",
+              "label": "ملاحظة",
+              "disabled": false
+            },
+            {
+              "action": "toggle-layer:pos",
+              "label": "نقطة البيع",
+              "disabled": false
+            },
+            {
+              "action": "select-layer:network",
+              "label": "الشبكة الرئيسية",
+              "disabled": false
+            },
+            {
+              "action": "select-layer:username",
+              "label": "00123874",
+              "disabled": false
+            },
+            {
+              "action": "select-layer:plan",
+              "label": "يومية · 600 MB",
+              "disabled": false
+            },
+            {
+              "action": "select-layer:price",
+              "label": "100 YER",
+              "disabled": false
+            },
+            {
+              "action": "font:down",
+              "label": "أصغر",
+              "disabled": false
+            },
+            {
+              "action": "font:up",
+              "label": "أكبر",
+              "disabled": false
+            },
+            {
+              "action": "center-layer",
+              "label": "توسيط الحقل",
+              "disabled": false
+            },
+            {
+              "action": "reset-layer",
+              "label": "إعادة مكانه",
+              "disabled": false
+            },
+            {
+              "action": "undo-design",
+              "label": "تراجع",
+              "disabled": false
+            },
+            {
+              "action": "choose-image",
+              "label": "رفع صورة خلفية",
+              "disabled": false
+            },
+            {
+              "action": "ready-style",
+              "label": "قالب جاهز",
+              "disabled": false
+            },
+            {
+              "action": "go:paper",
+              "label": "معاينة الورقة",
+              "disabled": false
+            },
+            {
+              "action": "save-template",
+              "label": "حفظ قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:hs-day",
+              "label": "التجهيز لاحقًا",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Paper arrangement preview",
+          "page": "paper",
+          "text": "رجوعمعاينة A4تأكد من ترتيب الورقة.Mikro.00123874Mikro.00123875Mikro.00123876Mikro.00123877Mikro.00123878Mikro.00123879Mikro.00123880Mikro.00123881Mikro.00123882Mikro.00123883Mikro.00123884Mikro.00123885في الصفحة12الكروت المختارة في المثال25الصفحات3معاينة توزيع مبسطة؛ لا PDF أو طباعة فعلية. يلزم فحص وضوح الخط والمحاذاة على ورقة اختبار.العودة للتعديل",
+          "actions": [
+            {
+              "action": "go:design",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:design",
+              "label": "العودة للتعديل",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "After template save",
+          "page": "plan-setup",
+          "text": "رجوعقوالب باقاتكاختر الباقة ثم صمّم كرتها.ما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.يوميةHotspot · 600 MB · 100 YERالقالب جاهزتصميم قالب الباقةتجهيز لاحقًايوميةUser Manager · 600 MB · 100 YERيمكن تجهيزه لاحقًاتصميم قالب الباقةتجهيز لاحقًاأسبوعيةUser Manager · 2 GB · 250 YERيمكن تجهيزه لاحقًاتصميم قالب الباقةتجهيز لاحقًامرنة 200Hotspot · 1 GB · 200 YERيمكن تجهيزه لاحقًاتصميم قالب الباقةتجهيز لاحقًامرنة 200User Manager · 1 GB · 200 YERيمكن تجهيزه لاحقًاتصميم قالب الباقةتجهيز لاحقًا",
+          "actions": [
+            {
+              "action": "go:packages",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "design:hs-day",
+              "label": "تصميم قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:hs-day",
+              "label": "تجهيز لاحقًا",
+              "disabled": false
+            },
+            {
+              "action": "design:um-day",
+              "label": "تصميم قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:um-day",
+              "label": "تجهيز لاحقًا",
+              "disabled": false
+            },
+            {
+              "action": "design:um-week",
+              "label": "تصميم قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:um-week",
+              "label": "تجهيز لاحقًا",
+              "disabled": false
+            },
+            {
+              "action": "design:hs-200",
+              "label": "تصميم قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:hs-200",
+              "label": "تجهيز لاحقًا",
+              "disabled": false
+            },
+            {
+              "action": "design:um-200",
+              "label": "تصميم قالب الباقة",
+              "disabled": false
+            },
+            {
+              "action": "skip-plan:um-200",
+              "label": "تجهيز لاحقًا",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Archive after issuing 25",
+          "page": "batches",
+          "text": "رجوعأرشيف الشبكة الرئيسيةدفعاتك وإعادة طباعتها.دفعة تجريبية100 · Hotspot · يوميةفتح القالب وإعادة الطباعةهذا التصور يعرض إعداد القالب؛ لا ينشئ PDF أو مهمة طباعة.",
+          "actions": [
+            {
+              "action": "go:home",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "design:hs-day",
+              "label": "فتح القالب وإعادة الطباعة",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "paper_codes_match_issued_batch": false,
+        "paper_uses_custom_design_contents": false,
+        "no_real_print_disclosure_present": true,
+        "archive_shows_fixed_100_sample_after_25_issued": true
+      }
+    },
+    {
+      "id": "T07-renew-with-remaining-balance",
+      "steps": [
+        {
+          "label": "Renew still-active voucher",
+          "page": "renew",
+          "text": "رجوعتجديد الكرتاختر باقته الجديدة.رقم الدخول00123877المصدر الثابتHotspotالباقة الحاليةيومية · 100 YERالتجديد إلى باقةيومية · 100 YER · 600 MBمرنة 200 · 200 YER · 1 GBتظهر باقات نفس النظام فقط. تغيير الباقة لا ينقل الكرت من Hotspot إلى User Manager أو العكس.ما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.بعد التجديد في المثالمكان الحفظHotspotالسعر100 YERالبيانات600 MBوقت الاتصال5 ساعةالصلاحية من أول استخدام2 يومالجلسات المتزامنة1التنزيل / الرفعحسب إعدادات الراوتربيانات الدخولنفس الرقم وكلمة المرورهذا تصور لإعادة حقوق الباقة المختارة، وليس إضافة رصيد متراكم. تطبيق الوقت والصلاحية لكل إصدار ينتظر السياسة والاختبار المعتمدين.تأكيد التجديد للباقة المختارة",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "renew-confirm",
+              "label": "تأكيد التجديد للباقة المختارة",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Choose another plan in same source",
+          "page": "renew",
+          "text": "رجوعتجديد الكرتاختر باقته الجديدة.رقم الدخول00123877المصدر الثابتHotspotالباقة الحاليةيومية · 100 YERالتجديد إلى باقةيومية · 100 YER · 600 MBمرنة 200 · 200 YER · 1 GBتظهر باقات نفس النظام فقط. تغيير الباقة لا ينقل الكرت من Hotspot إلى User Manager أو العكس.ما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.بعد التجديد في المثالمكان الحفظHotspotالسعر200 YERالبيانات1 GBوقت الاتصال10 ساعةالصلاحية من أول استخدام3 يومالجلسات المتزامنة1التنزيل / الرفع4 / 1 Mbpsبيانات الدخولنفس الرقم وكلمة المرورهذا تصور لإعادة حقوق الباقة المختارة، وليس إضافة رصيد متراكم. تطبيق الوقت والصلاحية لكل إصدار ينتظر السياسة والاختبار المعتمدين.تأكيد التجديد للباقة المختارة",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "renew-confirm",
+              "label": "تأكيد التجديد للباقة المختارة",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Write reply lost",
+          "page": "renew",
+          "text": "الرد لم يصل: ننتظر التحقق قبل إعلان النجاح أو تكرار الطلب.التحقق من النتيجة التجريبيةالتحقق لا يرسل أمر كتابة جديدًا. يمكنك مغادرة الشاشة والعودة؛ السياق يبقى لهذا الراوتر في هذه الجلسة.رجوعتجديد الكرتاختر باقته الجديدة.رقم الدخول00123877المصدر الثابتHotspotالباقة الحاليةيومية · 100 YERالتجديد إلى باقةيومية · 100 YER · 600 MBمرنة 200 · 200 YER · 1 GBتظهر باقات نفس النظام فقط. تغيير الباقة لا ينقل الكرت من Hotspot إلى User Manager أو العكس.ما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.بعد التجديد في المثالمكان الحفظHotspotالسعر200 YERالبيانات1 GBوقت الاتصال10 ساعةالصلاحية من أول استخدام3 يومالجلسات المتزامنة1التنزيل / الرفع4 / 1 Mbpsبيانات الدخولنفس الرقم وكلمة المرورهذا تصور لإعادة حقوق الباقة المختارة، وليس إضافة رصيد متراكم. تطبيق الوقت والصلاحية لكل إصدار ينتظر السياسة والاختبار المعتمدين.تأكيد التجديد للباقة المختارة",
+          "actions": [
+            {
+              "action": "verify-operation",
+              "label": "التحقق من النتيجة التجريبية",
+              "disabled": false
+            },
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "renew-confirm",
+              "label": "تأكيد التجديد للباقة المختارة",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "label": "Verification confirms renewal",
+          "page": "operation-result",
+          "text": "رجوعنتيجة تجريبيةتم التغيير وتأكد في المحاكاة.جُدد الكرت إلى الباقة المختارة في المحاكاة. بيانات الدخول لم تتغير، ودليل الشكوى السابق باقٍ.متابعة العمللا راوتر حقيقي اتصلنا به. هذا يختبر معنى الإجراء ومراجعته فقط.",
+          "actions": [
+            {
+              "action": "go:card",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:card",
+              "label": "متابعة العمل",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "remaining_before_renewal": 250,
+        "remaining_after_renewal": 1000,
+        "chosen_plan": "hs-200"
+      }
+    },
+    {
+      "id": "T08-disable-versus-disconnect",
+      "steps": [
+        {
+          "label": "Active sessions",
+          "page": "sessions",
+          "text": "رجوعالمتصلون · Hotspot3 جلسة متصلةكل إجراء يخص الجلسة التي تختارها. عدد الجلسات ليس عدد الأشخاص.ما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.00123874User Manager · 45 دقيقةمتصلفحص الكرتفصل00123877Hotspot · 130 دقيقةمتصلفحص الكرتفصل00123878Hotspot · 8 دقيقةمتصلفحص الكرتفصل",
+          "actions": [
+            {
+              "action": "go:home",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "session:session-1",
+              "label": "00123874User Manager · 45 دقيقةمتصل",
+              "disabled": false
+            },
+            {
+              "action": "session-card:session-1",
+              "label": "فحص الكرت",
+              "disabled": false
+            },
+            {
+              "action": "session-disconnect:session-1",
+              "label": "فصل",
+              "disabled": false
+            },
+            {
+              "action": "session:session-2",
+              "label": "00123877Hotspot · 130 دقيقةمتصل",
+              "disabled": false
+            },
+            {
+              "action": "session-card:session-2",
+              "label": "فحص الكرت",
+              "disabled": false
+            },
+            {
+              "action": "session-disconnect:session-2",
+              "label": "فصل",
+              "disabled": false
+            },
+            {
+              "action": "session:session-3",
+              "label": "00123878Hotspot · 8 دقيقةمتصل",
+              "disabled": false
+            },
+            {
+              "action": "session-card:session-3",
+              "label": "فحص الكرت",
+              "disabled": false
+            },
+            {
+              "action": "session-disconnect:session-3",
+              "label": "فصل",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Linked card opened from sessions",
+          "page": "card",
+          "text": "رجوعUser Manager · الشبكة الرئيسية00123874نشط90 MB من 600 MBالمتبقي510 MBتنزيل70 MBرفع20 MBوقت الاتصال المستخدم45 / 300 دقيقةالباقةيوميةالصلاحيةسارية في المثالماذا تقول القراءة؟ما زال هناك رصيد في هذه القراءة؛ تاريخ الاستخدام يحتاج سجلًا مؤرخًا.قراءة تجريبية قبل 12 ثانيةإرسال تقرير للزبونتجديد الكرتتسجيل شكوىالأجهزة وسجل القراءات",
+          "actions": [
+            {
+              "action": "go:cards",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:share",
+              "label": "إرسال تقرير للزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:renew",
+              "label": "تجديد الكرت",
+              "disabled": false
+            },
+            {
+              "action": "go:complaint-new",
+              "label": "تسجيل شكوى",
+              "disabled": false
+            },
+            {
+              "action": "go:card-history",
+              "label": "الأجهزة وسجل القراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Review single disconnect",
+          "page": "action-review",
+          "text": "رجوعمراجعة الإجراءفصل جلسة واحدةالراوترالشبكة الرئيسيةالكرت00123874المصدرUser Managerالجلسات المقصودة في القراءة1يفصل الاتصال المقصود فقط. لا يمنع الزبون من إعادة الدخول إذا بقي الكرت صالحًا.تأكيد الإجراء التجريبي",
+          "actions": [
+            {
+              "action": "go:sessions",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "confirm-card-action",
+              "label": "تأكيد الإجراء التجريبي",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Disconnect confirmed",
+          "page": "operation-result",
+          "text": "رجوعنتيجة تجريبيةتم التغيير وتأكد في المحاكاة.فُصلت الجلسة أو الجلسات المقصودة في المحاكاة فقط. يمكن إعادة الدخول بكرت صالح.متابعة العمللا راوتر حقيقي اتصلنا به. هذا يختبر معنى الإجراء ومراجعته فقط.",
+          "actions": [
+            {
+              "action": "go:sessions",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "go:sessions",
+              "label": "متابعة العمل",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "card_back_from_session_targets_cards": true,
+        "card_still_allowed": true
+      }
+    },
+    {
+      "id": "T09-offline-reading-and-recovery",
+      "steps": [
+        {
+          "label": "Saved workspace while disconnected",
+          "page": "home",
+          "text": "مهامك اليوميةوش ننجز الآن؟فحص كرتالرصيد والصلاحية والرد على الزبونإضافة كروتكرت واحد أو دفعة3جلسات في آخر قراءةقراءة محفوظة؛ الحالة الحالية غير معلومةالباقات — إضافة وتعديلأعد الاتصال قبل التأكيد؛ لم تتغير البيانات.مراجعة الاتصال",
+          "actions": [
+            {
+              "action": "go:lookup",
+              "label": "فحص كرتالرصيد والصلاحية والرد على الزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:add-choice",
+              "label": "إضافة كروتكرت واحد أو دفعة",
+              "disabled": false
+            },
+            {
+              "action": "go:sessions",
+              "label": "3جلسات في آخر قراءةقراءة محفوظة؛ الحالة الحالية غير معلومة",
+              "disabled": false
+            },
+            {
+              "action": "go:packages",
+              "label": "الباقات — إضافة وتعديل",
+              "disabled": false
+            },
+            {
+              "action": "reconnect",
+              "label": "مراجعة الاتصال",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Inspect saved or missing reading",
+          "page": "lookup-results",
+          "text": "رجوعنتيجة البحثاختر الكرت المقصود.الرقم موجود في أكثر من نظام؛ لا نخلط أرصدتها.00123874Hotspot · يوميةالرصيد منتهٍتجديدإجراءات00123874User Manager · يوميةنشطتجديدإجراءات",
+          "actions": [
+            {
+              "action": "go:lookup",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "open-card:hotspot:00123874",
+              "label": "00123874Hotspot · يوميةالرصيد منتهٍ",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:hotspot:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:hotspot:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            },
+            {
+              "action": "open-card:usermanager:00123874",
+              "label": "00123874User Manager · يوميةنشط",
+              "disabled": false
+            },
+            {
+              "action": "quick-renew:usermanager:00123874",
+              "label": "تجديد",
+              "disabled": false
+            },
+            {
+              "action": "card-options:usermanager:00123874",
+              "label": "إجراءات",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Select another offline network",
+          "page": "home",
+          "text": "مهامك اليوميةوش ننجز الآن؟فحص كرتالرصيد والصلاحية والرد على الزبونإضافة كروتكرت واحد أو دفعة2جلسات في آخر قراءةقراءة محفوظة؛ الحالة الحالية غير معلومةالباقات — إضافة وتعديلأعد الاتصال قبل التأكيد؛ لم تتغير البيانات.مراجعة الاتصال",
+          "actions": [
+            {
+              "action": "go:lookup",
+              "label": "فحص كرتالرصيد والصلاحية والرد على الزبون",
+              "disabled": false
+            },
+            {
+              "action": "go:add-choice",
+              "label": "إضافة كروتكرت واحد أو دفعة",
+              "disabled": false
+            },
+            {
+              "action": "go:sessions",
+              "label": "2جلسات في آخر قراءةقراءة محفوظة؛ الحالة الحالية غير معلومة",
+              "disabled": false
+            },
+            {
+              "action": "go:packages",
+              "label": "الباقات — إضافة وتعديل",
+              "disabled": false
+            },
+            {
+              "action": "reconnect",
+              "label": "مراجعة الاتصال",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {
+        "offline_lookup_page": "lookup-results",
+        "no_cross_router_selected_card": true
+      }
+    },
+    {
+      "id": "T10-guided-package-creation",
+      "steps": [
+        {
+          "label": "Plan setup first step",
+          "page": "package-form",
+          "text": "رجوعخطوة 1 من 3نجهز باقتك خطوة خطوة.أين تحفظ الباقة؟Hotspot · الحسابات المحليةUser Managerما الفرق بين Hotspot وUser Manager؟حسابات Hotspot المحليةالكروت محفوظة ضمن حسابات الهوتسبوت في الراوتر.User Managerإدارة للمستخدمين والباقات عبر RADIUS، ويمكن أن تخدم نفس صفحة الهوتسبوت.نحن نحدد مكان حفظ الكرت وباقته. إذا كان المصدر معروفًا نختاره لك، ولا ننقل الكرت بين النظامين.اسم واضح للباقةسعر الكرت — YER في المثالحجم الإنترنتوحدة الحجمMBGBحجم الإنترنت = البيانات التي يستهلكها الكرت. السعر هنا تعريف للباقة، وليس عملية تحصيل.التالي: الوقت والصلاحية",
+          "actions": [
+            {
+              "action": "go:packages",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "package-next",
+              "label": "التالي: الوقت والصلاحية",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Online time validity and speeds",
+          "page": "package-form",
+          "text": "رجوعخطوة 2 من 3نجهز باقتك خطوة خطوة.وقت الاستخداميجمع وقت اتصال الزبون فقط. خروجه من الشبكة لا يستهلك هذا الوقت.كم ساعة اتصال للكرت؟صلاحية الكرتمدة زمنية تبدأ من أول استخدام، وتمضي حتى لو خرج الزبون من الشبكة.بعد كم يوم تنتهي الصلاحية؟السرعة والأجهزة — اختياريسرعة التنزيل Mbpsسرعة الرفع Mbpsالجلسات المتزامنة المسموحةالسرعات الفارغة تعني اتباع إعدادات الراوتر، لا وعدًا بسرعة غير محدودة. عدد الجلسات لا يساوي عدد الأجهزة عبر عمر الكرت.مراجعة الباقة قبل الحفظتعديل الاسم والسعر والحجم",
+          "actions": [
+            {
+              "action": "go:packages",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "package-next",
+              "label": "مراجعة الباقة قبل الحفظ",
+              "disabled": false
+            },
+            {
+              "action": "package-previous",
+              "label": "تعديل الاسم والسعر والحجم",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Review new plan",
+          "page": "package-review",
+          "text": "رجوعخطوة 3 من 3هذه حقوق الكرت في باقتك.باقة تجربةمكان الحفظHotspotالسعر200 YERالبيانات1 GBوقت الاتصال5 ساعةالصلاحية من أول استخدام2 يومالجلسات المتزامنة1التنزيل / الرفعحسب إعدادات الراوترتأكيد إضافة الباقة التجريبيةتعديل التفاصيل",
+          "actions": [
+            {
+              "action": "go:package-form",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "package-save",
+              "label": "تأكيد إضافة الباقة التجريبية",
+              "disabled": false
+            },
+            {
+              "action": "package-edit-details",
+              "label": "تعديل التفاصيل",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Rejected write",
+          "page": "package-review",
+          "text": "رفض الراوتر الطلب في المحاكاة. لم تتغير البيانات؛ راجع الصلاحية والمدخلات.رجوعخطوة 3 من 3هذه حقوق الكرت في باقتك.باقة تجربةمكان الحفظHotspotالسعر200 YERالبيانات1 GBوقت الاتصال5 ساعةالصلاحية من أول استخدام2 يومالجلسات المتزامنة1التنزيل / الرفعحسب إعدادات الراوترتأكيد إضافة الباقة التجريبيةتعديل التفاصيل",
+          "actions": [
+            {
+              "action": "go:package-form",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "package-save",
+              "label": "تأكيد إضافة الباقة التجريبية",
+              "disabled": false
+            },
+            {
+              "action": "package-edit-details",
+              "label": "تعديل التفاصيل",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {}
+    },
+    {
+      "id": "T11-local-discovery-and-manual-fallback",
+      "steps": [
+        {
+          "label": "Discovery running",
+          "page": "discovery",
+          "text": "رجوعاستكشاف الشبكة المحليةنبحث عن راوترات قريبة…يمكنك إلغاء البحث وكتابة العنوان في أي وقت.نتيجة محاكاة فقط؛ لا يجري مسح الشبكة الحقيقية.إلغاء البحث وكتابة العنوانمساعدة الاتصال المحلي",
+          "actions": [
+            {
+              "action": "go:connect",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "cancel-discovery",
+              "label": "إلغاء البحث وكتابة العنوان",
+              "disabled": false
+            },
+            {
+              "action": "go:local-help",
+              "label": "مساعدة الاتصال المحلي",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "No local routers shown",
+          "page": "discovery",
+          "text": "رجوعاستكشاف الشبكة المحليةلم تظهر راوترات.قد يكون الاستكشاف معطلًا أو الأجهزة معزولة. اكتب العنوان إن كنت تعرفه.نتيجة محاكاة فقط؛ لا يجري مسح الشبكة الحقيقية.إعادة الاستكشافكتابة العنوان يدويًامساعدة الاتصال المحلي",
+          "actions": [
+            {
+              "action": "go:connect",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "start-discovery",
+              "label": "إعادة الاستكشاف",
+              "disabled": false
+            },
+            {
+              "action": "go:connect",
+              "label": "كتابة العنوان يدويًا",
+              "disabled": false
+            },
+            {
+              "action": "go:local-help",
+              "label": "مساعدة الاتصال المحلي",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Manual fallback",
+          "page": "connect",
+          "text": "رجوعإضافة شبكةاربط راوتر شبكتك.استكشاف الشبكة المحليةوأنت متصل بشبكة الراوتر، أو اكتب العنوان مباشرة.عنوان الراوترالمنفذبيانات دخول الراوتراسم المستخدمكلمة المرورنفس بيانات Winbox أو WebFig للراوتر، وليست رقم حساب Mikro.فحص الاتصالوين ألقى العنوان والمنفذ؟داخل الشبكة استخدم عنوان الراوتر المحلي. من خارجها استخدم رابط التحكم والمنفذ من المهندس. منفذ API قد يختلف عن منفذ صفحة الويب أو Winbox. طريقة الاتصال تختبر تلقائيًا، ولا نغير إعداد الراوتر.",
+          "actions": [
+            {
+              "action": "go:routers",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "start-discovery",
+              "label": "استكشاف الشبكة المحلية",
+              "disabled": false
+            },
+            {
+              "action": "show-password",
+              "label": "",
+              "disabled": false
+            },
+            {
+              "action": "check-connection",
+              "label": "فحص الاتصال",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {}
+    },
+    {
+      "id": "T12-network-rename-and-safe-removal",
+      "steps": [
+        {
+          "label": "Rename saved connection",
+          "page": "network-manage",
+          "text": "رجوعإدارة الاتصالالشبكة الرئيسية للتجربة192.168.88.1:8729هذا اتصال محفوظ على جهازك في التصور.فتح هذه الشبكةمراجعة العنوان وبيانات الدخولتغيير الاسم عندكإزالة الاتصال المحفوظ",
+          "actions": [
+            {
+              "action": "go:routers",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "router:main",
+              "label": "فتح هذه الشبكة",
+              "disabled": false
+            },
+            {
+              "action": "network-reconnect",
+              "label": "مراجعة العنوان وبيانات الدخول",
+              "disabled": false
+            },
+            {
+              "action": "network-rename",
+              "label": "تغيير الاسم عندك",
+              "disabled": false
+            },
+            {
+              "action": "go:network-remove",
+              "label": "إزالة الاتصال المحفوظ",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Removal review",
+          "page": "network-remove",
+          "text": "رجوعمراجعة الإزالةإزالة هذا الاتصال من القائمة؟الشبكة الرئيسية للتجربة192.168.88.1:8729لا يطفئ الراوتر، ولا يحذف كروته أو قوالبه. سيبقى المحفوظ قابلًا للاستعادة من قائمة الاتصالات التي أزلتها.إزالة الاتصال فقطإلغاء والاحتفاظ به",
+          "actions": [
+            {
+              "action": "go:network-manage",
+              "label": "رجوع",
+              "disabled": false
+            },
+            {
+              "action": "confirm-network-remove",
+              "label": "إزالة الاتصال فقط",
+              "disabled": false
+            },
+            {
+              "action": "go:network-manage",
+              "label": "إلغاء والاحتفاظ به",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Return to chooser without switching automatically",
+          "page": "routers",
+          "text": "الشبكاتاختر الشبكة التي تريد العمل عليها.كل اتصال يفتح كروت الراوتر وباقاته وقوالبه فقط.أزيل الاتصال من القائمة. المحفوظ قابل للاستعادة.إضافة شبكةشبكة الفرعbranch.example.net:8778غير متصل · بيانات محفوظةفتح البيانات المحفوظةإدارة الاتصالاتصالات أزلتها · استعادة المحفوظاختيار شبكة يغير مساحة العمل داخل Mikro؛ لا يبدّل Wi-Fi الهاتف ولا يوقف أي راوتر.",
+          "actions": [
+            {
+              "action": "new-router",
+              "label": "إضافة شبكة",
+              "disabled": false
+            },
+            {
+              "action": "router:branch",
+              "label": "فتح البيانات المحفوظة",
+              "disabled": false
+            },
+            {
+              "action": "network-menu:branch",
+              "label": "إدارة الاتصال",
+              "disabled": false
+            },
+            {
+              "action": "go:removed-networks",
+              "label": "اتصالات أزلتها · استعادة المحفوظ",
+              "disabled": false
+            }
+          ]
+        },
+        {
+          "label": "Restore saved connection offline",
+          "page": "routers",
+          "text": "الشبكاتاختر الشبكة التي تريد العمل عليها.كل اتصال يفتح كروت الراوتر وباقاته وقوالبه فقط.استعدنا الاتصال والمحـفوظ. افحص الاتصال قبل الكتابة.إضافة شبكةالشبكة الرئيسية للتجربةآخر شبكة مختارة192.168.88.1:8729غير متصل · بيانات محفوظةفتح البيانات المحفوظةإدارة الاتصالشبكة الفرعbranch.example.net:8778غير متصل · بيانات محفوظةفتح البيانات المحفوظةإدارة الاتصالاختيار شبكة يغير مساحة العمل داخل Mikro؛ لا يبدّل Wi-Fi الهاتف ولا يوقف أي راوتر.",
+          "actions": [
+            {
+              "action": "new-router",
+              "label": "إضافة شبكة",
+              "disabled": false
+            },
+            {
+              "action": "router:main",
+              "label": "فتح البيانات المحفوظة",
+              "disabled": false
+            },
+            {
+              "action": "network-menu:main",
+              "label": "إدارة الاتصال",
+              "disabled": false
+            },
+            {
+              "action": "router:branch",
+              "label": "فتح البيانات المحفوظة",
+              "disabled": false
+            },
+            {
+              "action": "network-menu:branch",
+              "label": "إدارة الاتصال",
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "observations": {}
+    }
+  ]
+}

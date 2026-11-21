@@ -1,4 +1,21 @@
+---
+type: project-index
+status: draft
+owner: founder
+updated: 2026-11-21
+related: [AGENTS.md, docs/README.md, apps/mobile/README.md, design/mobile/README.md]
+---
 # Hala How Are You
+
+**الملخص:** [confirmed] يجمع المستودع تطبيق الويب وتجربة Mikro للجوال ومعرفة الشركة وتصاميم الجوال التفاعلية.
+
+## أجزاء المشروع
+
+- [confirmed] [تطبيق Expo للجوال](apps/mobile/README.md): التشغيل والبناء على EAS؛ [نتيجة النسخة التجريبية](docs/03-product/mobile-eas-build.md).
+- [confirmed] [التصاميم التفاعلية وفحوصها](design/mobile/README.md): النسخة الأخيرة والنسخ السابقة، ببيانات توضيحية.
+- [confirmed] [معرفة الشركة](docs/README.md) و[الحالة الحالية](docs/05-operations/status.md): مصدر الخطط والقرارات وحدود التحقق.
+
+## إعداد الويب الأصلي
 
 هلا كيفك
 
