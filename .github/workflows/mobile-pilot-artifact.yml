@@ -1,0 +1,41 @@
+name: Archive verified mobile pilot APK
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-pilot-artifact
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: mobile-v0.1.0-pilot
+      SOURCE_COMMIT: ce1d70518c7fdb5d0e7b6c99e5917d35b82142f1
+      APK_FILE: mikro-pilot-0.1.0-e5ee2960.apk
+      APK_URL: https://expo.dev/artifacts/eas/08CfwoHY4v2fGPW7NKlW-JXl25GscJlVmAkx1EwFP8I.apk
+      EXPECTED_SHA: 32eb5e4abc3e449e15a9310c1aa8df9f42382955ad91b6312638278e7b3fe6e3
+    steps:
+      - name: Download and verify the EAS artifact
+        run: |
+          curl --fail --location --retry 3 --max-time 300 --output "$APK_FILE" "$APK_URL"
+          printf '%s  %s\n' "$EXPECTED_SHA" "$APK_FILE" | sha256sum --check --status
+
+      - name: Attach the verified file to the pilot release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release="$(gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG")"
+          test "$(jq -r '.target_commitish' <<< "$release")" = "$SOURCE_COMMIT"
+          if [ "$(jq -r '.draft' <<< "$release")" = "true" ]; then
+            gh release upload "$RELEASE_TAG" "$APK_FILE#Android APK" --clobber
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          fi
+          gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" | jq --exit-status \
+            --arg name "$APK_FILE" --arg digest "sha256:$EXPECTED_SHA" \
+            '.draft == false and .prerelease == true and any(.assets[]; .name == $name and .size == 101702703 and .state == "uploaded" and .digest == $digest)'
