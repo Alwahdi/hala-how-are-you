@@ -15,7 +15,7 @@ related: [status.md]
 - [x] حفظ الرؤية والمشاكل والعصف الذهني والقرارات
 
 ## المرحلة 2: إكمال الاستكشاف ⏳
-- [ ] تسليم المصدر والتصاميم وAPK التجريبي إلى GitHub وفق [D-057](../04-decisions/D-057-github-project-delivery.md) والتحقق من النتيجة؛ [السجل](github-delivery.md). [confirmed]
+- [x] تسليم المصدر والتصاميم وAPK التجريبي إلى GitHub وفق [D-057](../04-decisions/D-057-github-project-delivery.md) والتحقق من النتيجة؛ [السجل](github-delivery.md). [confirmed]
 - [x] إكمال بناء APK داخلي على EAS وفق [D-056](../04-decisions/D-056-eas-pilot-build.md) والتحقق من نتيجته؛ [السجل](../03-product/mobile-eas-build.md). [confirmed]
 - [x] اعتماد وتنفيذ كود الرحلة المحلية المحدودة وفق [D-055](../04-decisions/D-055-expo-local-pilot.md) وفحص المختبر والمتصفح؛ [حدود النتائج](../03-product/mobile-pilot-verification.md). [confirmed]
 - [ ] إكمال بناء وقبول رحلة D-055 على الهاتف والراوتر والطباعة الفعلية وملاحظة مستخدم مبتدئ. [confirmed]
